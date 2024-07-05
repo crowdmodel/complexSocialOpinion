@@ -143,6 +143,7 @@ class simulation(object):
         self.fpath = None # Input file path
         
         #self.autoPlotLogic = True
+        #self.readConfig = True # Boolean Flag
         self.dumpBin = True # Boolean Flag
         #self.fbin = None    # File pointer
         #self.fnameBin = None  # Binary file path and name
@@ -438,78 +439,78 @@ class simulation(object):
         
         
     def readconfig(self):
-        #FN_Temp = self.FN_EVAC
+        FN_Temp = self.FN_EVAC
         #if FN_Temp is None:
-        FN_Temp = os.path.join(self.fpath, "config.txt")
+        #FN_Temp = os.path.join(self.fpath, "config.txt")
         if os.path.exists(FN_Temp):
             for line in open(FN_Temp, "r"):
                 if re.match('ZOOM', line):
                     temp =  line.split('=')
-                    self.ZOOMFACTOR = float(temp[1].strip())#rstrip('\n').rstrip(',').strip())                    
+                    self.ZOOMFACTOR = float(temp[1].rstrip('\n').rstrip(',').strip())                    
                 if re.match('xSpace', line):
                     temp =  line.split('=')
-                    self.xSpace = float(temp[1].strip())
+                    self.xSpace = float(temp[1].rstrip('\n').rstrip(',').strip())   
                 if re.match('ySpace', line):
                     temp =  line.split('=')
-                    self.ySpace = float(temp[1].strip())
+                    self.ySpace = float(temp[1].rstrip('\n').rstrip(',').strip())   
                 if re.match('solver', line):
                     temp =  line.split('=')
-                    self.solver = int(temp[1].strip())
+                    self.solver = int(temp[1].rstrip('\n').rstrip(',').strip())   
                 if re.match('groupbehavior', line):
                     temp =  line.split('=')
-                    self.GROUPBEHAVIOR = bool(temp[1].strip())
+                    self.GROUPBEHAVIOR = bool(temp[1].rstrip('\n').rstrip(',').strip())   
                 #if re.match('pre-evac', line):
                 #    temp =  line.split('=')
                 #    self.TPREMODE = int(temp[1].strip())
                 if re.match('self-repulsion', line):
                     temp =  line.split('=')
-                    self.SELFREPULSION = bool(temp[1].strip())
+                    self.SELFREPULSION = bool(temp[1].rstrip('\n').rstrip(',').strip())   
                     
                 if re.match('dumpBinary', line):
                     temp =  line.split('=')
-                    self.dumpBin = bool(temp[1].strip())
+                    self.dumpBin = bool(temp[1].rstrip('\n').rstrip(',').strip())   
                 
                 # Time parameters
                 if re.match('DT', line):
                     temp =  line.split('=')
-                    self.DT = float(temp[1].strip())
+                    self.DT = float(temp[1].rstrip('\n').rstrip(',').strip())   
                 if re.match('DT_DumpData', line):
                     temp =  line.split('=')
-                    self.DT_DumpData = float(temp[1].strip())
+                    self.DT_DumpData = float(temp[1].rstrip('\n').rstrip(',').strip())   
                 if re.match('DT_OtherList', line):
                     temp =  line.split('=')
-                    self.DT_OtherList = float(temp[1].strip())
+                    self.DT_OtherList = float(temp[1].rstrip('\n').rstrip(',').strip())   
                     
                 if re.match('DT_ChangeDoor', line):
                     temp =  line.split('=')
-                    self.DT_ChangeDoor = float(temp[1].strip()) 
+                    self.DT_ChangeDoor = float(temp[1].rstrip('\n').rstrip(',').strip())   
 
                 if re.match('TEND', line):
                     temp =  line.split('=')
                     try:
-                        self.t_end = float(temp[1].strip())
+                        self.t_end = float(temp[1].rstrip('\n').rstrip(',').strip())   
                     except:
                         self.t_end = float(100.00)
                 
                 # Mesh parameters
                 if re.match('xmin', line):
                     temp =  line.split('=')
-                    self.xmin = int(temp[1].strip())
+                    self.xmin = int(temp[1].rstrip('\n').rstrip(',').strip())   
                 if re.match('xmax', line):
                     temp =  line.split('=')
-                    self.xmax = int(temp[1].strip())
+                    self.xmax = int(temp[1].rstrip('\n').rstrip(',').strip())   
                 if re.match('ymin', line):
                     temp =  line.split('=')
-                    self.ymin = int(temp[1].strip())
+                    self.ymin = int(temp[1].rstrip('\n').rstrip(',').strip())   
                 if re.match('ymax', line):
                     temp =  line.split('=')
-                    self.ymax = int(temp[1].strip())
+                    self.ymax = int(temp[1].rstrip('\n').rstrip(',').strip())   
                 if re.match('xpt', line):
                     temp =  line.split('=')
-                    self.xpt = int(temp[1].strip())
+                    self.xpt = int(temp[1].rstrip('\n').rstrip(',').strip())   
                 if re.match('ypt', line):
                     temp =  line.split('=')
-                    self.ypt = int(temp[1].strip())
+                    self.ypt = int(temp[1].rstrip('\n').rstrip(',').strip())   
                     
         return None
         
