@@ -247,19 +247,19 @@ class GUI(object):
         self.GroupBehavior_CB.place(x=300, y=36)  #(x=300, y=96)
         self.showHelp(self.GroupBehavior_CB, "Compute Group Social Force and Self Repulsion.  \n Check this button only if you have specified the group parameters in input file.")  #Uncheck it if you do not know what it means.")  
 
-        self.AutoPlot_Var = IntVar()
-        self.AutoPlot_Var.set(0)
-        self.AutoPlot_CB=Checkbutton(self.frameRun, text= 'Automatically plot figures from output data', variable=self.AutoPlot_Var, onvalue=1, offvalue=0)
-        self.AutoPlot_CB.pack() #place(x=306, y=236)
-        self.showHelp(self.AutoPlot_CB, "Plot figures automatically when simulation is complete.")
-
         self.UseConfig_Var = IntVar()
         self.UseConfig_Var.set(0)
-        self.UseConfig_CB=Checkbutton(self.frameParameters, text= 'Use config.txt to overwrite parameters selected in the GUI panels', variable=self.UseConfig_Var, onvalue=1, offvalue=0)
-        self.UseConfig_CB.place(x=2, y=296) #pack() 
+        self.UseConfig_CB=Checkbutton(self.frameRun, text= 'Use config.txt to overwrite parameters selected in the GUI panels', variable=self.UseConfig_Var, onvalue=1, offvalue=0)
+        self.UseConfig_CB.pack() #place(x=2, y=276) #pack() 
         self.showHelp(self.SHOWFORCE_CB, "Use config.txt to configure simulation object rather than use parameters selected in the GUI panels.")
-        
 
+        self.AutoPlot_Var = IntVar()
+        self.AutoPlot_Var.set(0)
+        self.AutoPlot_CB=Checkbutton(self.frameParameters, text= 'Automatically plot figures from output data', variable=self.AutoPlot_Var, onvalue=1, offvalue=0)
+        self.AutoPlot_CB.place(x=2, y=296)
+        self.showHelp(self.AutoPlot_CB, "Plot figures automatically when simulation is complete.")
+        
+        
         self.lbSoc2 = Label(self.frameParameters, text =  "Optional: Below please input the time interval for simulation step and data output step. \n")
         self.lbSoc2.place(x=12, y=130)
 
@@ -522,7 +522,7 @@ class GUI(object):
     def updateCtrlParam(self):
 
         self.currentSimu.dumpBin = self.DumpData_Var.get()
-        self.currentSimu.autoPlotLogic = self.AutoPlot_Var.get()
+        #self.currentSimu.autoPlotLogic = self.AutoPlot_Var.get()
 
         #self.currentSimu.SHOWTIME = self.SHOWTIME_Var.get()
         self.currentSimu.SHOWSTRESS = self.SHOWSTRESS_Var.get()
@@ -775,7 +775,8 @@ class GUI(object):
             sunpro1.join()
             
             self.currentSimu.dataComplete()
-            self.currentSimu.autoPlot()
+            if self.AutoPlot_Var.get():
+                self.currentSimu.autoPlot()
             self.currentSimu.quit()
 
         #show_geom(myTest)
@@ -840,7 +841,9 @@ class GUI(object):
         sunpro1.start()
         sunpro1.join()
         self.setStatusStr("Simulation Complete!")
-        self.currentSimu.autoPlot()
+        self.currentSimu.dataComplete()
+        if self.AutoPlot_Var.get():
+            self.currentSimu.autoPlot()
         #show_geom(myTest)
         #myTest.show_simulation()
         self.currentSimu.quit()
@@ -873,7 +876,9 @@ class GUI(object):
         sunpro1.start()
         sunpro1.join()
         self.setStatusStr("Simulation Complete!")
-        self.currentSimu.autoPlot()
+        self.currentSimu.dataComplete()
+        if self.AutoPlot_Var.get():
+            self.currentSimu.autoPlot()
         #show_geom(myTest)
         #myTest.show_simulation()
         self.currentSimu.quit()

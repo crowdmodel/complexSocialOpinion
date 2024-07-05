@@ -100,7 +100,7 @@ class simulation(object):
         self.TIMECOUNT = True
         self.WALLBLOCKHERDING = True
         self.TESTFORCE = True
-        self.TPREMODE = 2        ### Instructinn: 1 -- DesiredV = 0  2 -- Motive Force =0: 
+        #self.TPREMODE = 2        ### Instructinn: 1 -- DesiredV = 0  2 -- Motive Force =0: 
         self.GROUPBEHAVIOR = True     # Enable the group social force
         self.SELFREPULSION = True      # Enable self repulsion
         self.FLUCTUATION = True        # Enable Fluctuation Force: Mainly useful for particles
@@ -142,7 +142,7 @@ class simulation(object):
 
         self.fpath = None # Input file path
         
-        self.autoPlotLogic = True
+        #self.autoPlotLogic = True
         self.dumpBin = True # Boolean Flag
         #self.fbin = None    # File pointer
         #self.fnameBin = None  # Binary file path and name
@@ -458,12 +458,12 @@ class simulation(object):
                 if re.match('groupbehavior', line):
                     temp =  line.split('=')
                     self.GROUPBEHAVIOR = bool(temp[1].strip())
-                if re.match('pre-evac', line):
-                    temp =  line.split('=')
-                    self.TPREMODE = int(temp[1].strip())
+                #if re.match('pre-evac', line):
+                #    temp =  line.split('=')
+                #    self.TPREMODE = int(temp[1].strip())
                 if re.match('self-repulsion', line):
                     temp =  line.split('=')
-                    self.TPREMODE = bool(temp[1].strip())
+                    self.SELFREPULSION = bool(temp[1].strip())
                     
                 if re.match('dumpBinary', line):
                     temp =  line.split('=')
@@ -579,7 +579,7 @@ class simulation(object):
         
         print('simulation paramters:') # \n')     
         print('Solver: '+str(self.solver)) #+ '\n')   
-        print('TPRE Mode: '+str(self.TPREMODE)) #+ '\n')
+        #print('TPRE Mode: '+str(self.TPREMODE)) #+ '\n')
         print('Group: '+str(self.GROUPBEHAVIOR)) #+ '\n')
         print('Self Repulsion: '+str(self.SELFREPULSION)) #+ '\n')
         print('Dump Binary Data: '+str(self.dumpBin)) #+ '\n')
@@ -615,7 +615,7 @@ class simulation(object):
 
         f.write('simulation paramters:\n')   
         f.write('Solver: '+str(self.solver)+ '\n')        
-        f.write('TPRE Mode: '+str(self.TPREMODE)+'\n')
+        #f.write('TPRE Mode: '+str(self.TPREMODE)+'\n')
         f.write('Group: '+str(self.GROUPBEHAVIOR)+'\n')
         f.write('Self Repulsion: '+str(self.SELFREPULSION)+'\n')
         f.write('Dump Binary Data: '+str(self.dumpBin)+'\n')
@@ -1974,7 +1974,7 @@ class simulation(object):
                 #ai.desiredSpeed = random.uniform(0.3,1.6)
                 goDoor = None
                 
-                if (self.TPREMODE == 1): # Desired velocity is zero
+                if (ai.tpreMode == 1): # Desired velocity is zero
                     ai.desiredV = ai.direction*0.0
                     ai.desiredSpeed = 0.0
                     #ai.dest = ai.pos
@@ -1983,11 +1983,11 @@ class simulation(object):
             
                 #ai.sumAdapt += motiveForce*0.2  #PID: Integration Test Here
             
-                if (self.TPREMODE == 2): # Motive Force is zero
+                if (ai.tpreMode == 2): # Motive Force is zero
                     motiveForce = np.array([0.0, 0.0])
                     ai.motiveF = np.array([0.0, 0.0])
 
-                if (self.TPREMODE == 3):
+                if (ai.tpreMode == 3):
                     if outsideDoor:
                         doorInter = np.array([0.0, 0.0])
                         
@@ -2350,27 +2350,27 @@ class simulation(object):
 
 
     def autoPlot(self):
-        if self.autoPlotLogic:
-            try:
-                visualizeTpre(self.outDataName +'.bin', showdata=True)
-                readDoorProb(self.outDataName +'.txt', showdata=True)
-                
-                #np.histogram() ??
-                '''
-                if len(self.exits)>0:
-                    plt.bar(np.arange(len(self.exits)), self.exitUsage)
-                    plt.title("Exit Usage Histogram:")
-                    plt.grid()
-                    plt.legend(loc='best')
-                    plt.xlabel("Exit_Index")
-                    plt.ylabel("Num_of_Agents")
-                    temp=self.outDataName.split('.')
-                    namePNG = temp[0]+'exitUsage.png'
-                    plt.savefig(namePNG)
-                    plt.show()
-                '''
-            except:
-                input("Unable to plot figures from output data!  Please check!")
+        #if self.autoPlotLogic:
+        try:
+            visualizeTpre(self.outDataName +'.bin', showdata=True)
+            readDoorProb(self.outDataName +'.txt', showdata=True)
+            
+            #np.histogram() ??
+            '''
+            if len(self.exits)>0:
+                plt.bar(np.arange(len(self.exits)), self.exitUsage)
+                plt.title("Exit Usage Histogram:")
+                plt.grid()
+                plt.legend(loc='best')
+                plt.xlabel("Exit_Index")
+                plt.ylabel("Num_of_Agents")
+                temp=self.outDataName.split('.')
+                namePNG = temp[0]+'exitUsage.png'
+                plt.savefig(namePNG)
+                plt.show()
+            '''
+        except:
+            input("Unable to plot figures from output data!  Please check!")
         return None
     
     
