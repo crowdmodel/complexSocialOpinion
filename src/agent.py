@@ -46,8 +46,10 @@ class person(object):
         self.inComp = 1
         self.aType = 'Talk'  #{'MoveToDest' 'Follow' 'Talk' 'Search'}
 
-        self.tpreMode = 1
+        self.tpreMode = 2
         self.tpre = 10 #random.uniform(6.0,22.0)
+        self.arousalLevel = 0.1
+        
         self.maxSpeed = 1.3 #random.uniform(1.0,2.0)
         self.diss = -0.2 #random.uniform(-1.0,0.0)
 

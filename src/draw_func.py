@@ -1065,8 +1065,12 @@ def show_geom(simu, debug=False):
 
                     text_surface=myfont.render("tpre:"+format(agent.tpre, ".3f"), True, black, white)
                     screen.blit(text_surface, mouse_pos3+[0.0, 196.0])
+                    text_surface=myfont.render('TpreMode:'+str(agent.tpreMode), True, black, white)
+                    screen.blit(text_surface, mouse_pos3+[0.0, 216.0])
                     text_surface=myfont.render("exitSelected:"+str(agent.exitInMindIndex), True, black, white)
-                    screen.blit(text_surface,mouse_pos3+[0.0, 216.0])
+                    screen.blit(text_surface, mouse_pos3+[0.0, 236.0])
+                    
+                    
 
         # The Zoom and xSpace ySpace Info
         myfont=pygame.font.SysFont("arial",16)
@@ -1092,9 +1096,7 @@ def show_geom(simu, debug=False):
         text_surface=myfont.render('DT Output Data:'+str(simu.DT_DumpData), True, cyan, black)
         screen.blit(text_surface, [700.0, 135.0])
         
-        
-        text_surface=myfont.render('TpreMode:'+str(simu.TPREMODE), True, lightpink, black)
-        screen.blit(text_surface, [700.0, 160.0])
+        myfont=pygame.font.SysFont("arial",17)
         text_surface=myfont.render('GroupSoc:'+str(simu.GROUPBEHAVIOR), True, lightpink, black)
         screen.blit(text_surface, [700.0, 180.0])
         text_surface=myfont.render('SelfRep:'+str(simu.SELFREPULSION), True, lightpink, black)
@@ -1120,7 +1122,8 @@ def show_geom(simu, debug=False):
         #simu.GROUPBEHAVIOR = True     # Enable the group social force
         #simu.SELFREPULSION = True
 
-        text_surface=myfont.render("working path:"+str(simu.fpath), True, cyan, black)
+        myfont=pygame.font.SysFont("arial",19)
+        text_surface=myfont.render("Working Path: "+str(simu.fpath), True, cyan, black)
         screen.blit(text_surface, [16.0, 570.0])
 
         pygame.display.flip()

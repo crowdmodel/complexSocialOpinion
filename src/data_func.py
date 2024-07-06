@@ -563,17 +563,17 @@ def readAgents(FileName, debug=True, marginTitle=1, ini=1):
             agent.pp2 = 0.5
         
         try:
-            agent.talk_range = float(agentFeature[ini+9])
+            agent.arousalLevel = float(agentFeature[ini+9])
             agent.aType = str(agentFeature[ini+10])
             agent.inComp = int(agentFeature[ini+11]) 
         except:
-            agent.talk_range = 6.0
+            agent.arousalLevel = 0.2
             agent.aType = 'active'
             agent.inComp = int(1) 
         
         try:
             #agent.moving_tau = float(agentFeature[ini+12])
-            agent.tpre_tau = float(agentFeature[ini+12])
+            agent.talk_range = float(agentFeature[ini+12])
             agent.talk_tau = float(agentFeature[ini+13])
             agent.talk_prob = float(agentFeature[ini+14])
             #agent.pp2 = float(agentFeature[ini+15])
@@ -581,7 +581,7 @@ def readAgents(FileName, debug=True, marginTitle=1, ini=1):
             agent.mass = float(agentFeature[ini+17])
         except:     
             #agent.moving_tau = agent.tau
-            agent.tpre_tau = agent.tau
+            agent.talk_range = 2.0
             agent.talk_tau = agent.tau
             agent.talk_prob = 0.6
             #agent.pp2 = 0.1
