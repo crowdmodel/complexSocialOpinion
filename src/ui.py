@@ -105,9 +105,9 @@ class GUI(object):
 
         self.notebook.add(self.frameRun,text="QuickStart")
         self.notebook.add(self.frameParameters,text="Parameters")
-        self.notebook.add(self.frameFlow,text="MeshFlow")
+        self.notebook.add(self.frameFlow,text="FlowField")
         #self.notebook.add(self.frameInformation,text="Information")
-        self.notebook.add(self.frameSoc,text="EvacAgent")       
+        self.notebook.add(self.frameSoc,text="SocialAgent")       
         self.notebook.add(self.frameData,text="DataTool")
         self.notebook.add(self.frameCSV,text="CSVTool") 
         self.notebook.add(self.frameGuide,text="Readme")
@@ -184,7 +184,7 @@ class GUI(object):
         self.showHelp(self.buttonComp, "Only compute the numerical result without displaying in pygame.  \n Users can use another python program evac-prt5-tool to display the the numerical result.")
         
         self.buttonStart = Button(self.frameRun, text='compute and visualize simulation', command=self.startSim)
-        self.buttonStart.pack() #place(x=20, y=236)
+        self.buttonStart.pack() #(side=LEFT) #place(x=20, y=236)
         self.showHelp(self.buttonStart, "Compute the numerical result and display the result timely in pygame.  \n Please select the items in parameter panel to adjust the appearance in pygame window. ")
 
 
@@ -237,9 +237,9 @@ class GUI(object):
         
         self.DumpData_Var = IntVar()
         self.DumpData_Var.set(1)
-        self.DumpData_CB=Checkbutton(self.frameParameters, text= 'Dump data to a binary file', variable=self.DumpData_Var, onvalue=1, offvalue=0)
+        self.DumpData_CB=Checkbutton(self.frameParameters, text= 'Write simulation data into binary/npz files', variable=self.DumpData_Var, onvalue=1, offvalue=0)
         self.DumpData_CB.place(x=300, y=66)
-        self.showHelp(self.DumpData_CB, "Dump data to a binary file such that it can be visualized by our small program evac-prt5-tool.")        
+        self.showHelp(self.DumpData_CB, "Save simulation data in binary/npz files such that it could be visualized by data/visualization tool for furthet analysis.")        
 
         self.GroupBehavior_Var = IntVar()
         self.GroupBehavior_Var.set(1)
@@ -259,9 +259,10 @@ class GUI(object):
         self.AutoPlot_CB.place(x=2, y=296)
         self.showHelp(self.AutoPlot_CB, "Plot figures automatically when simulation is complete.")
         
-        
-        self.lbSoc2 = Label(self.frameParameters, text =  "Optional: Below please input the time interval for simulation step and data output step. \n")
-        self.lbSoc2.place(x=12, y=130)
+        self.lbPara1 = Label(self.frameParameters, text =  "Below please input the time interval for simulation step, data output step. ") 
+        self.lbPara1.place(x=12, y=109)
+        self.lbPara2 = Label(self.frameParameters, text =  "Please specify the final time point if simulation is only computed without visualization.")
+        self.lbPara2.place(x=12, y=127)
 
         self.lb_dtSim = Label(self.frameParameters, text = 'dtSim:')
         self.lb_dtSim.place(x=12, y=152)
@@ -277,6 +278,12 @@ class GUI(object):
         nameEntered_dtDump.insert(0, '0.2')
         nameEntered_dtDump.place(x=269, y=152)
         
+        self.lb_tEnd = Label(self.frameParameters, text = 'tEnd:')
+        self.lb_tEnd.place(x=412, y=152)
+        self.tEnd_gui = StringVar()
+        nameEntered_tEnd = Entry(self.frameParameters, width=13, textvariable=self.tEnd_gui)
+        nameEntered_tEnd.insert(0, '90.0')
+        nameEntered_tEnd.place(x=469, y=152)
 
         self.lb3 = Label(self.frameParameters, text =  "Optional: If fds file is selected, the compartment geometry is created from fds file. \n")
         self.lb3.place(x=12, y=179)
@@ -384,28 +391,38 @@ class GUI(object):
         ##############################################
         # ============================================
         # --------------------------------------------
-        # frameSoc SocialGroup
+        # frameSoc EvacAgent
         # --------------------------------------------
         
-        self.lbSoc1 = Label(self.frameSoc, text =  "Optional: Below please select the type of social interation force. \n 0: Social Force   1: Group Social Force    2: Magnetic force. ")
-        self.lbSoc1.place(x=12, y=30)
+        #self.lbSoc0 = Label(self.frameSoc, text =  "Optional: Below please specify the noise level for fluctuation force: \n Standard derivation for normal distribution.  ")
+        #self.lbSoc0.place(x=15, y=100)
+
+        # Adding a Textbox Entry widget
+        self.ymin_gui = StringVar()
+        nameEntered_ymin = Entry(self.frameSoc, width=12, textvariable=self.ymin_gui)
+        nameEntered_ymin.insert(0, 'auto')
+        nameEntered_ymin.place(x=422, y=6)
+        self.showHelp(nameEntered_ymin, "The noise level for fluctuation force: \n Standard derivation for normal distribution.  \n Write 'auto' or leave it blank if you do not know what it means and the program will automatically give the value.  ")
         
-        self.spin_socialforce = Spinbox(self.frameSoc, from_=0, to=2, width=5, bd=8) 
-        self.spin_socialforce.place(x=656, y=30)
-        self.showHelp(self.spin_socialforce, "Select the different formula of social force: \n 0: Social force; 1: Group Force; 2: Magnetic force.  ")  #Uncheck it if you do not know what it means.")
+        self.lbSoc1 = Label(self.frameSoc, text =  "Optional: Below please select the type of short-range interation force. \n 0: Social Force  1: Magnetic force. ")
+        self.lbSoc1.place(x=15, y=300)
+        
+        self.spin_socialforce = Spinbox(self.frameSoc, from_=0, to=1, width=5, bd=8) 
+        self.spin_socialforce.place(x=656, y=300)
+        self.showHelp(self.spin_socialforce, "Select the different formula of short-range interation force: \n 0: Social force; 1: Magnetic force.  ")  #Uncheck it if you do not know what it means.")
         
         self.lbSoc2 = Label(self.frameSoc, text =  "Optional: Below please input the time interval to update attention list and update target door in simulation. \n")
-        self.lbSoc2.place(x=12, y=196)
+        self.lbSoc2.place(x=15, y=196)
         
         self.lb_dtAtt = Label(self.frameSoc, text = 'dtAtt:')
-        self.lb_dtAtt.place(x=12, y=226)
+        self.lb_dtAtt.place(x=15, y=226)
         self.dtAtt_gui = StringVar()
         nameEntered_dtAtt = Entry(self.frameSoc, width=12, textvariable=self.dtAtt_gui)
         nameEntered_dtAtt.insert(0, '1.0')
         nameEntered_dtAtt.place(x=62, y=226)
 
         self.lb_dtExit = Label(self.frameSoc, text = 'dtExit:')
-        self.lb_dtExit.place(x=212, y=226)
+        self.lb_dtExit.place(x=215, y=226)
         self.dtExit_gui = StringVar()
         nameEntered_dtExit = Entry(self.frameSoc, width=12, textvariable=self.dtExit_gui)
         nameEntered_dtExit.insert(0, '1.0')
@@ -587,11 +604,12 @@ class GUI(object):
         elif self.ymin_gui.get()!='auto' or self.ymax_gui.get()!='auto':
             self.textInformation.insert(END, 'error: ymin and ymax should be float number! Automatic data used!')
 
-        if isfloatnum(self.dtSim_gui.get()) and isfloatnum(self.dtDump_gui.get()):
+        if isfloatnum(self.dtSim_gui.get()) and isfloatnum(self.dtDump_gui.get()) and isfloatnum(self.tEnd_gui.get()):
             self.currentSimu.DT=float(self.dtSim_gui.get())
             self.currentSimu.DT_DumpData=float(self.dtDump_gui.get())
+            self.currentSimu.t_end=float(self.tEnd_gui.get())
         else:
-            self.textInformation.insert(END, 'error: dtAtt and dtExit should be float number! Default data used!')
+            self.textInformation.insert(END, 'error: dtSim, dtDump and tEnd should be float number! Default data used!')
 
         if isfloatnum(self.dtAtt_gui.get()) and isfloatnum(self.dtExit_gui.get()):
             self.currentSimu.DT_OtherList=float(self.dtAtt_gui.get())
