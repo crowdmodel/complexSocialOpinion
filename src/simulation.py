@@ -104,6 +104,8 @@ class simulation(object):
         self.GROUPBEHAVIOR = True     # Enable the group social force
         self.SELFREPULSION = True      # Enable self repulsion
         self.FLUCTUATION = True        # Enable Fluctuation Force: Mainly useful for particles
+        self.INTERACTION = 0
+        self.OPINIONMODEL = 0
         self.DEBUG = True
 
         #self.DEBUGFORCE = False
@@ -490,7 +492,7 @@ class simulation(object):
                     try:
                         self.t_end = float(temp[1].rstrip('\n').rstrip(',').strip())   
                     except:
-                        self.t_end = float(100.00)
+                        self.t_end = float(90.00)
                 
                 # Mesh parameters
                 if re.match('xmin', line):
@@ -1974,7 +1976,10 @@ class simulation(object):
             if (self.t_sim < ai.tpre):
                 #ai.desiredSpeed = random.uniform(0.3,1.6)
                 goDoor = None
+                ai.preEvacModel()
+                motiveForce = ai.adaptMotiveForce()
                 
+                '''
                 if (ai.tpreMode == 1): # Desired velocity is zero
                     ai.desiredV = ai.direction*0.0
                     ai.desiredSpeed = 0.0
@@ -2011,7 +2016,7 @@ class simulation(object):
                         print  ('ai:', ai.ID, '&&& In Tpre Stage:')
                         print ('goSomeone is None.')
                         print ('postion:', ai.pos)
-
+                '''
                     
             if (self.t_sim >= ai.tpre):
 
@@ -2207,8 +2212,11 @@ class simulation(object):
                 
             
             peopleInter = ai.adaptSocialForce(self.agents, self.GROUPBEHAVIOR, True)
-            ai.opinionDynamics()
-            #ai.opinionExchange()
+            
+            if self.OPINIONMODEL == 0:
+                ai.opinionDynamics()
+            elif self.OPININOMODEL == 1:
+                ai.opinionExchange()
             ai.updateTalkList()
             #peopleInter = + ai.adaptPhyForce(self.agents)
             
