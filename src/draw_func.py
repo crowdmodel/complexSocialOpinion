@@ -2056,7 +2056,7 @@ def show_simu(simu):
                     pygame.draw.line(screen, green, scPos, scPosDir, 5)
 
                 if person.talk[idai, idaj] == 1 and simu.SHOWINTELINE: 
-                    pygame.draw.line(screen, magenta, scPos, scPosOther, 6)
+                    pygame.draw.line(screen, orange, scPos, scPosOther, 7)
                     pygame.draw.line(screen, green, scPos, scPosDir, 6)
                     #pygame.draw.line(screen, green, scPosDir, leftS, 4)
                     #pygame.draw.line(screen, green, scPosDir, rightS, 4)
@@ -3260,7 +3260,7 @@ def visualizeEvac(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=20
             num_others = INFO_t[17][idai]
             
             try:
-                ratioV = INFO_t[18][idai]
+                arousalLevel = INFO_t[18][idai]
                 stressLevel = INFO_t[19][idai]
             except:
                 print("No stressLevel data in the output binary file!")
@@ -3409,7 +3409,8 @@ def visualizeEvac(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=20
                     screen.blit(text_surface, np.round(scPos, 2)+[0.0, 196.0])
                     text_surface=myfont.render("stressLevel:"+str(format(stressLevel, ".3f")), True, black, white)
                     screen.blit(text_surface, np.round(scPos, 2)+[0.0, 216.0])
-                    
+                    text_surface=myfont.render("aroualLevel:"+str(format(arousalLevel, ".3f")), True, black, white)
+                    screen.blit(text_surface, np.round(scPos, 2)+[0.0, 236.0])
 
                     #text_surface=myfont.render("See List:    "+str(npzSee_t[TAG_t[idai],:]), True, black, white)
                     #screen.blit(text_surface, scPos+[0.0, 155.0])

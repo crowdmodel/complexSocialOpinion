@@ -563,11 +563,11 @@ def readAgents(FileName, debug=True, marginTitle=1, ini=1):
             agent.pp2 = 0.5
         
         try:
-            agent.arousalLevel = float(agentFeature[ini+9])
+            agent.tpreMode = int(agentFeature[ini+9])
             agent.aType = str(agentFeature[ini+10])
             agent.inComp = int(agentFeature[ini+11]) 
         except:
-            agent.arousalLevel = 0.2
+            agent.tpreMode = 0 #0.2
             agent.aType = 'active'
             agent.inComp = int(1) 
         
@@ -1660,7 +1660,7 @@ def dump_evac(agents, fileName, T, debug=True):
     Q_numOtherSee=[]
     Q_numOther=[]
     
-    Q_ratioV=[]
+    Q_arousal=[]
     Q_stressLevel=[]
     
     Q_doorFx=[]
@@ -1715,7 +1715,7 @@ def dump_evac(agents, fileName, T, debug=True):
         Q_numOtherSee.append(len(agent.seeothers))
         Q_numOther.append(len(agent.others))
         
-        Q_ratioV.append(agent.ratioV)
+        Q_arousal.append(agent.arousalLevel)
         Q_stressLevel.append(agent.stressLevel)
 
         Q_doorFx.append(agent.doorF[0])
@@ -1732,7 +1732,7 @@ def dump_evac(agents, fileName, T, debug=True):
     Q=Q_actualVx +Q_actualVy +Q_desiredVx +Q_desiredVy +Q_motiveFx +Q_motiveFy\
     +Q_socialFx +Q_socialFy +Q_selfrepFx +Q_selfrepFy\
     +Q_subFx +Q_subFy +Q_objFx+ Q_objFy+ Q_tpre+ Q_exit+ Q_numOtherSee +Q_numOther\
-    +Q_ratioV +Q_stressLevel
+    +Q_arousal +Q_stressLevel
     
     writeFRec(fileName, 'f', [T])
     writeFRec(fileName, 'I', [NPLIM])
