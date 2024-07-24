@@ -6,13 +6,10 @@
 #
 #-----------------------------------------------------------------------
 #=======================================================================
-# 
+
 # DESCRIPTION:
-# This software is part of a python library to assist in developing and
-# analyzing evacuation simulation results from Fire Dynamics Simulator with Evacuation (FDS+Evac).
-# FDS+Evac is an open source software package developed by NIST. The source
-# code is available at: https://github.com/firemodels/fds
-#
+# This software is a python library for Many-Particle Simulation of Complex Social Interaction
+# The individual-level model is extended based on the well-known social force model, and it mainly describes how agents/particles interact with each other, and also with surrounding facilities including obstructions and passageways. Most importantly, we introduce a set of arrays to define social relationship of agents/particles in a quantitative manner. Opinion dynamics is integrated with force-based interaction to study complex social phenonmena including path-selection activities, social group and herding effect.  Verying interestingly, the interaction of such agent/particles are not only at physics-level, but at consciousness and unconsciousness level by integratings advance social-psychological studies.  
 
 import pygame
 import pygame.draw

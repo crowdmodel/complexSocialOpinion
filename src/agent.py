@@ -1,3 +1,18 @@
+
+
+#-----------------------------------------------------------------------
+# Copyright (C) 2020, All rights reserved
+#
+# Peng Wang
+#
+#-----------------------------------------------------------------------
+#=======================================================================
+
+# DESCRIPTION:
+# This software is a python library for Many-Particle Simulation of Complex Social Interaction
+# The individual-level model is extended based on the well-known social force model, and it mainly describes how agents/particles interact with each other, and also with surrounding facilities including obstructions and passageways. Most importantly, we introduce a set of arrays to define social relationship of agents/particles in a quantitative manner. Opinion dynamics is integrated with force-based interaction to study complex social phenonmena including path-selection activities, social group and herding effect.  Verying interestingly, the interaction of such agent/particles are not only at physics-level, but at consciousness and unconsciousness level by integratings advance social-psychological studies.  
+
+
 # -*-coding:utf-8-*-
 # Author: WP
 # Email: wp2204@gmail.com
@@ -1204,7 +1219,7 @@ class person(object):
             ##################################
             #Group Effect and Talking Behavior
             person.talk[self.ID, aj.ID] = 0                        
-            if person.talk[aj.ID, self.ID] == 0:
+            if person.talk[aj.ID, self.ID] == 1:
                 person.talk[self.ID, aj.ID]=1
                 
                 person.DFactor[self.ID, aj.ID]=0.6
