@@ -563,11 +563,11 @@ def readAgents(FileName, debug=True, marginTitle=1, ini=1):
             agent.pp2 = 0.5
         
         try:
-            agent.tpreMode = int(agentFeature[ini+9])
+            agent.arousalLevel = float(agentFeature[ini+9])
             agent.aType = str(agentFeature[ini+10])
             agent.inComp = int(agentFeature[ini+11]) 
         except:
-            agent.tpreMode = 0 #0.2
+            agent.arousalLevel = 0 #0.2
             agent.aType = 'active'
             agent.inComp = int(1) 
         

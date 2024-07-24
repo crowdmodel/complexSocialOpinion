@@ -61,7 +61,6 @@ class person(object):
         #self.actualV = np.array([0.0, 0.0]) 
         self.actualV =  np.array([0.0, 0.0])#np.array([random.uniform(0,1.6), random.uniform(0,1.6)])
         self.actualSpeed = np.linalg.norm(self.actualV)  #np.array([0.0, 0.0])
-
         self.dest = np.array([60.0,10.0])
         self.exitInMind = None
         self.exitInMindIndex = None
@@ -71,9 +70,9 @@ class person(object):
         # Flow field vectors
         self.pathMapU= []
         self.pathMapV= []
-        
         # For solver=0
         self.pathMap = []
+        
         self.visibleDoors = []
         self.visibleExits = []
         self.route = []     # Record the passing doors
@@ -162,6 +161,7 @@ class person(object):
         self.stressLevelD = 0.0
 
         self.color = [255, 0, 0] #blue
+        self.outsideDoor = True
 
         self.moving_tau = 0.7
         self.tpre_tau = 1.6
@@ -169,6 +169,9 @@ class person(object):
 
         print('X and Y Position:', self.pos)
         print('self.direction:', self.direction)
+        
+        
+        
     
     ##############################################
     # This is for drawing agent with three circles
@@ -294,7 +297,45 @@ class person(object):
             self.desiredSpeed = self.desiredSpeed + random.uniform(-0.3, 0.0)
             self.desiredSpeed = max(0.0, self.desiredSpeed)
         return None
+
+
+    def preEvacModel(self, flag = 'random'):
+        
+        if (self.arousalLevel <= 0.2): # Desired velocity is zero
+            self.desiredV = self.direction*0.0
+            self.desiredSpeed = 0.0
+            self.tau = random.uniform(2.0,10.0) #self.tpre_tau
+            self.motiveF = self.adaptMotiveForce()
     
+        #ai.sumAdapt += motiveForce*0.2  #PID: Integration Test Here
+    
+        if (self.arousalLevel > 0.2 and self.arousalLevel <=0.6): # Motive Force is zero
+            self.motiveF = np.array([0.0, 0.0])
+
+        if (self.arousalLevel >= 0.6):
+            if self.outsideDoor:
+                self.doorF = np.array([0.0, 0.0])
+                
+            goSomeone = self.moveToAgent()
+            if goSomeone is not None:
+                gsid = goSomeone.ID
+                self.diretion = normalize(goSomeone.pos - self.pos)
+                self.desiredSpeed = random.uniform(0.6,1.6)
+                self.desiredV = self.diretion*self.desiredSpeed
+                self.tau = random.uniform(0.6,1.6) #self.tpre_tau
+                self.motiveF = self.adaptMotiveForce()
+                print ('ai:', self.ID, '&&& In Tpre Stage:')
+                print ('goSomeone:', goSomeone.ID)
+                print ('postion:', self.pos)
+            else:
+                self.desiredV = self.direction*0.0
+                self.desiredSpeed = 0.0
+                self.tau = random.uniform(2.0,10.0) #self.tpre_tau
+                self.motiveF = self.adaptMotiveForce()
+                print  ('ai:', self.ID, '&&& In Tpre Stage:')
+                print ('goSomeone is None.')
+                print ('postion:', self.pos)
+
     
     # Compute self-motive force before self-repulsion
     def adaptSelfRep(self, Dfactor=1, Afactor=1, Bfactor=1):
@@ -520,23 +561,23 @@ class person(object):
         # If inside a door, the wall force is zero  ???
         # If inside a door, the wall attached to the door should be considered.  
         for wall in walls:
-            outsideDoor = True
+            outsideDoorFlag = True
             if wall.inComp ==0:
                 continue
             # No need to test whether an agent is inside or not
             if wall.inside(self.pos):
                 for door in wall.attachedDoors:
                     if door.inside(self.pos):
-                        outsideDoor = False
+                        outsideDoorFlag = False
                         continue
                         # To add the door force here???  No
                         # Door force is added in adaptWallDoorForce()
             else:
                 for door in wall.attachedDoors:
                     if door.inside(self.pos):
-                        outsideDoor = False
+                        outsideDoorFlag = False
                         continue
-            if outsideDoor:
+            if outsideDoorFlag:
                 #self.wallrepF += self.wallPhyForce(wall)
                 self.physicWF += self.wallPhyForce(wall)
         return self.physicWF
@@ -546,7 +587,7 @@ class person(object):
         
         self.wallrepF = np.array([0.0,0.0])
         self.doorF= np.array([0.0,0.0])
-        outsideDoor = True
+        self.outsideDoor = True
         for door in doors:
             if door.inComp ==0:
                 continue
@@ -554,12 +595,12 @@ class person(object):
             if door.inside(self.pos):
                 self.wallrepF = np.array([0.0, 0.0])
                 self.doorF = self.doorForce(door) 
-                outsideDoor = False
-                return self.wallrepF, self.doorF, outsideDoor
+                self.outsideDoor = False
+                return self.wallrepF, self.doorF, self.outsideDoor
                 #doorInter = self.doorForce(door)
                 #break
 
-        if outsideDoor:
+        if self.outsideDoor:
             for wall in walls:
                 if wall.inComp ==0:
                     continue
@@ -569,7 +610,7 @@ class person(object):
         '''
         #########################
         # Calculate Wall Repulsion
-        if outsideDoor:
+        if self.outsideDoor:
             for wall in walls:
                 if wall.inComp ==0:
                     continue
@@ -581,7 +622,7 @@ class person(object):
                 if door.inComp ==0:
                     continue
                 self.doorF += self.doorForce(door)
-        return self.wallrepF, self.doorF, outsideDoor
+        return self.wallrepF, self.doorF, self.outsideDoor
     
             
         '''
@@ -630,7 +671,7 @@ class person(object):
                         break
         '''
         
-        return self.wallrepF, self.doorF, outsideDoor
+        return self.wallrepF, self.doorF, self.outsideDoor
                
         
     def selectTarget(self, exit2door=None, mode='default'):
@@ -930,7 +971,7 @@ class person(object):
         dest = None
         someoneOK = None
         for aj in self.others:
-            dest_temp = np.linalg.norm(aj.pos - self.pos)
+            dest_temp = 0.3*np.linalg.norm(aj.pos - self.pos) + 0.7*person.DFactor[self.ID, aj.ID]
             dir1 = self.direction
             dir2 = aj.pos-self.pos
             if dest ==None or dest>dest_temp:
@@ -1163,7 +1204,15 @@ class person(object):
             ##################################
             #Group Effect and Talking Behavior
             person.talk[self.ID, aj.ID] = 0                        
-            if dij<self.talk_range and self.talk_prob>random.uniform(0.0,1.0): 
+            if person.talk[aj.ID, self.ID] == 0:
+                person.talk[self.ID, aj.ID]=1
+                
+                person.DFactor[self.ID, aj.ID]=0.6
+                person.AFactor[self.ID, aj.ID]=6000
+                person.BFactor[self.ID, aj.ID]=30
+                self.tau = self.talk_tau
+                
+            elif dij<self.talk_range and self.talk_prob>random.uniform(0.0,1.0): 
             #and 0.6<random.uniform(0.0,1.0):
                 person.DFactor[self.ID, aj.ID]=0.6 #(1-self.p)*person.DFactor[self.ID, aj.ID]+self.p*person.DFactor[aj.ID, self.ID]
                 #person.AFactor[self.ID, aj.ID]=(1-self.p)*person.AFactor[self.ID, aj.ID]+self.p*person.AFactor[aj.ID, self.ID]
@@ -1184,7 +1233,7 @@ class person(object):
 
 
 
-    def adaptSocialForce(self, agents, GROUPBEHAVIOR, debug=False):
+    def adaptSocialForce(self, agents, GROUPBEHAVIOR=True, ShortRangeF=1, debug=False):
 
         self.socialF = np.array([0.0,0.0])
         #for idaj, aj in enumerate(agents):
@@ -1196,7 +1245,10 @@ class person(object):
                 continue
              
             # Traditional Social Force in Helbing et. al., 2000
-            self.socialF += self.socialForce(aj)
+            if ShortRangeF == 1:
+                self.socialF += self.socialForce(aj)
+            else:
+                self.socialF += self.magneticForce(aj)
             #peopleInter += self.socialForce(aj)*anisoF
 
         for aj in self.others:
@@ -1238,7 +1290,9 @@ class person(object):
         
         otherMovingDir = np.array([0.0, 0.0])
         otherMovingSpeed = 0.0
+        otherMovingNum = 0
         otherTpre = 0.0
+        otherArousal = 0.0
         
         temp = np.random.multinomial(1, person.CFactor[self.ID, :], size=1)
         print(self.ID)
@@ -1252,10 +1306,12 @@ class person(object):
                 otherMovingDir = normalize(aj.actualV) #/DFactor[idai, idaj]*AFactor[idai, idaj]
                 otherMovingSpeed = np.linalg.norm(aj.actualV) #/DFactor[idai, idaj]*AFactor[idai, idaj]
                 otherTpre = aj.tpre
+                otherArousal = aj.arousalLevel
                 
         
         if len(self.others)>0:
             self.tpre = (1-self.p)*self.tpre + self.p*otherTpre
+            self.arousalLevel = (1-self.p)*self.arousalLevel + self.p*otherArousal
         #DFactor[idai, idaj] = (1-ai.p)*DFactor[idai, idaj]+ai.p*DFactor[idaj, idai]
         #AFactor[idai, idaj] = (1-ai.p)*AFactor[idai, idaj]+ai.p*AFactor[idaj, idai]
         #BFactor[idai, idaj] = (1-ai.p)*BFactor[idai, idaj]+ai.p*BFactor[idaj, idai]
@@ -1278,12 +1334,14 @@ class person(object):
         otherMovingSpeed = 0.0
         otherMovingNum = 0
         otherTpre = 0.0
+        otherArousal = 0.0
 
         for idaj, aj in enumerate(self.others):
             otherMovingDir += normalize(person.CFactor[self.ID, aj.ID]*aj.actualV) #/DFactor[idai, idaj]*AFactor[idai, idaj]
             otherMovingSpeed += np.linalg.norm(person.CFactor[self.ID, aj.ID]*aj.actualV) #/DFactor[idai, idaj]*AFactor[idai, idaj]
             otherMovingNum += 1
             otherTpre += person.CFactor[self.ID, aj.ID]*aj.tpre
+            otherArousal += person.CFactor[self.ID, aj.ID]*aj.arousalLevel
 
         #nij = (self.pos - other.pos)/dij
         
@@ -1305,7 +1363,10 @@ class person(object):
         #return otherMovingDir, otherMovingSpeed/otherMovingNum, otherTpre
         if len(self.others)>0:
             #otherMovingDir, otherMovingSpeed_average, otherTpre = self.opinionDynamics()
+            self.arousalLevel = (1-self.p)*self.arousalLevel + self.p*otherArousal
             self.tpre = (1-self.p)*self.tpre + self.p*otherTpre
+            #if self.arousalLevel>0.5:
+            #    self.tpre = (1-self.p)*self.tpre + self.p*otherTpre
     
 
     def findDoorDir(self, direction):
