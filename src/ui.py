@@ -1,3 +1,19 @@
+#-----------------------------------------------------------------------
+# Copyright (C) 2020, All rights reserved
+#
+# Peng Wang
+#
+#-----------------------------------------------------------------------
+#=======================================================================
+
+# DESCRIPTION:
+# This software is a python library for Many-Particle Simulation of Complex Social Interaction
+# The individual-level model is extended based on the well-known social force model, and it mainly describes how agents/particles interact with each other, and also with surrounding facilities including obstructions and passageways. Most importantly, we introduce a set of arrays to define social relationship of agents/particles in a quantitative manner. Opinion dynamics is integrated with force-based interaction to study complex social phenonmena including path-selection activities, social group and herding effect.  Verying interestingly, the interaction of such agent/particles are not only at physics-level, but at consciousness and unconsciousness level by integratings advance social-psychological studies.  
+
+
+# -*-coding:utf-8-*-
+# Author: WP
+# Email: wp2204@gmail.com
 
 import os, sys, csv
 import multiprocessing as mp
@@ -56,7 +72,7 @@ class GUI(object):
             self.currentdir = os.path.dirname(self.fname_EVAC)
         
         self.window = Tk()
-        self.window.title('crowd egress simulator')
+        self.window.title('social array simulator')
         self.window.geometry('960x600')
 
         self.statusStr = ""
@@ -249,9 +265,9 @@ class GUI(object):
 
         self.UseConfig_Var = IntVar()
         self.UseConfig_Var.set(0)
-        self.UseConfig_CB=Checkbutton(self.frameRun, text= 'Use config.txt to overwrite parameters selected in the GUI panels', variable=self.UseConfig_Var, onvalue=1, offvalue=0)
+        self.UseConfig_CB=Checkbutton(self.frameRun, text= 'Use configuration data in csv file to overwrite parameters selected in the GUI panels', variable=self.UseConfig_Var, onvalue=1, offvalue=0)
         self.UseConfig_CB.pack() #place(x=2, y=276) #pack() 
-        self.showHelp(self.SHOWFORCE_CB, "Use config.txt to configure simulation object rather than use parameters selected in the GUI panels.")
+        self.showHelp(self.SHOWFORCE_CB, "Use configuration data in csv file to configure simulation object rather than use parameters selected in the GUI panels.")
 
         self.AutoPlot_Var = IntVar()
         self.AutoPlot_Var.set(0)
@@ -325,7 +341,6 @@ class GUI(object):
         nameEntered_xmin.place(x=122, y=6)
         self.showHelp(nameEntered_xmin, "Input the lower boundary value in x axis to create x-y planary mesh for one-floor geometry layout. \n Write 'auto' here if you do not know what it means and the program will automatically give the value.  ")
 
-
         self.lb_xmax = Label(self.frameFlow, text = 'x_max:')
         self.lb_xmax.place(x=12, y=36)
 
@@ -377,13 +392,13 @@ class GUI(object):
         nameEntered_nyp.place(x=422, y=66)
         self.showHelp(nameEntered_nyp, "Input the number of points in y axis for x-y planary mesh. \n The mesh is refined as the number of points increases, and more computational time will be needed. ")
 
-        self.buttonFlow2 = Button(self.frameFlow, text='compute egress flow field', command=self.testFlow)
+        self.buttonFlow2 = Button(self.frameFlow, text='compute egress flow field', command=self.testFlow, width=57)
         self.buttonFlow2.place(x=6, y=200)
         self.showHelp(self.buttonFlow2, "Generate the door flow field.  \n Users should first select either the nearest-exit method (default) or exit probablity method")
 
         #self.lb_outnpz = Label(self.frameFlow, text = 'The output npz file selected: None!  To show crowd fluid dynamics.')
         #self.lb_outnpz.place(x=12, y=206)        
-        self.buttonCFD = Button(self.frameFlow, text='Read output npz file and show crowd fluid', command=self.selectOutNPZ)
+        self.buttonCFD = Button(self.frameFlow, text='Read output npz file and show crowd fluid', command=self.selectOutNPZ, width=57)
         self.buttonCFD.place(x=6, y=230)
         self.showHelp(self.buttonCFD, "Read output npz file and show the numerical result of crowd fluid dynamics.")
         
@@ -403,6 +418,13 @@ class GUI(object):
         nameEntered_ymin.insert(0, 'auto')
         nameEntered_ymin.place(x=422, y=6)
         self.showHelp(nameEntered_ymin, "The noise level for fluctuation force: \n Standard derivation for normal distribution.  \n Write 'auto' or leave it blank if you do not know what it means and the program will automatically give the value.  ")
+        
+        self.lbSoc0 = Label(self.frameSoc, text =  "Optional: Below please select the type of opinion dynamics model. \n 0: Opinion dyanmics in linear algebra  1: Random gossip model. ")
+        self.lbSoc0.place(x=15, y=260)
+        
+        self.spin_opinion = Spinbox(self.frameSoc, from_=0, to=1, width=5, bd=8) 
+        self.spin_opinion.place(x=656, y=260)
+        self.showHelp(self.spin_opinion, "Select the different algorithm of opinion dynamics model: \n 0: Opinion dynamics; 1: Random gossip.  ")  #Uncheck it if you do not know what it means.")
         
         self.lbSoc1 = Label(self.frameSoc, text =  "Optional: Below please select the type of short-range interation force. \n 0: Social Force  1: Magnetic force. ")
         self.lbSoc1.place(x=15, y=300)
@@ -435,12 +457,12 @@ class GUI(object):
         # frameData Data Tool
         # --------------------------------------------
 
-        self.buttonTpre = Button(self.frameData, text='plot pre-movement time from output data', command=self.selectOutBinFile_Tpre)
+        self.buttonTpre = Button(self.frameData, text='plot pre-movement time from output data', command=self.selectOutBinFile_Tpre, width=57)
         self.buttonTpre.place(x=19, y=89)
         self.showHelp(self.buttonTpre, "Display the pre-movement time offline in matplotlib.  \n Please select the simulation output binary file. ")
 
 
-        self.buttonVideo = Button(self.frameData, text='visualize agent-based simulation output data', command=self.startVideo)
+        self.buttonVideo = Button(self.frameData, text='visualize agent-based simulation output data', command=self.startVideo, width=57)
         self.buttonVideo.place(x=19, y=126)
         self.showHelp(self.buttonVideo, "Display the simulation result offline in pygame.  \n Please select the simulation output binary file. ")
 
@@ -448,9 +470,9 @@ class GUI(object):
         self.lb_outtxt = Label(self.frameData, text = 'The output txt file selected: None!  To show probablity distribution of exit selection for each agent.')
         self.lb_outtxt.place(x=19, y=206)    
             
-        self.buttonExitProb = Button(self.frameData, text='Read output files and plot the door selection probablity', command=self.selectOutTxtFile_DoorProb)
+        self.buttonExitProb = Button(self.frameData, text='Read output files and plot the exit selection probablity', command=self.selectOutTxtFile_DoorProb)
         self.buttonExitProb.place(x=19, y=230)
-        self.showHelp(self.buttonExitProb, "Read output files and plot the door selection probablity.")
+        self.showHelp(self.buttonExitProb, "Read output files and plot the exit selection probablity.")
 
         self.spin_exitnumber = Spinbox(self.frameData, from_=0, to=100, width=5, bd=8) 
         self.spin_exitnumber.place(x=596, y=230)
@@ -467,6 +489,7 @@ class GUI(object):
         
         #self.scrollbar_y = Scrollbar(self.frameCSV, orient=VERTICAL)
         #self.scrollbar_x = Scrollbar(self.frameCSV, orient=HORIZONTAL)
+        columns = ("agent", "pos", "vel")
         
         self.table_agent2exit = Treeview(self.frameCSV, height=6, show="headings", columns=('agents', 'data1', 'data2'), selectmode='extended') #, yscrollcommand=self.scrollbar_y.set, xscrollcommand=self.scrollbar_x.set)
         self.table_agent2exit.column('agents', width=100)
@@ -477,6 +500,7 @@ class GUI(object):
         self.table_agent2exit.heading('data2', text="exit_prob")
         self.table_agent2exit.place(x=296, y=30)
 
+        self.table_agent2exit.bind('<Double-1>', self.set_cell_value)
         #self.scrollbar_y.config(command=self.table_agent2exit.yview)
         #self.scrollbar_x.config(command=self.table_agent2exit.xview)
         #self.scrollbar_y.pack(side=RIGHT, fill=Y)
@@ -534,6 +558,30 @@ class GUI(object):
     #    value = self.spin_exitnumber.get()
         #print(value)
         #scr.insert(tk.INSERT, value + '\n')
+
+    def set_cell_value(event): # double click to edit the item
+        '''
+        for item in self.table_agent2exit.selection():
+            #item = I001
+            item_text = self.table_agent2exit.item(item, "values")
+            print(item_text[0:2])  # Output the column number selected by users
+        '''
+        column= self.table_agent2exit.identify_column(event.x)# column
+        row = self.table_agent2exit.identify_row(event.y)  # row
+        cn = int(str(column).replace('#',''))
+        rn = int(str(row).replace('I',''))
+        entryedit = Text(self.frameCSV, width=10+(cn-1)*16, height = 1)
+        entryedit.place(x=16+(cn-1)*130, y=6+rn*20)
+        
+        def saveedit():
+            self.table_agent2exit.set(item, column=column, value=entryedit.get(0.0, "end"))
+            entryedit.destroy()
+            okb.destroy()
+            
+        okb = Button(self.frameCSV, text='OK', width=4, command=saveedit)
+        okb.place(x=90+(cn-1)*242,y=2+rn*20)
+        '''
+        '''
 
 
     def updateCtrlParam(self):
@@ -728,6 +776,7 @@ class GUI(object):
             #for j in range(self.currentSimu.num_exits):
             self.table_agent2exit.insert('', i, values=(self.currentSimu.agents[i].ID, self.currentSimu.agents[i].p, self.currentSimu.agent2exit[i,:]))
         self.textInformation.insert(END, '\n'+'agent2exit data: \n '+str(self.currentSimu.agent2exit)+'\n')
+        
 
     def readData_p(self):
         self.currentSimu = simulation()
