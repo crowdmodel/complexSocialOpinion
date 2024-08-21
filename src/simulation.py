@@ -258,7 +258,7 @@ class simulation(object):
             #raw_input('Please check output data path and filename!')
         #self.fnameBin = FN_EVAC.rstrip('.csv')+self.outDataName+'.bin'
         
-        
+        '''
         FN_Temp = os.path.join(self.fpath, "config.txt")
         if os.path.exists(FN_Temp):
             for line in open(FN_Temp, "r"):
@@ -283,7 +283,7 @@ class simulation(object):
                 if re.match('dumpBinary', line):
                     temp =  line.split('=')
                     self.dumpBin = bool(temp[1].strip())
-        '''
+
                 # Mesh parameters
                 if re.match('xmin', line):
                     temp =  line.split('=')
@@ -589,6 +589,8 @@ class simulation(object):
         #print('TPRE Mode: '+str(self.TPREMODE)) #+ '\n')
         print('Group: '+str(self.GROUPBEHAVIOR)) #+ '\n')
         print('Self Repulsion: '+str(self.SELFREPULSION)) #+ '\n')
+        print('Opinion Model: '+str(self.OPINIONMODEL)) #+ '\n')
+        print('Short-Range Force: '+str(self.INTERACTION)) #+ '\n')
         print('Dump Binary Data: '+str(self.dumpBin)) #+ '\n')
         print('Working Folder: '+str(self.fpath)) #+ '\n')
 
@@ -625,6 +627,8 @@ class simulation(object):
         #f.write('TPRE Mode: '+str(self.TPREMODE)+'\n')
         f.write('Group: '+str(self.GROUPBEHAVIOR)+'\n')
         f.write('Self Repulsion: '+str(self.SELFREPULSION)+'\n')
+        f.write('Opinion Model: '+str(self.OPINIONMODEL)+'\n')
+        f.write('Short-Range Force: '+str(self.INTERACTION)+ '\n')
         f.write('Dump Binary Data: '+str(self.dumpBin)+'\n')
         f.write('Working Folder: '+str(self.fpath)+ '\n')
         
@@ -2219,7 +2223,7 @@ class simulation(object):
             
             if self.OPINIONMODEL == 0:
                 ai.opinionDynamics()
-            elif self.OPININOMODEL == 1:
+            elif self.OPINIONMODEL == 1:
                 ai.opinionExchange()
             ai.updateTalkList()
             #peopleInter = + ai.adaptPhyForce(self.agents)

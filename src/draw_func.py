@@ -11,6 +11,7 @@
 # This software is a python library for Many-Particle Simulation of Complex Social Interaction
 # The individual-level model is extended based on the well-known social force model, and it mainly describes how agents/particles interact with each other, and also with surrounding facilities including obstructions and passageways. Most importantly, we introduce a set of arrays to define social relationship of agents/particles in a quantitative manner. Opinion dynamics is integrated with force-based interaction to study complex social phenonmena including path-selection activities, social group and herding effect.  Verying interestingly, the interaction of such agent/particles are not only at physics-level, but at consciousness and unconsciousness level by integratings advance social-psychological studies.  
 
+
 import pygame
 import pygame.draw
 import numpy as np
@@ -1095,9 +1096,11 @@ def show_geom(simu, debug=False):
         
         myfont=pygame.font.SysFont("arial",17)
         text_surface=myfont.render('GroupSoc:'+str(simu.GROUPBEHAVIOR), True, lightpink, black)
-        screen.blit(text_surface, [700.0, 180.0])
+        screen.blit(text_surface, [700.0, 167.0])
         text_surface=myfont.render('SelfRep:'+str(simu.SELFREPULSION), True, lightpink, black)
-        screen.blit(text_surface, [700.0, 200.0])
+        screen.blit(text_surface, [700.0, 187.0])
+        text_surface=myfont.render('Opinion:'+str(simu.OPINIONMODEL), True, lightpink, black)
+        screen.blit(text_surface, [700.0, 207.0])
         
         #basicXY = [756, 200]
 
@@ -3399,7 +3402,7 @@ def visualizeEvac(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=20
                     text_surface=myfont.render("npzD:"+str(np.round(npzD_t[TAG_t[idai],:],2)), True, orange, white)
                     screen.blit(text_surface, np.round(scPos, 2)+[0.0, 136.0])
                     text_surface=myfont.render("npzA:"+str(np.round(npzA_t[TAG_t[idai],:],2)), True, black, white)
-                    screen.blit(text_surface, np.round(scPos, 2)+[0.0, 156.0])
+                    screen.blit(text_surface, np.round(scPos, 2)+[0.0, 158.0])
                     text_surface=myfont.render("npzB:"+str(np.round(npzB_t[TAG_t[idai],:],2)), True, black, white)
                     screen.blit(text_surface, np.round(scPos, 2)+[0.0, 176.0])
                     text_surface=myfont.render("exitProb:"+str(np.round(npzEP_t[TAG_t[idai],:],2)), True, black, white)
