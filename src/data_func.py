@@ -8,11 +8,11 @@
 #=======================================================================
 # 
 # DESCRIPTION:
-# This software is a python library for Many-Particle Simulation of Complex Social Interaction
-# The individual-level model is extended based on the well-known social force model, and it mainly describes how agents/particles interact with each other, and also with surrounding facilities including obstructions and passageways. Most importantly, we introduce a set of arrays to define social relationship of agents/particles in a quantitative manner. Opinion dynamics is integrated with force-based interaction to study complex social phenonmena including path-selection activities, social group and herding effect.  Verying interestingly, the interaction of such agent/particles are not only at physics-level, but at consciousness and unconsciousness level by integratings advance social-psychological studies.  
-
-
-
+# This software is part of a python library to assist in developing and
+# analyzing evacuation simulation results from Fire Dynamics Simulator with Evacuation (FDS+Evac).
+# FDS+Evac is an open source software package developed by NIST. The source
+# code is available at: https://github.com/firemodels/fds
+#
 
 # -*-coding:utf-8-*-
 # Author: WP
@@ -230,7 +230,7 @@ def readCSV_base(fileName):
     return dataNP
 
 
-def getData(fileName, strNote):
+def getData(fileName, strNote, flag='npArray'):
     dataFeatures = readCSV_base(fileName)
 
     Num_Data = len(dataFeatures)
@@ -263,8 +263,11 @@ def getData(fileName, strNote):
                 break
             if j==Num_Data-1:
                 IPedEnd=Num_Data
-
-        dataOK = dataFeatures[IPedStart : IPedEnd]
+                
+        if flag=='npArray':
+            dataOK = dataFeatures[IPedStart : IPedEnd]
+        else:
+            dataOK = list(dataFeatures[IPedStart : IPedEnd])
         return dataOK, IPedStart, IPedEnd
 
     #data_result = np.array(dataOK)
@@ -510,7 +513,94 @@ def readArrayIndex(tableFeatures, NRow, NColomn, index=0, iniX=1, iniY=1, debug=
         print('Data in Table:', '\n', 'Index Number:', index, '\n', matrixC, '\n\n') #, matrixB, matrixD)
     return matrixC #, matrixB, matrixD
 
-    
+
+
+def readSocialArrayCSV(FileName, debug=True, marginTitle=1):
+
+    #dataFeatures = readCSV_base(FileName)
+    #[Num_Data, Num_Features] = np.shape(dataFeatures)   
+
+    agentFeatures, lowerIndex, upperIndex = getData(FileName, '&Ped')
+    Num_Agents=len(agentFeatures)-marginTitle
+    if Num_Agents <= 0:
+        agentFeatures, lowerIndex, upperIndex = getData(FileName, '&agent')
+        Num_Agents=len(agentFeatures)-marginTitle
+    if Num_Agents <= 0:
+        agentFeatures, lowerIndex, upperIndex = getData(FileName, '&Agent')
+        Num_Agents=len(agentFeatures)-marginTitle
+
+    if debug: 
+        print ('Number of Agents:', Num_Agents, '\n')
+        print ("Features of Agents\n", agentFeatures, "\n")
+
+    agent2exitFeatures, lowerIndex, upperIndex = getData(FileName, '&agent2exit')
+    Num_Agent2Exit=len(agent2exitFeatures)-marginTitle
+    if Num_Agent2Exit <= 0:
+        agent2exitFeatures, lowerIndex, upperIndex = getData(FileName, '&ped2exit')
+        Num_Agent2Exit=len(agent2exitFeatures)-marginTitle
+    if Num_Agent2Exit <= 0:
+        agent2exitFeatures, lowerIndex, upperIndex = getData(FileName, '&Ped2Exit')
+        Num_Agent2Exit=len(agent2exitFeatures)-marginTitle
+    if debug:
+        print ('Number of Agent2Exit:', Num_Agent2Exit, '\n')
+        print ('Features of Agent2Exit\n', agent2exitFeatures, "\n")
+
+    agentgroupFeatures, lowerIndex, upperIndex = getData(FileName, '&groupC')
+    Num_AgentGroup=len(agentgroupFeatures)-marginTitle
+    if Num_AgentGroup <= 0:
+        agentgroupFeatures, lowerIndex, upperIndex = getData(FileName, '&groupCABD')
+        Num_AgentGroup=len(agent2exitFeatures)-marginTitle
+    if Num_AgentGroup <= 0:
+        agentgroupFeatures, lowerIndex, upperIndex = getData(FileName, '&groupABD')
+        Num_AgentGroup=len(agent2exitFeatures)-marginTitle
+    if debug:
+        print ('Number of AgentGroup:', Num_AgentGroup, '\n')
+        print ('Features of AgentGroup\n', agentgroupFeatures, "\n")
+
+    obstFeatures, lowerIndex, upperIndex = getData(FileName, '&Wall')
+    Num_Obsts=len(obstFeatures)-marginTitle
+    if Num_Obsts <= 0:
+        obstFeatures, lowerIndex, upperIndex = getData(FileName, '&wall')
+        Num_Obsts=len(obstFeatures)-marginTitle
+
+    if debug:
+        print ('Number of Walls:', Num_Obsts, '\n')
+        print ("Features of Walls\n", obstFeatures, "\n")
+
+    exitFeatures, lowerIndex, upperIndex = getData(FileName, '&Exit')
+    Num_Exits=len(exitFeatures)-marginTitle
+    if Num_Exits <= 0:
+        exitFeatures, lowerIndex, upperIndex = getData(FileName, '&exit')
+        Num_Exits=len(exitFeatures)-marginTitle
+        
+    if debug: 
+        print ('Number of Exits:', Num_Exits, '\n')
+        print ("Features of Exits\n", exitFeatures, "\n")
+
+    doorFeatures, lowerIndex, upperIndex = getData(FileName, '&Door')
+    Num_Doors=len(doorFeatures)-marginTitle
+    if Num_Doors <= 0:
+        doorFeatures, lowerIndex, upperIndex = getData(FileName, '&door')
+        Num_Doors=len(doorFeatures)-marginTitle
+        
+    if debug:
+        print ('Number of Doors:', Num_Doors, '\n')
+        print ('Features of Doors\n', doorFeatures, "\n")
+        
+    exit2doorFeatures, lowerIndex, upperIndex = getData(FileName, '&Exit2Door')
+    Num_Exit2Door=len(exit2doorFeatures)-marginTitle
+    if Num_Exit2Door <= 0:
+        exit2doorFeatures, lowerIndex, upperIndex = getData(FileName, '&exit2door')
+        Num_Exit2Door=len(doorFeatures)-marginTitle
+
+    if debug:
+        print ('Number of Exit2Door:', Num_Exit2Door, '\n')
+        print ('Features of Exit2Door\n', exit2doorFeatures, "\n")
+
+
+    return agentFeatures, agent2exitFeatures, agentgroupFeatures, obstFeatures, exitFeatures, doorFeatures, exit2doorFeatures
+
+
 # The file to record the some output data of the simulation
 # f = open("outData.txt", "w+")
 
@@ -1253,7 +1343,7 @@ def updateDoorData(doors, outputFile, inputFile=None):
     try:
         with open(outputFile, mode='a+', newline='') as door_test_file:
             csv_writer = csv.writer(door_test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([''])
+            csv_writer.writerow([])
             if inputFile is not None:
                 csv_writer.writerow([inputFile])
             csv_writer.writerow(['DOOR/PATH data in TestGeom: '])
@@ -1266,7 +1356,7 @@ def updateDoorData(doors, outputFile, inputFile=None):
     except:
         with open(outputFile, mode='wb+') as door_test_file:
             csv_writer = csv.writer(door_test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([''])
+            csv_writer.writerow([])
             if inputFile is not None:
                 csv_writer.writerow([inputFile])
             csv_writer.writerow(['DOOR/PATH data in TestGeom: '])
@@ -1282,7 +1372,7 @@ def updateExitData(doors, outputFile, inputFile=None):
     try:
         with open(outputFile, mode='a+', newline='') as exit_test_file:
             csv_writer = csv.writer(exit_test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([''])
+            csv_writer.writerow([])
             if inputFile is not None:
                 csv_writer.writerow([inputFile])
             csv_writer.writerow(['EXIT data in TestGeom: '])
@@ -1295,7 +1385,7 @@ def updateExitData(doors, outputFile, inputFile=None):
     except:
         with open(outputFile, mode='wb+') as exit_test_file:
             csv_writer = csv.writer(exit_test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([''])
+            csv_writer.writerow([])
             if inputFile is not None:
                 csv_writer.writerow([inputFile])
             csv_writer.writerow(['EXIT data in TestGeom: '])
@@ -1311,7 +1401,7 @@ def updateWallData(walls, outputFile, inputFile=None):
     try:
         with open(outputFile, mode='a+', newline='') as wall_test_file:
             csv_writer = csv.writer(wall_test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([''])
+            csv_writer.writerow([])
             if inputFile is not None:
                 csv_writer.writerow([inputFile])
             csv_writer.writerow(['WALL/OBST data in TestGeom: '])
@@ -1324,7 +1414,7 @@ def updateWallData(walls, outputFile, inputFile=None):
     except:
         with open(outputFile, mode='wb+') as wall_test_file:
             csv_writer = csv.writer(wall_test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([''])
+            csv_writer.writerow([])
             if inputFile is not None:
                 csv_writer.writerow([inputFile])
             csv_writer.writerow(['WALL/OBST data in TestGeom: '])
@@ -1362,7 +1452,7 @@ def updateExit2Doors(exit2doors, outputFile, inputFile=None):
     try:
         with open(outputFile, mode='a+', newline='') as exit2door_file:
             csv_writer = csv.writer(exit2door_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([''])
+            csv_writer.writerow([])
             if inputFile is not None:
                 csv_writer.writerow([inputFile])
             csv_writer.writerow(['exit2door data in TestGeom: '])
@@ -1374,7 +1464,7 @@ def updateExit2Doors(exit2doors, outputFile, inputFile=None):
     except:
         with open(outputFile, mode='wb+') as exit2door_file:
             csv_writer = csv.writer(exit2door_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            csv_writer.writerow([''])
+            csv_writer.writerow([])
             if inputFile is not None:
                 csv_writer.writerow([inputFile])
             csv_writer.writerow(['exit2door data in TestGeom: '])
