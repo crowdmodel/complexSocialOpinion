@@ -1,19 +1,3 @@
-#-----------------------------------------------------------------------
-# Copyright (C) 2020, All rights reserved
-#
-# Peng Wang
-#
-#-----------------------------------------------------------------------
-#=======================================================================
-
-# DESCRIPTION:
-# This software is a python library for Many-Particle Simulation of Complex Social Interaction
-# The individual-level model is extended based on the well-known social force model, and it mainly describes how agents/particles interact with each other, and also with surrounding facilities including obstructions and passageways. Most importantly, we introduce a set of arrays to define social relationship of agents/particles in a quantitative manner. Opinion dynamics is integrated with force-based interaction to study complex social phenonmena including path-selection activities, social group and herding effect.  Verying interestingly, the interaction of such agent/particles are not only at physics-level, but at consciousness and unconsciousness level by integratings advance social-psychological studies.  
-
-
-# -*-coding:utf-8-*-
-# Author: WP
-# Email: wp2204@gmail.com
 
 import os, sys, csv
 import multiprocessing as mp
@@ -67,14 +51,28 @@ class GUI(object):
         self.fname_OutNPZ = "vel_flow0.npz"
         self.currentdir = None
         self.currentSimu = None
-        
+
+        self.AUTOCOMPLETE_WORDS = ["stress", "fixed", "random", "auto", "True", "False"]
+
         if self.fname_EVAC is not None:
             self.currentdir = os.path.dirname(self.fname_EVAC)
         
         self.window = Tk()
         self.window.title('social array simulator')
         self.window.geometry('960x600')
+                
+        self.menubar = Menu(self.window, bg="lightgrey", fg="black")
+        self.window.config(menu=self.menubar)
+        
+        self.file_menu = Menu(self.menubar, tearoff=0, bg="lightgrey", fg="black")
+        self.file_menu.add_command(label="Open", command=self.selectEvacFile, accelerator="Ctrl+O")
+        #self.file_menu.add_command(label="Edit", command=file_edit, accelerator="Ctrl+E")
+        self.file_menu.add_command(label="Save", command=self.file_save, accelerator="Ctrl+S")
+        self.menubar.add_cascade(label="File", menu=self.file_menu)
 
+        self.window.bind("<Control-s>", self.file_save)
+        self.window.bind("<Control-o>", self.selectEvacFile)
+        
         self.statusStr = ""
         self.statusText = StringVar(self.window, value=self.statusStr) # at this point, statusStr = ""
         # added "self.rootWindow" above by Hiroki Sayama 10/09/2018
@@ -93,13 +91,13 @@ class GUI(object):
         self.frameSoc = Frame(self.window)
         self.frameParameters = Frame(self.window)
         self.frameData = Frame(self.window)
-        self.frameCSV = Frame(self.window)
+        self.frameFDS = Frame(self.window)
         self.frameGuide = Frame(self.window)
         #self.frameExit = Frame(self.window)
         #self.frameSettings = Frame(self.window)
 
         scrollInfo = Scrollbar(self.window)#frameInformation)
-        self.textInformation = Text(self.window, width=45,height=6,bg='lightgray',wrap=WORD,font=("Courier",10))
+        self.textInformation = Text(self.window, width=45,height=6, bg="brown", fg="lightcyan", wrap=WORD,font=("Courier",10))
         scrollInfo.pack(side=RIGHT, fill=Y)
         self.textInformation.pack(side=LEFT,fill=BOTH,expand=YES)
         scrollInfo.config(command=self.textInformation.yview)
@@ -118,15 +116,14 @@ class GUI(object):
         self.textInformation.insert(END, str(self.fname_EVAC)+"\n")
         self.textInformation.insert(END, str(self.fname_FDS)+"\n")
 
-
-        self.notebook.add(self.frameRun,text="QuickStart")
-        self.notebook.add(self.frameParameters,text="Parameters")
-        self.notebook.add(self.frameFlow,text="FlowField")
+        self.notebook.add(self.frameRun,text=" <QuickStart> ")
+        self.notebook.add(self.frameParameters,text=" <Parameters> ")
+        self.notebook.add(self.frameFlow,text=" <FlowField> ")
         #self.notebook.add(self.frameInformation,text="Information")
-        self.notebook.add(self.frameSoc,text="SocialAgent")       
-        self.notebook.add(self.frameData,text="DataTool")
-        self.notebook.add(self.frameCSV,text="CSVTool") 
-        self.notebook.add(self.frameGuide,text="Readme")
+        self.notebook.add(self.frameSoc,text=" <SocialAgent> ")       
+        self.notebook.add(self.frameData,text=" <DataTool> ")
+        self.notebook.add(self.frameFDS,text="  <FDSTool>  ") 
+        self.notebook.add(self.frameGuide,text="  <Readme>  ")
         #self.notebook.add(self.frameSettings,text="Settings")
         self.notebook.pack(expand=NO, fill=BOTH, padx=5, pady=5 ,side=TOP)
         
@@ -158,18 +155,8 @@ class GUI(object):
 
         self.lb_csv = Label(self.frameRun,text = "Use csv file to create agent data or together with compartement geometry data.\n"+"The input csv file selected: "+str(self.fname_EVAC)+"\n")
         self.lb_csv.pack()
-        
-        self.lb_fds = Label(self.frameRun,text =  "Optional: If fds is selected, the compartment geometry could be created by fds file. \n"+"The fds file selected: "+str(self.fname_FDS)+"\n")
-        self.lb_fds.pack()
 
-
-        self.buttonSelectFDS =Button(self.frameRun, text='choose fds file for FDS data', command=self.selectFDSFile)
-        #self.buttonSelectFDS.place(x=2, y=60)
-        self.buttonSelectFDS.pack() #place(x=20, y=146)
-        self.showHelp(self.buttonSelectFDS, "Select fds file to set up the compartment geometry for the simulation")
-        
-
-        self.buttonSelectCSV =Button(self.frameRun, text='choose csv file for EVAC data', command=self.selectEvacFile)
+        self.buttonSelectCSV =Button(self.frameRun, text='choose csv file for EVAC data', width=38,command=self.selectEvacFile)
         #self.buttonSelectCSV.place(x=2, y=120)
         self.buttonSelectCSV.pack() #place(x=20, y=176)
         self.showHelp(self.buttonSelectCSV, "Select .csv file to set up the agent parameters for the simulation")
@@ -181,7 +168,7 @@ class GUI(object):
         
         #self.buttonRead = Button(self.frameRun, text='read now: read in data', command=self.readData)
         #self.buttonRead.pack()
-        self.buttonGeom = Button(self.frameRun, text='Create/Modify simulation object', command=self.testGeom)
+        self.buttonGeom = Button(self.frameRun, text='Create/Modify simulation object',  width=38,command=self.testGeom)
         self.buttonGeom.pack() #place(x=20, y=206)
         self.showHelp(self.buttonGeom, "Create or modify the simulation data by reading the input file (FDS or CSV files as selected above).  \n Users can easily modify the data such as adding doors, walls or exits.")
 
@@ -189,26 +176,58 @@ class GUI(object):
         #self.buttonDel.pack()
         #self.showHelp(self.buttonDel, "Delete the existing simulation so that users can create a new one.")
  
-        self.buttonFlow = Button(self.frameRun, text='compute egress flow field', command=self.testFlow)
-        self.buttonFlow.pack() #place(x=306, y=206)
-        self.showHelp(self.buttonFlow, "Generate the door flow field.  \n Users should first select either the nearest-exit method (default) or exit probablity method")
-
-        self.buttonComp = Button(self.frameRun, text='compute simulation and dump data', command=self.compSim)
-        self.buttonComp.pack() #place(x=306, y=176)
-        #self.buttonComp.grid(row=3, column=1, rowspan=2, ipady=7)
-        #self.buttonComp.place(x=397,y=191)
-        self.showHelp(self.buttonComp, "Only compute the numerical result without displaying in pygame.  \n Users can use another python program evac-prt5-tool to display the the numerical result.")
+        #self.buttonFlow = Button(self.frameRun, text='compute egress flow field', command=self.testFlow)
+        #self.buttonFlow.pack() #place(x=306, y=206)
+        #self.showHelp(self.buttonFlow, "Generate the door flow field.  \n Users should first select either the nearest-exit method (default) or exit probablity method")
         
-        self.buttonStart = Button(self.frameRun, text='compute and visualize simulation', command=self.startSim)
+        self.buttonStart = Button(self.frameRun, text='compute and visualize simulation',  width=38,command=self.startSim)
         self.buttonStart.pack() #(side=LEFT) #place(x=20, y=236)
         self.showHelp(self.buttonStart, "Compute the numerical result and display the result timely in pygame.  \n Please select the items in parameter panel to adjust the appearance in pygame window. ")
 
 
+        #####################################################################################33
+        # --------------------------------------------
+        # frameFDS
+        # --------------------------------------------
+
+        self.lb_fds = Label(self.frameFDS,text =  "Optional: If fds is selected, the compartment geometry could be created by fds file. \n"+"The fds file selected: "+str(self.fname_FDS)+"\n")
+        self.lb_fds.pack()
+
+
+        self.buttonSelectFDS =Button(self.frameFDS, text='choose fds file for FDS data', command=self.selectFDSFile)
+        #self.buttonSelectFDS.place(x=2, y=60)
+        self.buttonSelectFDS.pack() #place(x=20, y=146)
+        self.showHelp(self.buttonSelectFDS, "Select fds file to set up the compartment geometry for the simulation")
+        
+
         self.UseFDS_Var = IntVar()
         self.UseFDS_Var.set(1)
-        self.UseFDS_CB=Checkbutton(self.frameRun, text= 'Use FDS file to create compartment geometry', variable=self.UseFDS_Var, onvalue=1, offvalue=0)
+        self.UseFDS_CB=Checkbutton(self.frameFDS, text= 'Use FDS file to create compartment geometry', variable=self.UseFDS_Var, onvalue=1, offvalue=0)
         self.UseFDS_CB.pack() #place(x=306, y=146)
         self.showHelp(self.UseFDS_CB, "Use FDS file to create compartment geometry, including walls, doors and exits.")
+
+
+        self.lb3 = Label(self.frameFDS, text =  "Optional: If fds file is selected, the compartment geometry is created from fds file. \n")
+        self.lb3.place(x=12, y=179)
+
+        self.lb2 = Label(self.frameFDS, text =  "Optional: The single-floor mesh within x-y plane is read from fds file between z_min and z_max. \n")
+        self.lb2.place(x=12, y=200)
+
+        self.lb_zmin = Label(self.frameFDS, text = 'z_min:')
+        self.lb_zmin.place(x=12, y=226)
+        self.zmin_gui = StringVar()
+        nameEntered_zmin = Entry(self.frameFDS, width=12, textvariable=self.zmin_gui)
+        nameEntered_zmin.insert(0, '0.0')
+        nameEntered_zmin.place(x=62, y=226)
+        self.showHelp(nameEntered_zmin, "Use FDS file to create compartment geometry, \n and zmin is the lower bound in z axis for one-floor geometry mesh.")
+
+        self.lb_zmax = Label(self.frameFDS, text = 'z_max:')
+        self.lb_zmax.place(x=212, y=226)
+        self.zmax_gui = StringVar()
+        nameEntered_zmax = Entry(self.frameFDS, width=12, textvariable=self.zmax_gui)
+        nameEntered_zmax.insert(0, '3.0')
+        nameEntered_zmax.place(x=262, y=226)
+        self.showHelp(nameEntered_zmax, "Use FDS file to create compartment geometry, \n and zmax is the upper bound in z axis for one-floor geometry mesh.")  
 
 
         #buttonStart.place(x=5,y=220)
@@ -230,7 +249,7 @@ class GUI(object):
         self.SHOWSTRESS_CB=Checkbutton(self.frameParameters, text= 'Show Stress Level in Simulation', variable=self.SHOWSTRESS_Var, onvalue=1, offvalue=0)
         #self.SHOWSTRESS_CB.pack(side=TOP, padx=2, pady=2)
         self.SHOWSTRESS_CB.place(x=2, y=6)
-        self.showHelp(self.SHOWSTRESS_CB, "Show agents' stress level data in the simulation.  Try to press key <S> in pyagme screen!")
+        self.showHelp(self.SHOWSTRESS_CB, "Show stress level of agents in the simulation.  Try to press key <S> in pyagme screen!")
 
         self.SHOWGEOM_Var = IntVar()
         self.SHOWGEOM_Var.set(0)
@@ -255,7 +274,7 @@ class GUI(object):
         self.DumpData_Var.set(1)
         self.DumpData_CB=Checkbutton(self.frameParameters, text= 'Write simulation data into binary/npz files', variable=self.DumpData_Var, onvalue=1, offvalue=0)
         self.DumpData_CB.place(x=300, y=66)
-        self.showHelp(self.DumpData_CB, "Save simulation data in binary/npz files such that it could be visualized by data/visualization tool for furthet analysis.")        
+        self.showHelp(self.DumpData_CB, "Save simulation data in binary/npz files \n such that it could be visualized by data/visualization tool for furthet analysis.")        
 
         self.GroupBehavior_Var = IntVar()
         self.GroupBehavior_Var.set(1)
@@ -267,7 +286,7 @@ class GUI(object):
         self.UseConfig_Var.set(0)
         self.UseConfig_CB=Checkbutton(self.frameRun, text= 'Use configuration data in csv file to overwrite parameters selected in the GUI panels', variable=self.UseConfig_Var, onvalue=1, offvalue=0)
         self.UseConfig_CB.pack() #place(x=2, y=276) #pack() 
-        self.showHelp(self.SHOWFORCE_CB, "Use configuration data in csv file to configure simulation object rather than use parameters selected in the GUI panels.")
+        self.showHelp(self.UseConfig_CB, "Use configuration data in csv file to configure simulation object \n  rather than use parameters selected in the GUI panels.")
 
         self.AutoPlot_Var = IntVar()
         self.AutoPlot_Var.set(0)
@@ -300,28 +319,13 @@ class GUI(object):
         nameEntered_tEnd = Entry(self.frameParameters, width=13, textvariable=self.tEnd_gui)
         nameEntered_tEnd.insert(0, '90.0')
         nameEntered_tEnd.place(x=469, y=152)
-
-        self.lb3 = Label(self.frameParameters, text =  "Optional: If fds file is selected, the compartment geometry is created from fds file. \n")
-        self.lb3.place(x=12, y=179)
-
-        self.lb2 = Label(self.frameParameters, text =  "Optional: The single-floor mesh within x-y plane is read from fds file between z_min and z_max. \n")
-        self.lb2.place(x=12, y=200)
-
-        self.lb_zmin = Label(self.frameParameters, text = 'z_min:')
-        self.lb_zmin.place(x=12, y=226)
-        self.zmin_gui = StringVar()
-        nameEntered_zmin = Entry(self.frameParameters, width=12, textvariable=self.zmin_gui)
-        nameEntered_zmin.insert(0, '0.0')
-        nameEntered_zmin.place(x=62, y=226)
-        self.showHelp(nameEntered_zmin, "Use FDS file to create compartment geometry, \n and zmin is the lower bound in z axis for one-floor geometry mesh.")
-
-        self.lb_zmax = Label(self.frameParameters, text = 'z_max:')
-        self.lb_zmax.place(x=212, y=226)
-        self.zmax_gui = StringVar()
-        nameEntered_zmax = Entry(self.frameParameters, width=12, textvariable=self.zmax_gui)
-        nameEntered_zmax.insert(0, '3.0')
-        nameEntered_zmax.place(x=262, y=226)
-        self.showHelp(nameEntered_zmax, "Use FDS file to create compartment geometry, \n and zmax is the upper bound in z axis for one-floor geometry mesh.")        
+        
+        self.buttonComp = Button(self.frameParameters, text='compute simulation and save data without visualization', command=self.compSim)
+        self.buttonComp.place(x=19, y=192)
+        #self.buttonComp.grid(row=3, column=1, rowspan=2, ipady=7)
+        #self.buttonComp.place(x=397,y=191)
+        self.showHelp(self.buttonComp, "Only compute the numerical result without displaying in pygame.  \n Users can use another python program evac-prt5-tool to display the the numerical result.")
+      
         ######################################################################################
         # --------------------------------------------
         # frameFlowSettings
@@ -392,13 +396,13 @@ class GUI(object):
         nameEntered_nyp.place(x=422, y=66)
         self.showHelp(nameEntered_nyp, "Input the number of points in y axis for x-y planary mesh. \n The mesh is refined as the number of points increases, and more computational time will be needed. ")
 
-        self.buttonFlow2 = Button(self.frameFlow, text='compute egress flow field', command=self.testFlow, width=57)
+        self.buttonFlow2 = Button(self.frameFlow, text='compute egress flow field', command=self.testFlow, width=56)
         self.buttonFlow2.place(x=6, y=200)
         self.showHelp(self.buttonFlow2, "Generate the door flow field.  \n Users should first select either the nearest-exit method (default) or exit probablity method")
 
         #self.lb_outnpz = Label(self.frameFlow, text = 'The output npz file selected: None!  To show crowd fluid dynamics.')
         #self.lb_outnpz.place(x=12, y=206)        
-        self.buttonCFD = Button(self.frameFlow, text='Read output npz file and show crowd fluid', command=self.selectOutNPZ, width=57)
+        self.buttonCFD = Button(self.frameFlow, text='Read output npz file and show crowd fluid', command=self.selectOutNPZ, width=56)
         self.buttonCFD.place(x=6, y=230)
         self.showHelp(self.buttonCFD, "Read output npz file and show the numerical result of crowd fluid dynamics.")
         
@@ -420,17 +424,20 @@ class GUI(object):
         self.showHelp(nameEntered_ymin, "The noise level for fluctuation force: \n Standard derivation for normal distribution.  \n Write 'auto' or leave it blank if you do not know what it means and the program will automatically give the value.  ")
         
         self.lbSoc0 = Label(self.frameSoc, text =  "Optional: Below please select the type of opinion dynamics model. \n 0: Opinion dyanmics in linear algebra  1: Random gossip model. ")
-        self.lbSoc0.place(x=15, y=260)
+        self.lbSoc0.place(x=15, y=150)
         
         self.spin_opinion = Spinbox(self.frameSoc, from_=0, to=1, width=5, bd=8) 
-        self.spin_opinion.place(x=656, y=260)
+        self.spin_opinion.insert(1, '0')
+        #self.spin_opinion.set(1)
+        self.spin_opinion.place(x=656, y=150)
         self.showHelp(self.spin_opinion, "Select the different algorithm of opinion dynamics model: \n 0: Opinion dynamics; 1: Random gossip.  ")  #Uncheck it if you do not know what it means.")
         
         self.lbSoc1 = Label(self.frameSoc, text =  "Optional: Below please select the type of short-range interation force. \n 0: Social Force  1: Magnetic force. ")
-        self.lbSoc1.place(x=15, y=300)
+        self.lbSoc1.place(x=15, y=100)
         
         self.spin_socialforce = Spinbox(self.frameSoc, from_=0, to=1, width=5, bd=8) 
-        self.spin_socialforce.place(x=656, y=300)
+        #self.spin_socialforce.insert(0, '0')
+        self.spin_socialforce.place(x=656, y=100)
         self.showHelp(self.spin_socialforce, "Select the different formula of short-range interation force: \n 0: Social force; 1: Magnetic force.  ")  #Uncheck it if you do not know what it means.")
         
         self.lbSoc2 = Label(self.frameSoc, text =  "Optional: Below please input the time interval to update attention list and update target door in simulation. \n")
@@ -440,14 +447,14 @@ class GUI(object):
         self.lb_dtAtt.place(x=15, y=226)
         self.dtAtt_gui = StringVar()
         nameEntered_dtAtt = Entry(self.frameSoc, width=12, textvariable=self.dtAtt_gui)
-        nameEntered_dtAtt.insert(0, '1.0')
+        nameEntered_dtAtt.insert(0, '0.2')
         nameEntered_dtAtt.place(x=62, y=226)
 
         self.lb_dtExit = Label(self.frameSoc, text = 'dtExit:')
         self.lb_dtExit.place(x=215, y=226)
         self.dtExit_gui = StringVar()
         nameEntered_dtExit = Entry(self.frameSoc, width=12, textvariable=self.dtExit_gui)
-        nameEntered_dtExit.insert(0, '1.0')
+        nameEntered_dtExit.insert(0, '0.6')
         nameEntered_dtExit.place(x=262, y=226)
 
 
@@ -457,13 +464,13 @@ class GUI(object):
         # frameData Data Tool
         # --------------------------------------------
 
-        self.buttonTpre = Button(self.frameData, text='plot pre-movement time from output data', command=self.selectOutBinFile_Tpre, width=57)
-        self.buttonTpre.place(x=19, y=89)
+        self.buttonTpre = Button(self.frameData, text='plot pre-movement time from output data', command=self.selectOutBinFile_Tpre, width=56)
+        self.buttonTpre.place(x=19, y=99)
         self.showHelp(self.buttonTpre, "Display the pre-movement time offline in matplotlib.  \n Please select the simulation output binary file. ")
 
 
-        self.buttonVideo = Button(self.frameData, text='visualize agent-based simulation output data', command=self.startVideo, width=57)
-        self.buttonVideo.place(x=19, y=126)
+        self.buttonVideo = Button(self.frameData, text='visualize agent-based simulation output data', command=self.startVideo, width=56)
+        self.buttonVideo.place(x=19, y=138)
         self.showHelp(self.buttonVideo, "Display the simulation result offline in pygame.  \n Please select the simulation output binary file. ")
 
         
@@ -479,26 +486,21 @@ class GUI(object):
         self.showHelp(self.spin_exitnumber, "Select the exit index to show the probability.  \n The exit index starts from 0 to the number_of_exit-1. To identify the exit index, please show exit data in TestGeom. ")
 
                 
-        ##############################################
-        # ============================================
-        # --------------------------------------------
-        # frameCSV CSV Mdoel Tool
-        # --------------------------------------------
-        self.lb_wf = Label(self.frameCSV, text = 'The probablity distribution of exit selection is listed in the table for each agent.')
+        self.lb_wf = Label(self.frameData, text = 'The probablity distribution of exit selection is listed in the table for each agent.')
         self.lb_wf.place(x=12, y=6)
         
         #self.scrollbar_y = Scrollbar(self.frameCSV, orient=VERTICAL)
         #self.scrollbar_x = Scrollbar(self.frameCSV, orient=HORIZONTAL)
         columns = ("agent", "pos", "vel")
         
-        self.table_agent2exit = Treeview(self.frameCSV, height=6, show="headings", columns=('agents', 'data1', 'data2'), selectmode='extended') #, yscrollcommand=self.scrollbar_y.set, xscrollcommand=self.scrollbar_x.set)
+        self.table_agent2exit = Treeview(self.frameData, height=6, show="headings", columns=('agents', 'data1', 'data2'), selectmode='extended') #, yscrollcommand=self.scrollbar_y.set, xscrollcommand=self.scrollbar_x.set)
         self.table_agent2exit.column('agents', width=100)
         self.table_agent2exit.column('data1', width=100)
         self.table_agent2exit.column('data2', width=150)
         self.table_agent2exit.heading('agents', text="agents")
         self.table_agent2exit.heading('data1', text="data_p")
         self.table_agent2exit.heading('data2', text="exit_prob")
-        self.table_agent2exit.place(x=296, y=30)
+        self.table_agent2exit.place(x=556, y=30)
 
         self.table_agent2exit.bind('<Double-1>', self.set_cell_value)
         #self.scrollbar_y.config(command=self.table_agent2exit.yview)
@@ -506,27 +508,35 @@ class GUI(object):
         #self.scrollbar_y.pack(side=RIGHT, fill=Y)
         #self.scrollbar_x.pack(side=BOTTOM, fill=X)
         
-        self.buttonExitProb =Button(self.frameCSV, text='View exit selection probability', command=self.readData_exitprob)
+        self.buttonExitProb =Button(self.frameData, text='View exit selection probability', command=self.readData_exitprob)
         self.buttonExitProb.place(x=13, y=30)
         #self.buttonTree.pack()
         self.showHelp(self.buttonExitProb, "Show the agent parameters for exit selection probility.")
 
-        self.buttonPD =Button(self.frameCSV, text='View decision balace parameter', command=self.readData_p)
-        self.buttonPD.place(x=13, y=60)
-        self.showHelp(self.buttonPD, "Show the agent parameters for exit selection probility.")
+        #self.buttonPD =Button(self.frameData, text='View decision balace parameter', command=self.readData_p)
+        #self.buttonPD.place(x=223, y=60)
+        #self.showHelp(self.buttonPD, "Show the agent parameters for exit selection probility.")
         
-
-        self.buttonCSVView =Button(self.frameCSV, text='View csv data file', command=self.viewCSV)
-        self.buttonCSVView.place(x=13, y=90)
+        self.buttonCSVView =Button(self.frameData, text='View csv data file', command=self.viewCSV)
+        self.buttonCSVView.place(x=13, y=60)
         self.showHelp(self.buttonCSVView, "Show the agent data in csv data file.")
         
+        self.window.bind("<Control-l>", self.viewCSV)
+
+        ##############################################
+        # ============================================
+        # --------------------------------------------
+        # frameFDS Tool
+        # --------------------------------------------
+        
+
         ##########################################################################3
         # ============================================
         # --------------------------------------------
         # frameGuide
         # --------------------------------------------
         scrollInfo = Scrollbar(self.frameGuide)
-        self.textGuide = Text(self.frameGuide, width=45,height=13,bg='white',wrap=WORD,font=("Courier",10))
+        self.textGuide = Text(self.frameGuide, width=45,height=13, bg="lightgrey", fg="black", wrap=WORD,font=("Courier",10))
         #self.textGuide = Text(self.frameGuide, width=45,height=13,bg='lightgrey',wrap=WORD,font=("Courier",10))
         scrollInfo.pack(side=RIGHT, fill=Y)
         self.textGuide.pack(side=LEFT,fill=BOTH,expand=YES)
@@ -582,7 +592,6 @@ class GUI(object):
         okb.place(x=90+(cn-1)*242,y=2+rn*20)
         '''
         '''
-
 
     def updateCtrlParam(self):
 
@@ -674,7 +683,23 @@ class GUI(object):
             self.currentSimu.ypt=int(self.nyp_gui.get())
         else:
             self.textInformation.insert(END, 'error: y point number should be integer! Automatic data used!')
-
+        
+        self.currentSimu.OPINIONMODEL = int(self.spin_opinion.get())
+        self.currentSimu.INTERACTION = int(self.spin_socialforce.get())
+        
+        '''    
+        if self.spin_opinion.get():
+            pass
+        else:
+            pass
+        
+        if self.spin_sociaforce.get():
+            pass
+        else:
+            pass
+            
+        '''
+        
     def start(self):
         self.window.mainloop()
 
@@ -683,18 +708,18 @@ class GUI(object):
         self.window.quit()
         self.window.destroy()
 
-    def setStatusStr(self,newStatus):
+    def setStatusStr(self, newStatus):
         self.statusStr = newStatus
         self.statusText.set(self.statusStr)
 
     def showHelp(self, widget, text):
         def setText(self):
             self.statusText.set(text)
-            self.status.configure(foreground='black')
+            self.status.configure(bg="brown", fg="white")
             
         def showHelpLeave(self):
             self.statusText.set(self.statusStr)
-            self.status.configure(foreground='black')
+            self.status.configure(bg="black", fg="white")
         widget.bind("<Enter>", lambda e : setText(self))
         widget.bind("<Leave>", lambda e : showHelpLeave(self))
         
@@ -710,8 +735,13 @@ class GUI(object):
         self.setStatusStr("Simulation not yet started!")
         self.textInformation.insert(END, '\n'+'FDS Input File Selected:   '+self.fname_FDS+'\n')
 
-    def selectEvacFile(self):
-        self.fname_EVAC = tkf.askopenfilename(filetypes=(("csv files", "*.csv"),("All files", "*.*")),initialdir=self.currentdir)
+    def selectEvacFile(self, event=None):
+        file_to_open = tkf.askopenfilename(filetypes=(("csv files", "*.csv"),("All files", "*.*")),initialdir=self.currentdir)
+        if file_to_open:
+        #    self.open_file = file_to_open
+            self.fname_EVAC=file_to_open
+            self.textInformation.delete(1.0, END)
+            
         #temp=self.fname_EVAC.split('/') 
         temp=os.path.basename(self.fname_EVAC)
         self.currentdir = os.path.dirname(self.fname_EVAC)
@@ -722,6 +752,21 @@ class GUI(object):
         self.textInformation.insert(END, '\n'+'EVAC Input File Selected:   '+self.fname_EVAC+'\n')
         self.currentdir = os.path.dirname(self.fname_EVAC)
 
+        #if file_to_open:
+        #    self.open_file = file_to_open
+        #    self.textInformation.delete(1.0, tk.END)
+        
+        with open(file_to_open, "r") as file_contents:
+                file_lines = file_contents.readlines()
+                #file_lines_t = re.sub(r',', '\t', file_lines)
+                if len(file_lines) > 0:
+                    for index, line in enumerate(file_lines):
+                        index = float(index) + 1.0
+                        line_t = re.sub(r',', ',\t', line)
+                        self.textInformation.insert(index, line_t)
+        self.window.title(" - ".join(["Social Array Simulation", self.fname_EVAC]))
+        
+        
     def selectOutTxtFile_DoorProb(self):
         #tempdir=os.path.dirname(self.fname_EVAC)
         #print(tempdir)
@@ -796,8 +841,17 @@ class GUI(object):
         self.textInformation.insert(END, '\n'+'decision parameter p: \n '+str(pArray)+'\n')
 
 
-    def viewCSV(self):
-        os.system('et.exe.lnk '+ os.path.join(self.fname_EVAC))
+    def viewCSV(self, event=None):
+        os.system('et.ext.lnk '+ os.path.join(self.fname_EVAC))
+
+    def file_save(self, event=None):
+        new_file_name = filedialog.asksaveasfilename()
+        if new_file_name:
+            self.fname_EVAC = new_file_name
+        if self.fname_EVAC:
+            new_contents = self.textInformation.get(1.0, END)
+            with open(self.fname_EVAC, "w") as open_file:
+                open_file.write(new_contents)
 
     #def deleteGeom(self):
     #    self.currentSimu = None
