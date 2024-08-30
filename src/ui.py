@@ -1,4 +1,18 @@
 
+
+#-----------------------------------------------------------------------
+# Copyright (C) 2020, All rights reserved
+#
+# Peng Wang
+#
+#-----------------------------------------------------------------------
+#=======================================================================
+
+# DESCRIPTION:
+# This software is a python library for Many-Particle Simulation of Complex Social Interaction
+# The individual-level model is extended based on the well-known social force model, and it mainly describes how agents/particles interact with each other, and also with surrounding facilities including obstructions and passageways. Most importantly, we introduce a set of arrays to define social relationship of agents/particles in a quantitative manner. Opinion dynamics is integrated with force-based interaction to study complex social phenonmena including path-selection activities, social group and herding effect.  Verying interestingly, the interaction of such agent/particles are not only at physics-level, but at consciousness and unconsciousness level by integratings advance social-psychological studies.  
+
+
 import os, sys, csv
 import multiprocessing as mp
 from simulation import *
@@ -115,14 +129,32 @@ class GUI(object):
         self.textInformation.insert(END, '\n\nFiles selected in the last run (Read from log.txt): \n')
         self.textInformation.insert(END, str(self.fname_EVAC)+"\n")
         self.textInformation.insert(END, str(self.fname_FDS)+"\n")
-
+        
+        try:
+            with open(self.fname_EVAC, "r") as file_contents:
+                file_lines = file_contents.readlines()
+                #file_lines_t = re.sub(r',', '\t', file_lines)
+                if len(file_lines) > 0:
+                    for index, line in enumerate(file_lines):
+                        index = float(index) + 26.0
+                        #line=line.rstrip(',')
+                        #print(line)
+                        line=re.sub(r',,', '', line)
+                        print(line)
+                        line_t = re.sub(r',', ',\t', line)
+                        #print(line_t)
+                        self.textInformation.insert(index, line_t)
+            self.window.title(" - ".join(["Social Array Simulation", self.fname_EVAC]))
+        except:
+            pass
+            
         self.notebook.add(self.frameRun,text=" <QuickStart> ")
         self.notebook.add(self.frameParameters,text=" <Parameters> ")
         self.notebook.add(self.frameFlow,text=" <FlowField> ")
         #self.notebook.add(self.frameInformation,text="Information")
         self.notebook.add(self.frameSoc,text=" <SocialAgent> ")       
         self.notebook.add(self.frameData,text=" <DataTool> ")
-        self.notebook.add(self.frameFDS,text="  <FDSTool>  ") 
+        self.notebook.add(self.frameFDS,text="  <FDSTool>  ")
         self.notebook.add(self.frameGuide,text="  <Readme>  ")
         #self.notebook.add(self.frameSettings,text="Settings")
         self.notebook.pack(expand=NO, fill=BOTH, padx=5, pady=5 ,side=TOP)
@@ -156,7 +188,7 @@ class GUI(object):
         self.lb_csv = Label(self.frameRun,text = "Use csv file to create agent data or together with compartement geometry data.\n"+"The input csv file selected: "+str(self.fname_EVAC)+"\n")
         self.lb_csv.pack()
 
-        self.buttonSelectCSV =Button(self.frameRun, text='choose csv file for EVAC data', width=38,command=self.selectEvacFile)
+        self.buttonSelectCSV =Button(self.frameRun, text='choose csv file (input data file)', width=38,command=self.selectEvacFile)
         #self.buttonSelectCSV.place(x=2, y=120)
         self.buttonSelectCSV.pack() #place(x=20, y=176)
         self.showHelp(self.buttonSelectCSV, "Select .csv file to set up the agent parameters for the simulation")
@@ -183,7 +215,6 @@ class GUI(object):
         self.buttonStart = Button(self.frameRun, text='compute and visualize simulation',  width=38,command=self.startSim)
         self.buttonStart.pack() #(side=LEFT) #place(x=20, y=236)
         self.showHelp(self.buttonStart, "Compute the numerical result and display the result timely in pygame.  \n Please select the items in parameter panel to adjust the appearance in pygame window. ")
-
 
         #####################################################################################33
         # --------------------------------------------
@@ -762,6 +793,9 @@ class GUI(object):
                 if len(file_lines) > 0:
                     for index, line in enumerate(file_lines):
                         index = float(index) + 1.0
+                        #line=line.rstrip(',')
+                        line=re.sub(r',,', '', line)
+                        #print(line)
                         line_t = re.sub(r',', ',\t', line)
                         self.textInformation.insert(index, line_t)
         self.window.title(" - ".join(["Social Array Simulation", self.fname_EVAC]))
@@ -817,6 +851,8 @@ class GUI(object):
         self.updateCtrlParam()
         self.currentSimu.preprocessGeom()
         self.currentSimu.preprocessAgent()
+        self.table_agent2exit.delete(*self.table_agent2exit.get_children())
+        self.table_agent2exit.update()    
         for i in range(self.currentSimu.num_agents):
             #for j in range(self.currentSimu.num_exits):
             self.table_agent2exit.insert('', i, values=(self.currentSimu.agents[i].ID, self.currentSimu.agents[i].p, self.currentSimu.agent2exit[i,:]))
@@ -842,16 +878,17 @@ class GUI(object):
 
 
     def viewCSV(self, event=None):
-        os.system('et.ext.lnk '+ os.path.join(self.fname_EVAC))
+        os.system('notepad '+ os.path.join(self.fname_EVAC))
 
     def file_save(self, event=None):
-        new_file_name = filedialog.asksaveasfilename()
+        new_file_name = filedialog.asksaveasfilename(filetypes=(("csv files", "*.csv"),("All files", "*.*")), initialdir=self.currentdir)
         if new_file_name:
             self.fname_EVAC = new_file_name
         if self.fname_EVAC:
             new_contents = self.textInformation.get(1.0, END)
             with open(self.fname_EVAC, "w") as open_file:
-                open_file.write(new_contents)
+                new_contents2 = re.sub(',\t', ',', new_contents)
+                open_file.write(new_contents2)
 
     #def deleteGeom(self):
     #    self.currentSimu = None
