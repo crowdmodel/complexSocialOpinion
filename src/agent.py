@@ -1229,7 +1229,12 @@ class person(object):
                 
             elif dij<self.talk_range and self.talk_prob>random.uniform(0.0,1.0): 
             #and 0.6<random.uniform(0.0,1.0):
-                person.DFactor[self.ID, aj.ID]=0.6 #(1-self.p)*person.DFactor[self.ID, aj.ID]+self.p*person.DFactor[aj.ID, self.ID]
+                #person.DFactor[self.ID, aj.ID]=0.6
+                
+                person.DFactor[self.ID, aj.ID]=random.uniform(0.3,0.7) 
+                
+                #person.DFactor[self.ID, aj.ID]=(1-self.p)*person.DFactor[self.ID, aj.ID]+self.p*person.DFactor[aj.ID, self.ID]
+                
                 #person.AFactor[self.ID, aj.ID]=(1-self.p)*person.AFactor[self.ID, aj.ID]+self.p*person.AFactor[aj.ID, self.ID]
                 #person.BFactor[self.ID, aj.ID]=(1-self.p)*person.BFactor[self.ID, aj.ID]+self.p*person.BFactor[aj.ID, self.ID]
                 #person.DFactor[self.ID, aj.ID]=2.0
@@ -1287,7 +1292,7 @@ class person(object):
                 nij = (self.pos - aj.pos)/dij
                 vij = self.actualV - aj.actualV
         
-                self.socialF += self.groupForce(aj, person.DFactor[self.ID, aj.ID], person.AFactor[self.ID, aj.ID], person.BFactor[self.ID, aj.ID]) + 560.0*ggg(np.dot(-vij, nij))*nij*anisoF # The force term of vij_acutalV is not that useful
+                self.socialF += self.groupForce(aj, person.DFactor[self.ID, aj.ID], person.AFactor[self.ID, aj.ID], person.BFactor[self.ID, aj.ID]) + 60.0*ggg(np.dot(-vij, nij))*nij*anisoF # The force term of vij_acutalV is not that useful
 
             #########################################
             # Opinion dynamics for tpre feature: Opinion Exchange
