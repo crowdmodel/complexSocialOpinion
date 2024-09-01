@@ -11,6 +11,10 @@
 # This software is a python library for Many-Particle Simulation of Complex Social Interaction
 # The individual-level model is extended based on the well-known social force model, and it mainly describes how agents/particles interact with each other, and also with surrounding facilities including obstructions and passageways. Most importantly, we introduce a set of arrays to define social relationship of agents/particles in a quantitative manner. Opinion dynamics is integrated with force-based interaction to study complex social phenonmena including path-selection activities, social group and herding effect.  Verying interestingly, the interaction of such agent/particles are not only at physics-level, but at consciousness and unconsciousness level by integratings advance social-psychological studies.  
 
+# -*-coding:utf-8-*-
+# Author: WP
+# Email: wp2204@gmail.com
+
 
 import pygame
 import pygame.draw
@@ -2964,7 +2968,8 @@ def visualizeEvac(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=20
         print ("T_Final=", Time[T_END-1])
         
     T_INDEX=0
-
+    
+    '''
     if evacfile!="" and evacfile!="None" and evacfile is not None:
         walls = readWalls(evacfile)  #readWalls(FN_Walls) #readWalls("obstData2018.csv")
         doors = readDoors(evacfile)
@@ -2980,12 +2985,17 @@ def visualizeEvac(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=20
         exits=readEXIT(fdsfile, '&EXIT', Zmin, Zmax)
         #doors=doors+readPATH(fdsfile, '&DOOR', Zmin, Zmax)
         #entries=readPATH(fdsfile, '&ENTRY', Zmin, Zmax)
+    '''
     
     if os.path.exists(fnameCSV):
         walls = readWalls(fnameCSV)
         doors = readDoors(fnameCSV)
         exits = readExits(fnameCSV)
         
+    elif os.path.exists(fnameTXT):
+        walls = readWalls(fnameTXT)
+        doors = readDoors(fnameTXT)
+        exits = readExits(fnameTXT)
     
     MODETRAJ=False
     SHOWTIME=True

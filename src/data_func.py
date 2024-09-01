@@ -6,13 +6,10 @@
 #
 #-----------------------------------------------------------------------
 #=======================================================================
-# 
+
 # DESCRIPTION:
-# This software is part of a python library to assist in developing and
-# analyzing evacuation simulation results from Fire Dynamics Simulator with Evacuation (FDS+Evac).
-# FDS+Evac is an open source software package developed by NIST. The source
-# code is available at: https://github.com/firemodels/fds
-#
+# This software is a python library for Many-Particle Simulation of Complex Social Interaction
+# The individual-level model is extended based on the well-known social force model, and it mainly describes how agents/particles interact with each other, and also with surrounding facilities including obstructions and passageways. Most importantly, we introduce a set of arrays to define social relationship of agents/particles in a quantitative manner. Opinion dynamics is integrated with force-based interaction to study complex social phenonmena including path-selection activities, social group and herding effect.  Verying interestingly, the interaction of such agent/particles are not only at physics-level, but at consciousness and unconsciousness level by integratings advance social-psychological studies.  
 
 # -*-coding:utf-8-*-
 # Author: WP
@@ -653,13 +650,13 @@ def readAgents(FileName, debug=True, marginTitle=1, ini=1):
             agent.pp2 = 0.5
         
         try:
-            agent.arousalLevel = float(agentFeature[ini+9])
+            agent.tpreMode = int(agentFeature[ini+9]) #arousalLevel = float(agentFeature[ini+9])
             agent.aType = str(agentFeature[ini+10])
             agent.inComp = int(agentFeature[ini+11]) 
         except:
-            agent.arousalLevel = 0 #0.2
+            agent.tpreMode = int(1) #arousalLevel = 0 #0.2
             agent.aType = 'active'
-            agent.inComp = int(1) 
+            agent.inComp = int(1)
         
         try:
             #agent.moving_tau = float(agentFeature[ini+12])
@@ -1338,6 +1335,35 @@ def readEXIT(FileName, Keyword='&EXIT', Zmin=0.0, Zmax=3.0, outputFile=None, deb
                 
     return exits
 
+
+def updateAgentData(agents, outputFile, inputFile=None):
+    try:
+        with open(outputFile, mode='a+', newline='') as agent_test_file:
+            csv_writer = csv.writer(agent_test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            csv_writer.writerow([])
+            if inputFile is not None:
+                csv_writer.writerow([inputFile])
+            csv_writer.writerow(['Agent data in TestGeom: '])
+            csv_writer.writerow(['time:', time.strftime('%Y-%m-%d_%H_%M_%S')])
+            csv_writer.writerow(['&Agent', '1/iniX', '2/iniY', '3/iniVx', '4/iniVy', '5/tau', '6/tpre', '7/p, 8/pMode, 9/pp2, 10/tpreMode, 11/aType, 12/inComp, 13/talkRange'])
+            index_temp=0
+            for agent in agents:
+                csv_writer.writerow([str(agent.name), str(agent.pos[0]), str(agent.pos[1]), str(agent.actualV[0]), str(agent.actualV[1]), str(agent.tau), str(agent.tpre), str(agent.p), str(agent.pMode), str(agent.pp2), str(agent.tpreMode), str(agent.aType), str(agent.inComp), str(agent.talk_range), str(agent.talk_prob)])
+                index_temp=index_temp+1
+    except:
+        with open(outputFile, mode='wb+') as agent_test_file:
+            csv_writer = csv.writer(agent_test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            csv_writer.writerow([])
+            if inputFile is not None:
+                csv_writer.writerow([inputFile])
+            csv_writer.writerow(['Agent data in TestGeom: '])
+            csv_writer.writerow(['time:', time.strftime('%Y-%m-%d_%H_%M_%S')])
+            csv_writer.writerow(['&Agent', '1/iniX', '2/iniY', '3/iniVx', '4/iniVy', '5/tau', '6/tpre', '7/p, 8/pMode, 9/pp2, 10/tpreMode, 11/aType, 12/inComp, 13/talkRange'])
+            index_temp=0
+            for agent in agents:
+                csv_writer.writerow([str(agent.name), str(agent.pos[0]), str(agent.pos[1]), str(agent.actualV[0]), str(agent.actualV[1]), str(agent.tau), str(agent.tpre), str(agent.p), str(agent.pMode), str(agent.pp2), str(agent.tpreMode), str(agent.aType), str(agent.inComp), str(agent.talkRange), str(agent.talkProb)])
+                index_temp=index_temp+1
+                
 
 def updateDoorData(doors, outputFile, inputFile=None):
     try:
