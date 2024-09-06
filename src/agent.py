@@ -1,18 +1,3 @@
-
-
-#-----------------------------------------------------------------------
-# Copyright (C) 2020, All rights reserved
-#
-# Peng Wang
-#
-#-----------------------------------------------------------------------
-#=======================================================================
-
-# DESCRIPTION:
-# This software is a python library for Many-Particle Simulation of Complex Social Interaction
-# The individual-level model is extended based on the well-known social force model, and it mainly describes how agents/particles interact with each other, and also with surrounding facilities including obstructions and passageways. Most importantly, we introduce a set of arrays to define social relationship of agents/particles in a quantitative manner. Opinion dynamics is integrated with force-based interaction to study complex social phenonmena including path-selection activities, social group and herding effect.  Verying interestingly, the interaction of such agent/particles are not only at physics-level, but at consciousness and unconsciousness level by integratings advance social-psychological studies.  
-
-
 # -*-coding:utf-8-*-
 # Author: WP
 # Email: wp2204@gmail.com
@@ -1187,7 +1172,7 @@ class person(object):
             ######################################################################
             # There are several persons around you.  Which draws your attention?  
             ######################################################################
-            if dij < 2*self.B_CF*person.BFactor[self.ID, aj.ID] + person.DFactor[self.ID, aj.ID] and person.see_flag[self.ID, aj.ID]:
+            if dij < 2*self.B_CF*person.BFactor[self.ID, aj.ID] + person.DFactor[self.ID, aj.ID] and person.see_flag[self.ID, aj.ID] or person.talk[aj.ID, self.ID] == 1:
             #if dij < self.talk_range and no_wall_ij and see_i2j:
                 person.comm[self.ID, aj.ID] = 1
                 self.others.append(aj)
@@ -1230,11 +1215,8 @@ class person(object):
             elif dij<self.talk_range and self.talk_prob>random.uniform(0.0,1.0): 
             #and 0.6<random.uniform(0.0,1.0):
                 #person.DFactor[self.ID, aj.ID]=0.6
-                
-                person.DFactor[self.ID, aj.ID]=random.uniform(0.3,0.7) 
-                
-                #person.DFactor[self.ID, aj.ID]=(1-self.p)*person.DFactor[self.ID, aj.ID]+self.p*person.DFactor[aj.ID, self.ID]
-                
+                person.DFactor[self.ID, aj.ID]=random.uniform(0.3, 0.7)
+                person.DFactor[self.ID, aj.ID]=(1-self.p)*person.DFactor[self.ID, aj.ID]+self.p*person.DFactor[aj.ID, self.ID]
                 #person.AFactor[self.ID, aj.ID]=(1-self.p)*person.AFactor[self.ID, aj.ID]+self.p*person.AFactor[aj.ID, self.ID]
                 #person.BFactor[self.ID, aj.ID]=(1-self.p)*person.BFactor[self.ID, aj.ID]+self.p*person.BFactor[aj.ID, self.ID]
                 #person.DFactor[self.ID, aj.ID]=2.0
