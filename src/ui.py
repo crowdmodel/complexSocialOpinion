@@ -73,7 +73,7 @@ class GUI(object):
         
         self.window = Tk()
         self.window.title('social array simulator')
-        self.window.geometry('960x600')
+        self.window.geometry('960x700')
                 
         self.menubar = Menu(self.window, bg="lightgrey", fg="black")
         self.window.config(menu=self.menubar)
@@ -96,7 +96,7 @@ class GUI(object):
         self.status.pack(side=TOP, fill=X, padx=5, pady=5, expand=NO)
         
 
-        self.notebook = Notebook(self.window)      
+        self.notebook = Notebook(self.window, width=45, height=300)      
         self.notebook.pack(side=TOP, padx=2, pady=2)
         
         # added "self.rootWindow" by Hiroki Sayama 10/09/2018

@@ -1,5 +1,4 @@
 
-
 #-----------------------------------------------------------------------
 # Copyright (C) 2020, All rights reserved
 #
@@ -11,11 +10,6 @@
 # DESCRIPTION:
 # This software is a python library for Many-Particle Simulation of Complex Social Interaction
 # The individual-level model is extended based on the well-known social force model, and it mainly describes how agents/particles interact with each other, and also with surrounding facilities including obstructions and passageways. Most importantly, we introduce a set of arrays to define social relationship of agents/particles in a quantitative manner. Opinion dynamics is integrated with force-based interaction to study complex social phenonmena including path-selection activities, social group and herding effect.  Verying interestingly, the interaction of such agent/particles are not only at physics-level, but at consciousness and unconsciousness level by integratings advance social-psychological studies.  
-
-
-# -*-coding:utf-8-*-
-# Author: WP
-# Email: wp2204@gmail.com
 
 
 import os, sys
@@ -258,7 +252,7 @@ class simulation(object):
             #raw_input('Please check output data path and filename!')
         #self.fnameBin = FN_EVAC.rstrip('.csv')+self.outDataName+'.bin'
         
-        '''
+        
         FN_Temp = os.path.join(self.fpath, "config.txt")
         if os.path.exists(FN_Temp):
             for line in open(FN_Temp, "r"):
@@ -283,7 +277,7 @@ class simulation(object):
                 if re.match('dumpBinary', line):
                     temp =  line.split('=')
                     self.dumpBin = bool(temp[1].strip())
-
+        '''
                 # Mesh parameters
                 if re.match('xmin', line):
                     temp =  line.split('=')
@@ -464,17 +458,17 @@ class simulation(object):
                     self.solver = int(temp[1].rstrip('\n').rstrip(',').strip())   
                 if re.match('groupbehavior', line):
                     temp =  line.split('=')
-                    self.GROUPBEHAVIOR = bool(temp[1].rstrip('\n').rstrip(',').strip())   
+                    self.GROUPBEHAVIOR = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
                 #if re.match('pre-evac', line):
                 #    temp =  line.split('=')
                 #    self.TPREMODE = int(temp[1].strip())
                 if re.match('self-repulsion', line):
                     temp =  line.split('=')
-                    self.SELFREPULSION = bool(temp[1].rstrip('\n').rstrip(',').strip())   
+                    self.SELFREPULSION = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
                     
                 if re.match('dumpBinary', line):
                     temp =  line.split('=')
-                    self.dumpBin = bool(temp[1].rstrip('\n').rstrip(',').strip())   
+                    self.dumpBin = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
                 
                 # Time parameters
                 if re.match('DT', line):
@@ -595,7 +589,13 @@ class simulation(object):
         print('Working Folder: '+str(self.fpath)) #+ '\n')
 
         print('\n')
+        
+        updateAgentData(self.agents, FN_Temp)
+        updateWallData(self.walls, FN_Temp)
+        updateDoorData(self.doors, FN_Temp)
+        updateExitData(self.exits, FN_Temp)
 
+        f.write('\n')
         f.write('Display a summary of input data as below.\n')
         f.write('number of agents in input file: '+str(self.num_agents)+ '\n')
         f.write('number of walls in input file: '+str(self.num_walls)+ '\n')
@@ -1454,11 +1454,11 @@ class simulation(object):
                         person.AFactor_Init = np.zeros((self.num_agents, self.num_agents))
                         person.BFactor_Init = np.zeros((self.num_agents, self.num_agents))
                         person.DFactor_Init = np.zeros((self.num_agents, self.num_agents))
+                        self.GROUPBEHAVIOR = False
                         
                     tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupC')
                     if len(tableFeatures)>0:
                         person.CFactor_Init = readGroupC(tableFeatures, len(self.agents), len(self.agents))
-                        self.GROUPBEHAVIOR = True
                     else:
                         person.CFactor_Init = np.zeros((self.num_agents, self.num_agents))
                 except:
@@ -1541,7 +1541,7 @@ class simulation(object):
             person.CFactor_Init = np.zeros((self.num_agents, self.num_agents))
             person.DFactor_Init = np.zeros((self.num_agents, self.num_agents))
             person.AFactor_Init = np.zeros((self.num_agents, self.num_agents))
-            person.BFactor_Init = np.ones((self.num_agents, self.num_agents))
+            person.BFactor_Init = np.zeros((self.num_agents, self.num_agents))
             
             person.CFactor = person.CFactor_Init
             person.DFactor = person.DFactor_Init
