@@ -609,10 +609,10 @@ def readAgents(FileName, debug=True, marginTitle=1, ini=1):
     agentFeatures, lowerIndex, upperIndex = getData(FileName, '&Ped')
     Num_Agents=len(agentFeatures)-marginTitle
     if Num_Agents <= 0:
-        agentFeatures, lowerIndex, upperIndex = getData(FileName, '&agent')
+        agentFeatures, lowerIndex, upperIndex = getData(FileName, '&Agent')
         Num_Agents=len(agentFeatures)-marginTitle
     if Num_Agents <= 0:
-        agentFeatures, lowerIndex, upperIndex = getData(FileName, '&Agent')
+        agentFeatures, lowerIndex, upperIndex = getData(FileName, '&agent')
         Num_Agents=len(agentFeatures)-marginTitle
 
     if debug: 
@@ -753,8 +753,8 @@ def readWalls(FileName, debug=True, marginTitle=1, ini=0):
             wall.pointer1 = np.array([float(obstFeature[ini+8]), float(obstFeature[ini+9])])
             wall.pointer2 = np.array([float(obstFeature[ini+10]), float(obstFeature[ini+11])])
         except:
-            wall.pointer1 = np.nan #np.array([float('NaN'), float('NaN')])
-            wall.pointer2 = np.nan #np.array([float('NaN'), float('NaN')])
+            wall.pointer1 = np.array([np.nan, np.nan])
+            wall.pointer2 = np.array([np.nan, np.nan]) #np.array([float('NaN'), float('NaN')])
         
         # Walls have no exit signs if arrow is 0
         wall.exitSign = bool(wall.arrow)
@@ -805,6 +805,12 @@ def readDoors(FileName, debug=True, marginTitle=1, ini=0):
     Num_Doors=len(doorFeatures)-marginTitle
     if Num_Doors <= 0:
         doorFeatures, lowerIndex, upperIndex = getData(FileName, '&door')
+        Num_Doors=len(doorFeatures)-marginTitle
+    if Num_Doors <= 0:
+        doorFeatures, lowerIndex, upperIndex = getData(FileName, '&Path')
+        Num_Doors=len(doorFeatures)-marginTitle
+    if Num_Doors <= 0:
+        doorFeatures, lowerIndex, upperIndex = getData(FileName, '&path')
         Num_Doors=len(doorFeatures)-marginTitle
         
     if debug:
