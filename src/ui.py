@@ -25,7 +25,9 @@ if sys.version_info[0] == 3: # Python 3
     from tkinter import *
     from tkinter.ttk import Notebook
     from tkinter.ttk import Treeview
+    from tkinter.ttk import Entry
     import tkinter.filedialog as tkf
+    import tkinter.messagebox as msg
 else:
     # Python 2
     from Tkinter import *
@@ -33,7 +35,7 @@ else:
     from ttk import Treeview
     from ttk import Entry
     import tkFileDialog as tkf
-
+    import tkMessageBox as msg
 
 class GUI(object):
 
@@ -82,6 +84,7 @@ class GUI(object):
         self.file_menu.add_command(label="Open", command=self.selectEvacFile, accelerator="Ctrl+O")
         #self.file_menu.add_command(label="Edit", command=file_edit, accelerator="Ctrl+E")
         self.file_menu.add_command(label="Save", command=self.file_save, accelerator="Ctrl+S")
+        self.file_menu.add_command(label="SaveAs", command=self.file_save_as)
         self.menubar.add_cascade(label="File", menu=self.file_menu)
 
         self.window.bind("<Control-s>", self.file_save)
@@ -95,8 +98,8 @@ class GUI(object):
         # self.status.grid(row=1,column=0,padx=5,pady=5,sticky='nswe') # commented out by toshi on 2016-06-21(Tue) 18:31:17
         self.status.pack(side=TOP, fill=X, padx=5, pady=5, expand=NO)
         
-
-        self.notebook = Notebook(self.window, width=45, height=300)      
+        #self.notebook = Notebook(self.window)  
+        self.notebook = Notebook(self.window, width=45, height=300)     
         self.notebook.pack(side=TOP, padx=2, pady=2)
         
         # added "self.rootWindow" by Hiroki Sayama 10/09/2018
@@ -116,7 +119,7 @@ class GUI(object):
         self.textInformation.pack(side=LEFT,fill=BOTH,expand=YES)
         scrollInfo.config(command=self.textInformation.yview)
         self.textInformation.config(yscrollcommand=scrollInfo.set)
-        self.textInformation.insert(END, 'QuickStart: \nStep1: Please select csv file or fds file to read in evac data and compartement geometry data!\n')
+        self.textInformation.insert(END, '\n\nQuickStart: \nStep1: Please select csv file to read in simulation data and compartement geometry data!\n')
         self.textInformation.insert(END, 'Step2: Create simulation object!\n')
         self.textInformation.insert(END, 'Step3: Compute and visualize simulation!\n')
         self.textInformation.insert(END, '\nWhen simulation starts, please try to press the following keys in your keybroad, and you will see the effects on the screen. \n')
@@ -136,11 +139,11 @@ class GUI(object):
                 #file_lines_t = re.sub(r',', '\t', file_lines)
                 if len(file_lines) > 0:
                     for index, line in enumerate(file_lines):
-                        index = float(index) + 26.0
+                        index = float(index) + 1.0
                         #line=line.rstrip(',')
                         #print(line)
                         line=re.sub(r',,', '', line)
-                        print(line)
+                        #print(line)
                         line_t = re.sub(r',', ',\t', line)
                         #print(line_t)
                         self.textInformation.insert(index, line_t)
@@ -188,7 +191,7 @@ class GUI(object):
         self.lb_csv = Label(self.frameRun,text = "Use csv file to create agent data or together with compartement geometry data.\n"+"The input csv file selected: "+str(self.fname_EVAC)+"\n")
         self.lb_csv.pack()
 
-        self.buttonSelectCSV =Button(self.frameRun, text='choose csv file (input data file)', width=38,command=self.selectEvacFile)
+        self.buttonSelectCSV =Button(self.frameRun, text='choose csv file (input data)', width=38,command=self.selectEvacFile)
         #self.buttonSelectCSV.place(x=2, y=120)
         self.buttonSelectCSV.pack() #place(x=20, y=176)
         self.showHelp(self.buttonSelectCSV, "Select .csv file to set up the agent parameters for the simulation")
@@ -202,7 +205,7 @@ class GUI(object):
         #self.buttonRead.pack()
         self.buttonGeom = Button(self.frameRun, text='Create/Modify simulation object',  width=38,command=self.testGeom)
         self.buttonGeom.pack() #place(x=20, y=206)
-        self.showHelp(self.buttonGeom, "Create or modify the simulation data by reading the input file (FDS or CSV files as selected above).  \n Users can easily modify the data such as adding doors, walls or exits.")
+        self.showHelp(self.buttonGeom, "Create or modify the simulation data by reading the input file (CSV files as selected above).  \n Users can easily modify the data such as adding walls, doors, exits.")
 
         #self.buttonDel = Button(self.frameRun, text='delete now: delete simulation data', command=self.deleteGeom)
         #self.buttonDel.pack()
@@ -314,7 +317,7 @@ class GUI(object):
         self.showHelp(self.GroupBehavior_CB, "Compute Group Social Force and Self Repulsion.  \n Check this button only if you have specified the group parameters in input file.")  #Uncheck it if you do not know what it means.")  
 
         self.UseConfig_Var = IntVar()
-        self.UseConfig_Var.set(0)
+        self.UseConfig_Var.set(1)
         self.UseConfig_CB=Checkbutton(self.frameRun, text= 'Use configuration data in csv file to overwrite parameters selected in the GUI panels', variable=self.UseConfig_Var, onvalue=1, offvalue=0)
         self.UseConfig_CB.pack() #place(x=2, y=276) #pack() 
         self.showHelp(self.UseConfig_CB, "Use configuration data in csv file to configure simulation object \n  rather than use parameters selected in the GUI panels.")
@@ -552,7 +555,7 @@ class GUI(object):
         self.buttonCSVView.place(x=13, y=60)
         self.showHelp(self.buttonCSVView, "Show the agent data in csv data file.")
         
-        self.window.bind("<Control-l>", self.viewCSV)
+        self.window.bind("<Control-w>", self.viewCSV)
 
         ##############################################
         # ============================================
@@ -880,17 +883,34 @@ class GUI(object):
     def viewCSV(self, event=None):
         os.system('notepad '+ os.path.join(self.fname_EVAC))
 
-    def file_save(self, event=None):
+    def file_save_as(self, event=None):
         new_file_name = filedialog.asksaveasfilename(filetypes=(("csv files", "*.csv"),("All files", "*.*")), initialdir=self.currentdir)
         if new_file_name:
-            self.fname_EVAC = new_file_name
-        if self.fname_EVAC:
             new_contents = self.textInformation.get(1.0, END)
-            with open(self.fname_EVAC, "w") as open_file:
+            with open(self.new_file_name, "w") as open_file:
                 new_contents2 = re.sub(',\t', ',', new_contents)
                 open_file.write(new_contents2)
+            self.fname_EVAC = new_file_name
+            self.currentdir = os.path.dirname(self.fname_EVAC)
 
     #def deleteGeom(self):
+    def file_save(self, event=None):
+        if not self.fname_EVAC:
+            new_file_name = tkf.asksaveasfilename()
+            if new_file_name:
+                self.fname_EVAC = new_file_name
+                self.currentdir = os.path.dirname(self.fname_EVAC)
+            else:
+                msg.showerror("No File Open", "Please open an csv file first")
+        if self.fname_EVAC:
+            #new_contents = self.main_text.get(1.0, END)
+            #with open(self.open_file, "w") as open_file:
+            #    open_file.write(new_contents)
+            new_contents = self.textInformation.get(1.0, END)
+            new_contents2 = re.sub(',\t', ',', new_contents)
+            with open(self.fname_EVAC, "w") as open_file:
+                open_file.write(new_contents2)
+            msg.showinfo("Saved", "File Saved Successfully")
     #    self.currentSimu = None
 
     def testGeom(self):
@@ -936,6 +956,8 @@ class GUI(object):
             if self.AutoPlot_Var.get():
                 self.currentSimu.autoPlot()
             self.currentSimu.quit()
+        else:
+            os.remove(self.currentSimu.outDataName + ".txt")
 
         #show_geom(myTest)
         #myTest.show_simulation()
