@@ -1585,7 +1585,7 @@ def readFRec(infile,fmt):
 
 #################################
 # The function readPRTfile
-def readPRTfile(fname, max_time=np.Inf, mode='evac'):
+def readPRTfile(fname, max_time=float('inf'), mode='evac'):
 
     fin = open(fname,'rb')
     #if wrtxt:
