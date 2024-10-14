@@ -10,28 +10,28 @@ Exit1,60.3,3,66,5,0,rect,1
 Exit2,67,17,70,20,0,rect,1
 ,
 ,
-&Wall,start X,start Y,end X,end Y,5/direction,6/shape,7/inComp,pointerX1,pointerY1,pointerX2,pointerY2
-Line0,3.33,3.33,49.97,3.33,1,line,1,NaN,NaN,NaN,NaN
-Line1,3.33,3.33,3.33,33.31,-1,line,1,NaN,NaN,NaN,NaN
-Line2,3.33,33.31,49.97,33.31,1,line,1,NaN,NaN,NaN,NaN
-Slash-Line3,23,3.33,30,14,1,line,1,NaN,NaN,NaN,NaN
-Slash-Line4,23,33.31,30,20,-1,line,1,NaN,NaN,NaN,NaN
-Line5,30,14,37,14,-1,line,1,NaN,NaN,NaN,NaN
-Line6,30,20,37,20,0,line,1,NaN,NaN,NaN,NaN
-2DoorLine7,46,8,46,27,1,line,1,46,29,46,6
-Rect8,20,10,22,26,1,rect,1,21,9,21,27
+&Wall,start X,start Y,end X,end Y,5/direction,6/shape,7/inComp
+Line0,3.33,3.33,49.97,3.33,1,line,1
+Line1,3.33,3.33,3.33,33.31,-1,line,1
+Line2,3.33,33.31,49.97,33.31,1,line,1
+Slash-Line3,23,3.33,30,14,1,line,1
+Slash-Line4,23,33.31,30,20,-1,line,1
+Line5,30,14,37,14,-1,line,1
+Line6,30,20,37,20,0,line,1
+2DoorLine7,46,8,46,27,1,line,1
+Rect8,20,10,22,26,1,rect,1
 ,
 ,
 ,
-&Agent,01/InitalX,02/InitialY,02/IniVx,03_IniVy,05/tau,06/tpre,07/p,08/pMode,09/pp2,10/talkRange,11/aType,12/inComp,13/tpre_tau,14/talk_tau,15/talk_prob,15/pp2,radius,mass,maxSpeed
-Person0,6.33,13,0.6,0.2,0.3,3,0,fixed,1,3,active,1,0.7,2.6,0.7,0.3,0.35,47,1.2
-Person1,7.33,15,1.6,0.3,0.6,16,0.6,random,1,2,active,1,2.3,3.2,0.7,0.6,0.35,60,1.2
-Person2,8.33,17,0.3,0.3,3,17,0,fixed,1,3,active,1,2.2,2.3,0.7,0.3,0.3,43,1.2
-Person3,9.33,23,1.6,1,2.3,17,0.3,random,1,6,active,1,0.3,1.6,0.7,0.3,0.35,60,1.2
-Person4,10.33,16,1.6,0.6,1.3,32,0.4,random,1,3,active,1,0.6,3.3,0.7,0.7,0.25,60,1.2
-Person5,11.33,18,0,0,1.6,33,0.36,random,1,2,follow,1,1.6,3.6,0.7,0.6,0.22,60,1.2
-Person6,22.33,12,0,0,1.7,36,0.63,random,1,6,follow,1,2.6,4.6,0.7,0.7,0.2,76,1.2
-Person7,23.33,16,0.2,0.9,12,47,0.66,random,0,3,search,1,0.3,3.6,0.7,0.2,0.35,60,1.2
+&Ped,00/IniX,01/IniY,02/IniVx,03_IniVy,04_tau,05_tpre,06_p,07/pMode,08/pp2,09/tpreMode,10/atype,11/inComp,12/talkRange,13/talk_tau,14/talk_prob
+Person0,6.33,13,0.6,0.2,0.3,3,0.6,fixed,1,30,active,1,0.7,2.6,0.7
+Person1,7.33,15,1.6,0.3,0.6,2,0.6,random,1,31,active,1,2.3,3.2,0.7
+Person2,8.33,17,0.3,0.3,3,10,0.3,fixed,1,57,active,1,2.2,2.3,0.7
+Person3,9.33,23,1.6,1,2.3,6,0.3,random,1,33,active,1,0.3,1.6,0.7
+Person4,10.33,16,1.6,0.6,1.3,22,0.4,random,1,34,active,1,0.6,3.3,0.7
+Person5,11.33,18,0,0,1.6,6,0.36,fixed,1,35,follow,1,1.6,3.6,0.7
+Person6,22.33,12,0,0,1.7,16,0.63,random,1,36,follow,1,2.6,4.6,0.7
+Person7,23.33,16,0.2,0.9,12,23,0.66,random,0,37,search,1,0.3,3.6,0.7
 ,
 ,
 &Ped2Exit,Exit0,Exit1,Exit2
@@ -44,8 +44,9 @@ Person5,0.7,0.1,0.2
 Person6,0.3,0.6,0.1
 Person7,0.3,0.5,0.2
 ,
-,
-&Exit2Door,DoorID0,DoorID1,DoorID2
+#If egress flow field is used (Solver=1 or 2), there is no need to specify this data block manually
+#The program will automatically generate this data block from the egress flow field.  
+&Exit2Door,DoorID0,DoorID1,DoorID2 
 ExitID0,1,1,1
 ExitID1,1,1,1
 ExitID2,1,1,1
@@ -60,5 +61,33 @@ Person5,0,0,0,0,0,0,9|70.0|1|1,0,
 Person6,0,0,0,0,0,3|300.0|1|1,0,0,
 Person7,0,0,0,0,0,8|1.0|1|1,0,0,
 
-EVAC Input File Selected:   C:/Program Files (x86)/Git/complexSocialOpinion/examples/GroupTest/groupTest2024.csv
+# The parameters to configure simulation window (pygame screen).
+# User may also use pageup/pagedown to zoom in/out the screen, and use the direction keys to move entities in the screen.  
+
+ZOOM=20.0
+xSpace=30.0
+ySpace=60.0
+
+# The parameter to configure the egress flow solver.  
+# xpt and ypt are the number of points in x and y axises.  
+# xmin and xmax specify the range of flow field in x axis; # ymin and ymax specify the range of flow field in y axis
+xpt=90
+ypt=60
+
+# Solver: 0 No egress flow field; 1 Nearest exit flow field; 2 Exit selection flow field
+solver=0
+
+DT=0.5
+DT_OtherList=0.5
+DT_ChangeDoor=0.5
+DT_DumpData=0.5
+TEND = 19.0
+
+# Parameters to configure the simulation object.  
+# Groupbehavior: 0 No social group effect; 1 Compute social group effect
+# dumpBinary: 0 No output data; 1 Dump and save simulation data in binary file
+
+groupbehavior = 1
+pre-evac = 2
+dumpBinary = 1
 
