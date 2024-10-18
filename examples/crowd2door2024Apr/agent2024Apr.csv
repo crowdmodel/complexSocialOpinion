@@ -14,7 +14,7 @@ Door2,72.33,6,71.33,5,2
 ,
 ,
 ,
-&Ped,00/IniX,01/IniY,02/IniVx,03_IniVy,04_tau,05_tpre,06_p,07/pMode,08/pp2,09/ArousalL,10/atype,11/inComp,12/talkRange,13/talk_tau,14/talk_prob,15/pp2,radius,mass,maxSpeed
+&Agent,00/IniX,01/IniY,02/IniVx,03_IniVy,04_tau,05_tpre,06_p,07/pMode,08/p2,09/ArousalL,10/atype,11/inComp,12/talkRange,13/talk_tau,14/talk_prob,15/c2,radius,mass,maxSpeed
 Person0,16.33,23,0.6,0.2,0.3,3,0.6,fixed,0.3,30,active,1,0.7,2.6,0.7,0.3,0.35,47,1.2
 Person1,17.33,16,1.6,0.3,0.6,2,0.6,random,0.6,31,active,1,2.3,3.2,0.7,0.6,0.35,60,1.2
 Person2,18.33,20,0.3,0.3,3,10,0.3,fixed,0.3,57,active,1,2.2,2.3,0.7,0.3,0.3,43,1.2
@@ -25,7 +25,7 @@ Person6,23.33,16,0,0,1.7,16,0.63,random,0.7,36,follow,1,2.6,4.6,0.7,0.7,0.2,76,1
 Person7,30.33,16,0.2,0.9,12,23,0.66,random,0.2,37,search,1,0.3,3.6,0.7,0.2,0.35,60,1.2
 ,
 ,
-&Ped2Exit,Exit0,Exit1,
+&Agent2Exit,Exit0,Exit1,
 Person0,0.3,0.7,
 Person1,0.7,0.3,
 Person2,0.5,0.5,

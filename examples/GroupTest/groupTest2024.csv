@@ -23,7 +23,7 @@ Rect8,20,10,22,26,1,rect,1
 ,
 ,
 ,
-&Ped,00/IniX,01/IniY,02/IniVx,03_IniVy,04_tau,05_tpre,06_p,07/pMode,08/pp2,09/tpreMode,10/atype,11/inComp,12/talkRange,13/talk_tau,14/talk_prob
+&Agent,00/IniX,01/IniY,02/IniVx,03_IniVy,04_tau,05_tpre,06_p,07/pMode,08/pp2,09/tpreMode,10/atype,11/inComp,12/talkRange,13/talk_tau,14/talk_prob
 Person0,6.33,13,0.6,0.2,0.3,3,0.6,fixed,1,30,active,1,0.7,2.6,0.7
 Person1,7.33,15,1.6,0.3,0.6,2,0.6,random,1,31,active,1,2.3,3.2,0.7
 Person2,8.33,17,0.3,0.3,3,10,0.3,fixed,1,57,active,1,2.2,2.3,0.7
@@ -34,7 +34,7 @@ Person6,22.33,12,0,0,1.7,16,0.63,random,1,36,follow,1,2.6,4.6,0.7
 Person7,23.33,16,0.2,0.9,12,23,0.66,random,0,37,search,1,0.3,3.6,0.7
 ,
 ,
-&Ped2Exit,Exit0,Exit1,Exit2
+&Agent2Exit,Exit0,Exit1,Exit2
 Person0,0.3,0.2,0.5
 Person1,0.7,0.3,0
 Person2,0.8,0.2,0
