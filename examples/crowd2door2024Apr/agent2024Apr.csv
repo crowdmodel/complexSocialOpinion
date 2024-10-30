@@ -41,7 +41,7 @@ Person7,0.3,0.7,
 Person0,0,7|122.3|20|6,0,0,0,0,0,0,
 Person1,2|260|36|2,0,5|30.0|1|5,3|20.0|1|1,0,0,0,0,
 Person2,0,5|17|2|7,0,2|96.0|30|3,0,0,0,0,
-Person3,0,0,3|30.0|1|5,0,0,3|10.0|1|1,2|0.6|1|1
+Person3,0,0,3|30.0|1|5,0,0,3|10.0|1|1,2|0.6|1|1,
 Person4,0,0,0,2|20.0|1|1,0,3|20.0|1|1,0,5|20|3|1,
 Person5,0,0,0,0,0,0,9|70.0|1|1,0,
 Person6,0,0,0,0,0,3|300.0|1|1,0,0,
@@ -56,8 +56,9 @@ ySpace=60.0
 # The parameter to configure the egress flow solver.  
 # xpt and ypt are the number of points in x and y axises.  
 # xmin and xmax specify the range of flow field in x axis; # ymin and ymax specify the range of flow field in y axis
-xpt=90
-ypt=60
+xpt=30
+ypt=30
+xmax = 80
 
 # Solver: 0 No egress flow field; 1 Nearest exit flow field; 2 Exit selection flow field
 solver=2
@@ -69,6 +70,49 @@ solver=2
 groupbehavior = 1
 pre-evac = 1
 dumpBinary = 1
+
+
+QuickStart: 
+Step1: Please select csv file to read in simulation data and compartement geometry data!
+Step2: Create simulation object!
+Step3: Compute and visualize simulation!
+
+When simulation starts, please try to press the following keys in your keybroad, and you will see the effects on the screen. 
+Press <pageup/pagedown> to zoom in or zoom out.
+Press arrow keys to move the entities vertically or horizonally in screen.
+Press 1/2/3 in number panel (Right side in the keyboard) to display the door or exit data on the screen.
+Press <o> and <p> to show the egress flow field. 
+Press <space> to pause or resume the simulaton. 
+
+
+Files selected in the last run (Read from log.txt): 
+C:/Program Files (x86)/Git/complexSocialOpinion/examples/crowd2door2024Apr/agent2024Apr.csv
+None
+
+
+
+
+
+
+
+
+QuickStart: 
+Step1: Please select csv file to read in simulation data and compartement geometry data!
+Step2: Create simulation object!
+Step3: Compute and visualize simulation!
+
+When simulation starts, please try to press the following keys in your keybroad, and you will see the effects on the screen. 
+Press <pageup/pagedown> to zoom in or zoom out.
+Press arrow keys to move the entities vertically or horizonally in screen.
+Press 1/2/3 in number panel (Right side in the keyboard) to display the door or exit data on the screen.
+Press <o> and <p> to show the egress flow field. 
+Press <space> to pause or resume the simulaton. 
+
+
+Files selected in the last run (Read from log.txt): 
+C:/Program Files (x86)/Git/complexSocialOpinion/examples/crowd2door2024Apr/agent2024Apr.csv
+None
+
 
 
 QuickStart: 
