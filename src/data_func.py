@@ -211,20 +211,18 @@ def readCSV_base(fileName):
         strData.append(item)
 
     #print(strData)
-    #print('np.shape(strData)=', np.shape(strData))
-    #print('\n')
+    #print(strData[1:,1:])
+    #print('np.shape(strData)=', np.shape(strData), '\n')
 
     print('\n')
     print('#=======================#')
     print(fileName)
-    dataNP = np.array(strData)
-    #print (dataNP)
-    #print ('np.shape(dataNP)', np.shape(dataNP))
-    #print ('\n')
+    #dataNP = np.array(strData)
+    #print(dataNP)
+    #print('np.shape(dataNP)', np.shape(dataNP),'\n')
 
-    #print(strData[1:,1:])
     csvFile.close()
-    return dataNP
+    return strData #dataNP
 
 
 def getData(fileName, strNote, flag='npArray'):
@@ -606,13 +604,13 @@ def readAgents(FileName, debug=True, marginTitle=1, ini=1):
     #dataFeatures = readCSV_base(FileName)
     #[Num_Data, Num_Features] = np.shape(dataFeatures)   
 
-    agentFeatures, lowerIndex, upperIndex = getData(FileName, '&Ped')
+    agentFeatures, lowerIndex, upperIndex = getData(FileName, '&Agent')
     Num_Agents=len(agentFeatures)-marginTitle
     if Num_Agents <= 0:
-        agentFeatures, lowerIndex, upperIndex = getData(FileName, '&Agent')
+        agentFeatures, lowerIndex, upperIndex = getData(FileName, '&agent')
         Num_Agents=len(agentFeatures)-marginTitle
     if Num_Agents <= 0:
-        agentFeatures, lowerIndex, upperIndex = getData(FileName, '&agent')
+        agentFeatures, lowerIndex, upperIndex = getData(FileName, '&Ped')
         Num_Agents=len(agentFeatures)-marginTitle
 
     if debug: 
@@ -702,6 +700,9 @@ def readWalls(FileName, debug=True, marginTitle=1, ini=0):
     Num_Obsts=len(obstFeatures)-marginTitle
     if Num_Obsts <= 0:
         obstFeatures, lowerIndex, upperIndex = getData(FileName, '&wall')
+        Num_Obsts=len(obstFeatures)-marginTitle
+    if Num_Obsts <= 0:
+        obstFeatures, lowerIndex, upperIndex = getData(FileName, '&obst')
         Num_Obsts=len(obstFeatures)-marginTitle
 
     if debug:
