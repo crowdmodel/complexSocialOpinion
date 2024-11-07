@@ -35,3 +35,9 @@ If you are a student or researcher who want to use this python package to test y
 So if you are interested in this project and would like to contribute your ideas, please feel free to start an issue to propose your ideas!  Collaborations are much welcome and comments are appreciated!  There are several things to do to improve the source code and document.  For example, the user interface (GUI) is to be improved, but I do not have much time to do that.  If you are good at developing user interface, please feel free to contribute and I will give you credits in the manual or in our papers.  Please refer to the issue "To-do list" for details.  
 
 Open discussion is much encouraged about the model and algorithm!  
+
+Citation
+--------
+If you use this software in your research, please consider citing this project as:
+
+Peng Wang, Xixoda Wang, Peter Luh, Neal Olderman, Xuesong Lu, Christian Wilkie, "SocialArray: Many-Particle Simulation of Array-Based Social Interaction," (2024), GitHub repository, https://github.com/crowdmodel/complexSocialOpinion. 
