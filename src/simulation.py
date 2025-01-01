@@ -78,7 +78,7 @@ class simulation(object):
         # Time parameters
         self.DT = 0.3
         self.t_sim=0.0
-        self.t_end=0.0
+        self.t_end=9.0
         self.t_pause=0.0
 
         # A Logical Varible to Control if TestGeom Goes to Simulation
@@ -570,23 +570,26 @@ class simulation(object):
         print('person exit_known:'+'\n'+str(person.exit_known)+ '\n')
 
         print('time-related paramters:') #\n')        
-        print('DT: '+str(self.DT)) #+ '\n')
-        print('DT_DumpData: '+str(self.DT_DumpData)) #+'\n')
-        print('t_end: '+str(self.t_end)+ '\n')
-        print('DT_OtherList'+str(self.DT_OtherList)) #+ '\n')
-        print('DT_ChangeDoor'+str(self.DT_ChangeDoor)) #+ '\n')
+        print('DT = '+str(self.DT)) #+ '\n')
+        print('DT_DumpData = '+str(self.DT_DumpData)) #+'\n')
+        print('t_end = '+str(self.t_end)+ '\n')
+        print('DT_OtherList ='+str(self.DT_OtherList)) #+ '\n')
+        print('DT_ChangeDoor ='+str(self.DT_ChangeDoor)) #+ '\n')
         
         print('\n')
         
-        print('simulation paramters:') # \n')     
-        print('Solver: '+str(self.solver)) #+ '\n')   
+        print('simulation paramters=') # \n')     
+        print('Solver= '+str(self.solver)) #+ '\n')   
         #print('TPRE Mode: '+str(self.TPREMODE)) #+ '\n')
-        print('Group: '+str(self.GROUPBEHAVIOR)) #+ '\n')
-        print('Self Repulsion: '+str(self.SELFREPULSION)) #+ '\n')
-        print('Opinion Model: '+str(self.OPINIONMODEL)) #+ '\n')
-        print('Short-Range Force: '+str(self.INTERACTION)) #+ '\n')
-        print('Dump Binary Data: '+str(self.dumpBin)) #+ '\n')
-        print('Working Folder: '+str(self.fpath)) #+ '\n')
+        print('Group = '+str(self.GROUPBEHAVIOR)) #+ '\n')
+        print('Self Repulsion = '+str(self.SELFREPULSION)) #+ '\n')
+        if self.OPINIONMODEL==0:
+            print('Opinion Model = '+str('0: Linear or Nonlinear System')) #+ '\n')
+        if self.OPINIONMODEL==1:
+            print('Opinion Model = '+str('1: Random Gossip'))
+        print('Short-Range Force = '+str(self.INTERACTION)) #+ '\n')
+        print('Dump Binary Data = '+str(self.dumpBin)) #+ '\n')
+        print('Working Folder = '+str(self.fpath)) #+ '\n')
 
         print('\n')
         
@@ -616,21 +619,27 @@ class simulation(object):
         f.write('\n')
 
         f.write('time-related paramters: \n')        
-        f.write('DT: '+str(self.DT)+ '\n')
-        f.write('DT_DumpData: '+str(self.DT_DumpData)+ '\n')
-        f.write('t_end: '+str(self.t_end)+ '\n')
-        f.write('DT_OtherList'+str(self.DT_OtherList)+ '\n')
-        f.write('DT_ChangeDoor'+str(self.DT_ChangeDoor)+ '\n\n')
+        f.write('DT = '+str(self.DT)+ '\n')
+        f.write('DT_DumpData = '+str(self.DT_DumpData)+ '\n')
+        f.write('t_end = '+str(self.t_end)+ '\n')
+        f.write('DT_OtherList ='+str(self.DT_OtherList)+ '\n')
+        f.write('DT_ChangeDoor ='+str(self.DT_ChangeDoor)+ '\n\n')
 
         f.write('simulation paramters:\n')   
-        f.write('Solver: '+str(self.solver)+ '\n')        
+        f.write('solver = '+str(self.solver)+ '\n')        
         #f.write('TPRE Mode: '+str(self.TPREMODE)+'\n')
-        f.write('Group: '+str(self.GROUPBEHAVIOR)+'\n')
-        f.write('Self Repulsion: '+str(self.SELFREPULSION)+'\n')
-        f.write('Opinion Model: '+str(self.OPINIONMODEL)+'\n')
-        f.write('Short-Range Force: '+str(self.INTERACTION)+ '\n')
-        f.write('Dump Binary Data: '+str(self.dumpBin)+'\n')
-        f.write('Working Folder: '+str(self.fpath)+ '\n')
+        f.write('Group = '+str(self.GROUPBEHAVIOR)+'\n')
+        f.write('Self Repulsion = '+str(self.SELFREPULSION)+'\n')
+        
+        if self.OPINIONMODEL==0:
+            #print('Opinion Model = '+str('Linear or Nonlinear System')) #+ '\n')\
+            f.write('Opinion Model = '+str('0: Linear or Nonlinear System')+'\n')
+        if self.OPINIONMODEL==1:
+            #print('Opinion Model = '+str('Random Gossip'))
+            f.write('Opinion Model = '+str('1: Random Gossip')+'\n')
+        f.write('Short-Range Force = '+str(self.INTERACTION)+ '\n')
+        f.write('Dump Binary Data = '+str(self.dumpBin)+'\n')
+        f.write('Working Folder = '+str(self.fpath)+ '\n')
         
         f.close()
 
@@ -1710,10 +1719,8 @@ class simulation(object):
                 ai.actualV = ai.actualV*ai.maxSpeed/ai.actualSpeed
                 #ai.actualV[0] = ai.actualV[0]*ai.maxSpeed/ai.actualSpeed
                 #ai.actualV[1] = ai.actualV[1]*ai.maxSpeed/ai.actualSpeed
-                
         return None
     
-
     
     def simulation_step2022(self, f):
         
@@ -1727,7 +1734,7 @@ class simulation(object):
                 if ai.inComp == 0:
                     continue
                 ai.updateSeeList(self.agents, self.walls) 
-                ai.updateAttentionList(self.agents, self.walls) #, self.WALLBLOCKHERDING)
+                #ai.updateAttentionList(self.agents, self.GROUPBEHAVIOR) #, self.WALLBLOCKHERDING)
                 #ai.updatePArray(self.agents)
                 print ('=== ai id ===::', idai)
                 print ('ai.others len:', len(ai.others))
@@ -1761,12 +1768,14 @@ class simulation(object):
                     continue
                 if np.sum(CArray[idai,:])>0:
                     CArray[idai,:] = CArray[idai,:]/np.sum(CArray[idai,:])
-                for idaj,aj in enumerate(self.agents):
-                    if idaj == idai:
-                        person.PFactor[idai,idaj]=1-ai.p
-                    else:
-                        person.PFactor[idai,idaj] = CArray[idai,idaj]*ai.p
-                        
+                    for idaj,aj in enumerate(self.agents):
+                        if idaj == idai:
+                            person.PFactor[idai,idaj]=1-ai.p
+                        else:
+                            person.PFactor[idai,idaj] = CArray[idai,idaj]*ai.p
+                else:
+                    person.PFactor[idai,idai]=1.0
+            
             person.CFactor=CArray
             
             print("person.see_flag:\n", person.see_flag)
@@ -1796,7 +1805,6 @@ class simulation(object):
             f.write('\n')
             #f.close()
                     
-        
         #if (self.t_sim < ai.tpre):
         if self.t_sim >= self.tt_ChangeDoor and self.num_exits>0 and self.solver!=1:
             print('Time for update ExitProb:', self.t_sim)
@@ -1984,7 +1992,7 @@ class simulation(object):
             if (self.t_sim < ai.tpre):
                 #ai.desiredSpeed = random.uniform(0.3,1.6)
                 goDoor = None
-                ai.preEvacModel()
+                #ai.preEvacModel()
                 motiveForce = ai.adaptMotiveForce()
                 
                 '''
@@ -2048,10 +2056,15 @@ class simulation(object):
                         otherSpeed = 0.0
                         #otherMovingNum = 0
                         if len(ai.others)!=0: #and tt>ai.tpre:
-                            otherDir, otherSpeed, otherTpre = ai.opinionDynamics()
+                            otherDir, otherSpeed = ai.opinionDynamics()
                             ai.direction = (1-ai.p)*ai.direction + ai.p*otherDir
                             ai.desiredSpeed = (1-ai.p)*ai.desiredSpeed + ai.p*otherSpeed
                             ai.desiredV = ai.desiredSpeed*ai.direction
+                        else:
+                            ai.dest = ai.exitInMind.pos
+                            ai.dirction=normalize(ai.exitInMind.pos - ai.pos)
+                            ai.desiredV = ai.desiredSpeed*ai.direction                                    
+                        
                         motiveForce = ai.adaptMotiveForce()
                         
                     else:
@@ -2225,6 +2238,8 @@ class simulation(object):
                 ai.opinionDynamics()
             elif self.OPINIONMODEL == 1:
                 ai.opinionExchange()
+                
+            ai.updateAttentionList(self.agents, self.GROUPBEHAVIOR) #, self.WALLBLOCKHERDING)
             ai.updateTalkList()
             #peopleInter = + ai.adaptPhyForce(self.agents)
             
