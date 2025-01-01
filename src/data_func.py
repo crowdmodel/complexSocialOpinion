@@ -1368,7 +1368,7 @@ def updateAgentData(agents, outputFile, inputFile=None):
             csv_writer.writerow(['&Agent', '1/iniX', '2/iniY', '3/iniVx', '4/iniVy', '5/tau', '6/tpre', '7/p, 8/pMode, 9/pp2, 10/tpreMode, 11/aType, 12/inComp, 13/talkRange'])
             index_temp=0
             for agent in agents:
-                csv_writer.writerow([str(agent.name), str(agent.pos[0]), str(agent.pos[1]), str(agent.actualV[0]), str(agent.actualV[1]), str(agent.tau), str(agent.tpre), str(agent.p), str(agent.pMode), str(agent.pp2), str(agent.tpreMode), str(agent.aType), str(agent.inComp), str(agent.talkRange), str(agent.talkProb)])
+                csv_writer.writerow([str(agent.name), str(agent.pos[0]), str(agent.pos[1]), str(agent.actualV[0]), str(agent.actualV[1]), str(agent.tau), str(agent.tpre), str(agent.p), str(agent.pMode), str(agent.pp2), str(agent.tpreMode), str(agent.aType), str(agent.inComp), str(agent.talk_range), str(agent.talk_prob)])
                 index_temp=index_temp+1
                 
 

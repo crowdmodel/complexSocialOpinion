@@ -843,9 +843,10 @@ def show_geom(simu, debug=False):
         if menu_01 or menu_02 or menu_03 or menu_04 or menu_05 or menu_06:
             pass
         elif drawLine:
+            #myfont=pygame.font.SysFont("arial",16)
             pygame.draw.line(screen, white, px1*ZOOMFACTOR+xyShift, px2*ZOOMFACTOR+xyShift, LINEWIDTH)
             measure_surface=myfont.render("length:" + str(np.round(np.linalg.norm(px1 - px2),2)), True, red, black)
-            screen.blit(measure_surface, [726,570]) #[750,350]*ZOOMFACTOR)
+            screen.blit(measure_surface, [18,538]) #[750,350]*ZOOMFACTOR)
         
         ####################################
         # Drawing the geometries: walls, doors, exits
@@ -1067,11 +1068,14 @@ def show_geom(simu, debug=False):
 
                     text_surface=myfont.render("tpre:"+format(agent.tpre, ".3f"), True, black, white)
                     screen.blit(text_surface, mouse_pos3+[0.0, 196.0])
-                    text_surface=myfont.render('TpreMode:'+str(agent.tpreMode), True, black, white)
+                    text_surface=myfont.render('tpreR:'+str(agent.tpreMode), True, black, white)
                     screen.blit(text_surface, mouse_pos3+[0.0, 216.0])
                     text_surface=myfont.render("exitSelected:"+str(agent.exitInMindIndex), True, black, white)
                     screen.blit(text_surface, mouse_pos3+[0.0, 236.0])
-                    
+                    text_surface=myfont.render('range:'+str(agent.talk_range), True, black, white)
+                    screen.blit(text_surface, mouse_pos3+[0.0, 256.0])
+                    text_surface=myfont.render('aType:'+str(agent.aType), True, black, white)
+                    screen.blit(text_surface, mouse_pos3+[0.0, 276.0])
                     
 
         # The Zoom and xSpace ySpace Info
@@ -1103,7 +1107,12 @@ def show_geom(simu, debug=False):
         screen.blit(text_surface, [700.0, 167.0])
         text_surface=myfont.render('SelfRep:'+str(simu.SELFREPULSION), True, lightpink, black)
         screen.blit(text_surface, [700.0, 187.0])
-        text_surface=myfont.render('Opinion:'+str(simu.OPINIONMODEL), True, lightpink, black)
+        if simu.OPINIONMODEL==0:
+            text_surface=myfont.render('Opinion:'+str(simu.OPINIONMODEL)+' LinearSys', True, lightpink, black)
+        elif simu.OPINIONMODEL==1:
+            text_surface=myfont.render('Opinion:'+str(simu.OPINIONMODEL)+' RandomGossip', True, lightpink, black)
+        else:
+            text_surface=myfont.render('Opinion: None', True, lightpink, black)
         screen.blit(text_surface, [700.0, 207.0])
         
         #basicXY = [756, 200]
@@ -2969,13 +2978,17 @@ def visualizeEvac(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=20
         
     T_INDEX=0
     
-    '''
+    walls=[]
+    doors=[]
+    exits=[]
+    
+    
     if evacfile!="" and evacfile!="None" and evacfile is not None:
         walls = readWalls(evacfile)  #readWalls(FN_Walls) #readWalls("obstData2018.csv")
         doors = readDoors(evacfile)
         exits = readExits(evacfile)
-
-    if fdsfile!="" and fdsfile!="None" and fdsfile is not None:
+    
+    if fdsfile!="" and fdsfile!="None" and fdsfile is not None and len(walls)+len(doors)+len(exits)==0:
         #meshes, evacZmin, evacZmax = readMESH(fdsfile, 'evac')
         #N_meshes = len(meshes)
         #evacZoffset=0.5*(evacZmin+evacZmax)
@@ -2985,14 +2998,13 @@ def visualizeEvac(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=20
         exits=readEXIT(fdsfile, '&EXIT', Zmin, Zmax)
         #doors=doors+readPATH(fdsfile, '&DOOR', Zmin, Zmax)
         #entries=readPATH(fdsfile, '&ENTRY', Zmin, Zmax)
-    '''
     
-    if os.path.exists(fnameCSV):
+    if os.path.exists(fnameCSV) and len(walls)+len(doors)+len(exits)==0:
         walls = readWalls(fnameCSV)
         doors = readDoors(fnameCSV)
         exits = readExits(fnameCSV)
         
-    elif os.path.exists(fnameTXT):
+    elif os.path.exists(fnameTXT) and len(walls)+len(doors)+len(exits)==0:
         walls = readWalls(fnameTXT)
         doors = readDoors(fnameTXT)
         exits = readExits(fnameTXT)
@@ -3104,6 +3116,8 @@ def visualizeEvac(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=20
                     agentIndex2=agentIndex2+1
                 elif event.key == pygame.K_p:
                     agentIndex2=agentIndex2-1
+                elif event.key == pygame.K_z:
+                    agentIndex = -1
                     
         if MODETRAJ == False:
             screen.fill([0,0,0])
