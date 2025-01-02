@@ -44,10 +44,10 @@ class person(object):
         self.name = 'None'
         self.ID = 0 #Name or index of agents
         self.inComp = 1
-        self.aType = 'Talk'  #{'MoveToDest' 'Follow' 'Talk' 'Search'}
+        self.aType = 'active'  #{'MoveToDest' 'Follow' 'Talk' 'Search'}
 
-        self.tpreMode = 2
-        self.tpre = 10 #random.uniform(6.0,22.0)
+        self.tpreMode = int(1)
+        self.tpre = 10.0 #random.uniform(6.0,22.0)
         self.arousalLevel = 0.1
         
         self.maxSpeed = 1.3 #random.uniform(1.0,2.0)
@@ -61,7 +61,7 @@ class person(object):
         #self.actualV = np.array([0.0, 0.0]) 
         self.actualV =  np.array([0.0, 0.0])#np.array([random.uniform(0,1.6), random.uniform(0,1.6)])
         self.actualSpeed = np.linalg.norm(self.actualV)  #np.array([0.0, 0.0])
-        self.dest = np.array([60.0,10.0])
+        self.dest = None #np.array([60.0,10.0])
         self.exitInMind = None
         self.exitInMindIndex = None
         self.direction = np.array([0.0, 0.0]) #normalize(self.dest - self.pos)
@@ -82,6 +82,8 @@ class person(object):
         #self.memory = np.array([0.0, 0.0], [0.0, 0.0], [0.0, 0.0])
         #self.sumAdapt = np.array([0.0, 0.0])
         
+        # Talk List -- Social Behavior
+        self.talkothers = []
         
         # Attention List -- Social Behavior
         self.others = []
@@ -111,15 +113,17 @@ class person(object):
         # Summary of Forces
         self.motiveF= np.array([0.0,0.0])
         self.selfrepF= np.array([0.0,0.0])
-        self.socialF= np.array([0.0,0.0])
-        # self.socialF= np.array([0.0,0.0])
-        self.physicF= np.array([0.0,0.0])
-        self.physicSF= np.array([0.0,0.0])
-        self.physicWF= np.array([0.0,0.0])
-        
+
         self.wallrepF= np.array([0.0,0.0])
         self.doorF= np.array([0.0,0.0])
         self.flucF= np.array([0.0,0.0])
+
+        self.socialF= np.array([0.0,0.0])
+        self.groupF= np.array([0.0,0.0])
+        
+        self.physicF= np.array([0.0,0.0])
+        self.physicSF= np.array([0.0,0.0])
+        self.physicWF= np.array([0.0,0.0])
 
         self.objF = np.array([0.0,0.0])
         self.subF = np.array([0.0,0.0])
@@ -171,8 +175,6 @@ class person(object):
         print('self.direction:', self.direction)
         
         
-        
-    
     ##############################################
     # This is for drawing agent with three circles
     def shoulders(self):
@@ -188,13 +190,17 @@ class person(object):
         return leftPx, rightPx
     
     
-    def updateStress(self, flag='instant'):
+    def updateStress(self, flag='accumulate'):
         
         self.actualSpeed = np.linalg.norm(self.actualV)
         self.desiredSpeed = np.linalg.norm(self.desiredV)
         
-        speed_gap = (np.linalg.norm(self.desiredV)-np.linalg.norm(self.actualV))/np.linalg.norm(self.desiredV)
-        direction_gap = np.linalg.norm(normalize(self.desiredV)-normalize(self.actualV))/normalize(self.desiredV) # 0 - 2
+        if np.linalg.norm(self.desiredV)>0:
+            speed_gap = (np.linalg.norm(self.desiredV)-np.linalg.norm(self.actualV))/np.linalg.norm(self.desiredV)
+            direction_gap = np.linalg.norm(normalize(self.desiredV)-normalize(self.actualV)) #/np.linalg.norm(self.desiredV) # 0 - 2
+        else:
+            speed_gap = 0.0
+            direction_gap = 0.0
         
         n_others = len(self.others)
         sum_temp = 0.0
@@ -230,16 +236,20 @@ class person(object):
         #if flag == 'accumulate':
         #    self.stressLevel = 1.0 - self.ratioAccumulateV
         if flag == 'instant':
-            if np.linalg.norm(self.desiredV) != 0.0:
+            if np.linalg.norm(self.desiredV) > 0.0:
                 self.stressLevel = min(np.linalg.norm(self.desiredV - self.actualV)/np.linalg.norm(self.desiredV), 1.0)
             else:
                 self.stressLevel = 0.0
+        elif flag == 'accumulate':
+            self.stressLevelV = 0.3*self.stressLevelV+0.7*(0.5*speed_gap+0.5*direction_gap)
+            self.stressLevel = 0.7*self.stressLevelV + 0.3*self.stressLevelD
         else:
-            self.stressLevelV = 0.3*self.stressLevelV+0.7(0.5*speed_gap+0.5*direction_gap)
-            self.stressLevel = 0.7*self.stressLevelV + 0.3*selt.stressLevelD
-                
+            self.stressLevel=0.0
+        
+        print(self.ID, self.stressLevel, self.selfrepF)
         return self.stressLevel
-    
+
+
     # For solver=0
     def adaptDirection(self):
         self.direction = normalize(self.destmemeory[-1]-self.pos)
@@ -257,17 +267,30 @@ class person(object):
         self.motiveF = deltaV*self.mass/self.tau
         return self.motiveF
 
+    
+    # Compute self-motive force before self-repulsion
+    def adaptSelfRep(self, Dfactor=1, Afactor=1, Bfactor=1):
+        
+        if len(self.others)>0:
+            commonTargeNum = 0
+            for aj in self.others:
+                if self.exitInMindIndex == aj.exitInMindIndex:
+                    commonTargeNum = commonTargeNum + 1
+                
+        if len(self.others)>0:
+            # selfRep = -selfMotive*(1.0-exp(-n))
+            if (1-self.stressLevel)<1e-3:
+                first = -self.motiveF
+            else:
+                alpha = (self.stressLevel)/(1-self.stressLevel)
+                first = -self.motiveF*(1.0-np.exp(-alpha)) #np.exp(-len(self.others))
+            #*(self.radius*Dfactor)/(self.B_CF*Bfactor)))
+            #first = -self.direction*Afactor*self.A_CF*np.exp((self.radius*Dfactor)/(self.B_CF*Bfactor))*(self.radius*Dfactor)
+            self.selfrepF = first*(1-commonTargeNum/len(self.others))
+        else:
+            self.selfrepF = np.array([0.0, 0.0])
+        return self.selfrepF
 
-    def adaptFluctuationForce(self, noiseLevel, debugFluc=False):
-        
-        self.flucF= np.array([0.0,0.0])
-        self.flucF[0] = np.random.normal(0, noiseLevel)
-        self.flucF[1] = np.random.normal(0, noiseLevel)
-        
-        if debugFluc:
-            print('Flucuation Force:', self.flucF)
-            input('Please check!')
-        return self.flucF
 
     def adaptP(self, flag = 'random'):
         if flag == 'random':
@@ -335,23 +358,7 @@ class person(object):
                 print  ('ai:', self.ID, '&&& In Tpre Stage:')
                 print ('goSomeone is None.')
                 print ('postion:', self.pos)
-
-    
-    # Compute self-motive force before self-repulsion
-    def adaptSelfRep(self, Dfactor=1, Afactor=1, Bfactor=1):
-        if len(self.others)>0:
-            # selfRep = -selfMotive*(1.0-exp(-n))
-            if (1-self.stressLevel)<1e-3:
-                first = -self.motiveF
-            else:
-                alpha = (self.stressLevel)/(1-self.stressLevel)
-                first = -self.motiveF*(1.0-np.exp(-alpha)) #np.exp(-len(self.others))
-            #*(self.radius*Dfactor)/(self.B_CF*Bfactor)))
-            #first = -self.direction*Afactor*self.A_CF*np.exp((self.radius*Dfactor)/(self.B_CF*Bfactor))*(self.radius*Dfactor)
-            self.selfrepF = first
-        else:
-            self.selfrepF = np.array([0.0, 0.0])
-        return self.selfrepF
+                
 
     # This is written for TestGeom: To modify agent's initial conditions
     def changeAttr(self, x=1, y=1, Vx=1, Vy=1):
@@ -1130,7 +1137,7 @@ class person(object):
                 self.seeothers.append(aj)
 
 
-    def updateAttentionList(self, agents, walls): #, WALLBLOCKHERDING):
+    def updateAttentionList(self, agents, GROUPBEHAVIOR): #, WALLBLOCKHERDING):
     
         #######################################################
         # Compute interaction of agents:  Find the agents who draw ai's attention
@@ -1172,17 +1179,26 @@ class person(object):
             ######################################################################
             # There are several persons around you.  Which draws your attention?  
             ######################################################################
-            if dij < 2*self.B_CF*person.BFactor[self.ID, aj.ID] + person.DFactor[self.ID, aj.ID] and person.see_flag[self.ID, aj.ID] or person.talk[aj.ID, self.ID] == 1:
-            #if dij < self.talk_range and no_wall_ij and see_i2j:
-                person.comm[self.ID, aj.ID] = 1
-                self.others.append(aj)
-            else: 
-                person.comm[self.ID, aj.ID] = 0
+            if GROUPBEHAVIOR:
+                if dij < 2*self.B_CF*person.BFactor[self.ID, aj.ID] + person.DFactor[self.ID, aj.ID] and person.see_flag[self.ID, aj.ID] or person.talk[aj.ID, self.ID] == 1:
+                #if dij < self.talk_range and person.see_flag[self.ID, aj.ID] or person.talk[aj.ID, self.ID] == 1:
+                    person.comm[self.ID, aj.ID] = 1
+                    self.others.append(aj)
+                else:
+                    person.comm[self.ID, aj.ID] = 0
+            else:
+                if dij < self.talk_range and person.see_flag[self.ID, aj.ID] or person.talk[aj.ID, self.ID] == 1:
+                    person.comm[self.ID, aj.ID] = 1
+                    self.others.append(aj)
+                else: 
+                    person.comm[self.ID, aj.ID] = 0
             # Loop of idaj,aj ends here
             ###########################
 
     def updateTalkList(self, debug=False):
         
+        # Talk List -- Social Behavior
+        self.talkothers =[]
         for aj in self.others:
 
             if aj.inComp == 0:
@@ -1194,7 +1210,6 @@ class person(object):
                 
             if debug:
                 print ('others ID', aj.ID)
-                        
             dij = np.linalg.norm(self.pos - aj.pos)
             #Difference of desired velocities
             vij_desiredV = np.linalg.norm(self.desiredV - aj.desiredV)
@@ -1206,37 +1221,20 @@ class person(object):
             person.talk[self.ID, aj.ID] = 0                        
             if person.talk[aj.ID, self.ID] == 1:
                 person.talk[self.ID, aj.ID]=1
-                
-                person.DFactor[self.ID, aj.ID]=0.6
-                person.AFactor[self.ID, aj.ID]=6000
-                person.BFactor[self.ID, aj.ID]=30
                 self.tau = self.talk_tau
+                self.talkothers.append(aj)
                 
             elif dij<self.talk_range and self.talk_prob>random.uniform(0.0,1.0): 
             #and 0.6<random.uniform(0.0,1.0):
-                #person.DFactor[self.ID, aj.ID]=0.6
-                person.DFactor[self.ID, aj.ID]=random.uniform(0.3, 0.7)
-                person.DFactor[self.ID, aj.ID]=(1-self.p)*person.DFactor[self.ID, aj.ID]+self.p*person.DFactor[aj.ID, self.ID]
-                #person.AFactor[self.ID, aj.ID]=(1-self.p)*person.AFactor[self.ID, aj.ID]+self.p*person.AFactor[aj.ID, self.ID]
-                #person.BFactor[self.ID, aj.ID]=(1-self.p)*person.BFactor[self.ID, aj.ID]+self.p*person.BFactor[aj.ID, self.ID]
-                #person.DFactor[self.ID, aj.ID]=2.0
-                person.AFactor[self.ID, aj.ID]=6000
-                person.BFactor[self.ID, aj.ID]=30
                 self.tau = self.talk_tau
-                #self.desiredV = np.array([0.0,0.0])
                 person.talk[self.ID, aj.ID]=1
+                self.talkothers.append(aj)
             else:
-                person.DFactor[self.ID, aj.ID]=person.DFactor_Init[self.ID, aj.ID]
-                person.AFactor[self.ID, aj.ID]=person.AFactor_Init[self.ID, aj.ID]
-                person.BFactor[self.ID, aj.ID]=person.BFactor_Init[self.ID, aj.ID]
                 self.tau = self.moving_tau
                 person.talk[self.ID, aj.ID]=0
 
 
-
-
     def adaptSocialForce(self, agents, GROUPBEHAVIOR=True, ShortRangeF=1, debug=False):
-
         self.socialF = np.array([0.0,0.0])
         #for idaj, aj in enumerate(agents):
         for aj in self.seeothers: #enumerate(self.seeothers):
@@ -1253,43 +1251,57 @@ class person(object):
                 self.socialF += self.magneticForce(aj)
             #peopleInter += self.socialForce(aj)*anisoF
 
-        for aj in self.others:
+        ####################################
+        # Turn on or off group social force
+        ####################################
+        self.groupF= np.array([0.0,0.0])
+        if GROUPBEHAVIOR:
+            for aj in self.others:
+                if aj.inComp == 0:
+                    continue
+                if aj is self:
+                    continue
+                    
+                if debug:
+                    print ('others ID', aj.ID)
 
-            if aj.inComp == 0:
-                continue
-            if aj is self:
-                continue
-                
-            if debug:
-                print ('others ID', aj.ID)
-
-            ####################################
-            # Turn on or off group social force
-            ####################################
-            if GROUPBEHAVIOR:
                 vij_actualV = np.linalg.norm(self.actualV - aj.actualV)
                 phiij = vectorAngleCos(self.actualV, (aj.pos - self.pos))
                 anisoF = self.lamb + (1-self.lamb)*(1+cos(phiij))*0.5
                 dij = np.linalg.norm(self.pos - aj.pos)
                 nij = (self.pos - aj.pos)/dij
                 vij = self.actualV - aj.actualV
+                
+                
+                if person.talk[self.ID, aj.ID]==1:
+                    #person.DFactor[self.ID, aj.ID]=2.0
+                    #person.DFactor[self.ID, aj.ID]=0.6
+                    #person.DFactor[self.ID, aj.ID]=random.uniform(0.3, 0.7)
+                    person.DFactor[self.ID, aj.ID]=(1-self.p)*person.DFactor[self.ID, aj.ID]+self.p*person.DFactor[aj.ID, self.ID]
+                    person.AFactor[self.ID, aj.ID]=(1-self.p)*person.AFactor[self.ID, aj.ID]+self.p*person.AFactor[aj.ID, self.ID]
+                    person.BFactor[self.ID, aj.ID]=(1-self.p)*person.BFactor[self.ID, aj.ID]+self.p*person.BFactor[aj.ID, self.ID]
+                    #person.AFactor[self.ID, aj.ID]=2600
+                    #person.BFactor[self.ID, aj.ID]=30
+                else:
+                    person.DFactor[self.ID, aj.ID]=person.DFactor_Init[self.ID, aj.ID]
+                    person.AFactor[self.ID, aj.ID]=person.AFactor_Init[self.ID, aj.ID]
+                    person.BFactor[self.ID, aj.ID]=person.BFactor_Init[self.ID, aj.ID]
         
-                self.socialF += self.groupForce(aj, person.DFactor[self.ID, aj.ID], person.AFactor[self.ID, aj.ID], person.BFactor[self.ID, aj.ID]) + 60.0*ggg(np.dot(-vij, nij))*nij*anisoF # The force term of vij_acutalV is not that useful
+                self.groupF += self.groupForce(aj, person.DFactor[self.ID, aj.ID], person.AFactor[self.ID, aj.ID], person.BFactor[self.ID, aj.ID]) + 180.0*ggg(np.dot(-vij, nij))*nij*anisoF # The force term of vij_acutalV is not that useful
 
-            #########################################
-            # Opinion dynamics for tpre feature: Opinion Exchange
-            #########################################
-            #if dij < self.talk_range:
-            #    self.tpre = (1-self.p)*self.tpre + self.p*aj.tpre
+                #########################################
+                # Opinion dynamics for tpre feature: Opinion Exchange
+                #########################################
+                #if dij < self.talk_range:
+                #    self.tpre = (1-self.p)*self.tpre + self.p*aj.tpre
+        return self.socialF + self.groupF
 
-        return self.socialF
 
     # Interactive Opinion Dynamics Starts here
     # Opinion Exchange in Pair
     def opinionExchange(self): #, other, mode=1.0):
         
         #otherV= (1-mode)*other.desiredV + mode*other.actualV
-        
         otherMovingDir = np.array([0.0, 0.0])
         otherMovingSpeed = 0.0
         otherMovingNum = 0
@@ -1309,7 +1321,6 @@ class person(object):
                 otherMovingSpeed = np.linalg.norm(aj.actualV) #/DFactor[idai, idaj]*AFactor[idai, idaj]
                 otherTpre = aj.tpre
                 otherArousal = aj.arousalLevel
-                
         
         if len(self.others)>0:
             self.tpre = (1-self.p)*self.tpre + self.p*otherTpre
@@ -1319,7 +1330,7 @@ class person(object):
         #BFactor[idai, idaj] = (1-ai.p)*BFactor[idai, idaj]+ai.p*BFactor[idaj, idai]
         #ai.desiredV = (1-ai.p)*ai.desiredV + ai.p*aj.desiredV
         #return None
-
+        return otherMovingDir, otherMovingSpeed
 
     #####################################
     # how an agent interacts with others
@@ -1369,7 +1380,8 @@ class person(object):
             self.tpre = (1-self.p)*self.tpre + self.p*otherTpre
             #if self.arousalLevel>0.5:
             #    self.tpre = (1-self.p)*self.tpre + self.p*otherTpre
-    
+        return otherMovingDir, otherMovingSpeed
+        
 
     def findDoorDir(self, direction):
         if direction == 1:
@@ -1456,7 +1468,18 @@ class person(object):
                 return np.array([0.0, 0.0])
              #   if abs(self.actualV[0]) > abs(self.actualV[1]):
 
-              
+
+    def adaptFluctuationForce(self, noiseLevel, debugFluc=False):
+        
+        self.flucF= np.array([0.0,0.0])
+        self.flucF[0] = np.random.normal(0, noiseLevel)
+        self.flucF[1] = np.random.normal(0, noiseLevel)
+        
+        if debugFluc:
+            print('Flucuation Force:', self.flucF)
+            input('Please check!')
+        return self.flucF
+
 
 if __name__ == '__main__':
     
