@@ -1044,7 +1044,7 @@ class simulation(object):
 
                 print('iii', ipos, 'jjj', jpos)
                 print('floor and ceil check:', ifloor, iceil, jfloor, jceil)
-                fwrite('floor and ceil check:'+str([ifloor, iceil, jfloor, jceil])+'\n')
+                f.write('floor and ceil check:'+str([ifloor, iceil, jfloor, jceil])+'\n')
 
                 Usum=0.0 #np.array([0.0, 0.0])
                 Vsum=0.0 #np.array([0.0, 0.0])
@@ -1448,9 +1448,11 @@ class simulation(object):
 
         if self.GROUPBEHAVIOR:
             # Initialize Desired Interpersonal Distance
-            tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupCABD')
+            tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupSABD')
+            if len(tableFeatures)<=0:
+                tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupCABD')
             if len(tableFeatures)>0:
-                person.CFactor_Init, person.AFactor_Init, person.BFactor_Init, person.DFactor_Init = readGroupCABD(tableFeatures, len(self.agents), len(self.agents))
+                person.CFactor_Init, person.AFactor_Init, person.BFactor_Init, person.DFactor_Init = readGroupSABD(tableFeatures, len(self.agents), len(self.agents))
                 ###=== Group Behavior is simulated ===
                 self.GROUPBEHAVIOR = True
             else:
@@ -1465,9 +1467,11 @@ class simulation(object):
                         person.DFactor_Init = np.zeros((self.num_agents, self.num_agents))
                         self.GROUPBEHAVIOR = False
                         
-                    tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupC')
+                    tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupS')
+                    if len(tableFeatures)<=0:
+                        tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupC')
                     if len(tableFeatures)>0:
-                        person.CFactor_Init = readGroupC(tableFeatures, len(self.agents), len(self.agents))
+                        person.CFactor_Init = readGroupS(tableFeatures, len(self.agents), len(self.agents))
                     else:
                         person.CFactor_Init = np.zeros((self.num_agents, self.num_agents))
                 except:
@@ -1766,11 +1770,14 @@ class simulation(object):
             for idai,ai in enumerate(self.agents):
                 if ai.inComp == 0:
                     continue
-                if np.sum(CArray[idai,:])>0:
-                    CArray[idai,:] = CArray[idai,:]/np.sum(CArray[idai,:])
+                if np.sum(np.fabs(CArray[idai,:]))>0:
+                    CArray[idai,:] = np.sign(CArray[idai,:])*np.fabs(CArray[idai,:])/np.sum(np.fabs(CArray[idai,:]))
+                #if np.sum(CArray[idai,:])>0:
+                    #CArray[idai,:] = CArray[idai,:]/np.sum(CArray[idai,:])
                     for idaj,aj in enumerate(self.agents):
                         if idaj == idai:
-                            person.PFactor[idai,idaj]=1-ai.p
+                            person.PFactor[idai,idaj] = 1-ai.p*np.sum(np.fabs(CArray[idai,:]))
+                            #person.PFactor[idai,idaj] = 1-ai.p
                         else:
                             person.PFactor[idai,idaj] = CArray[idai,idaj]*ai.p
                 else:
@@ -1970,7 +1977,7 @@ class simulation(object):
             ai.stressLevel = 1 - ai.ratioV
             ai.test = 0.0 #??
             
-            ai.updateStress(flag='instant')
+            ai.updateStress(flag='accumulate')
             
             #ai.diw_desired = max(0.2, ai.ratioV)*0.6
             #ai.A_WF = 700*max(0.3, ai.ratioV)
@@ -2297,9 +2304,10 @@ class simulation(object):
                         f.write('goDoor:'+str(goDoor.oid)+'\n')
                     else:
                         f.write('goDoor: None'+'\n')
-                else:
+                elif self.solver == 2:
                     f.write('ExitSelected:'+str(ai.exitInMind.oid)+'\n')
-                
+                else:
+                    pass
                 
                 #f.write('visibleDoors:'+str(ai.visibleDoors)+'\n')
                 #f.write('visibleExits:'+str(ai.visibleExits)+'\n')
