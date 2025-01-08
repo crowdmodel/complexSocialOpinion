@@ -379,10 +379,10 @@ def readAgent2Exit(tableFeatures, NRow, NColomn, debug=True):
     return matrixA2E #, matrixKW
 
 
-def readGroupCABD(tableFeatures, NRow, NColomn, debug=True):
+def readGroupSABD(tableFeatures, NRow, NColomn, debug=True):
 
     # NRow and NColomn are the size of data to be extracted from tableFeatures
-    matrixC = np.zeros((NRow, NColomn))
+    matrixS = np.zeros((NRow, NColomn))
     matrixA = np.zeros((NRow, NColomn))
     matrixB = np.zeros((NRow, NColomn))
     matrixD = np.zeros((NRow, NColomn))
@@ -394,27 +394,27 @@ def readGroupCABD(tableFeatures, NRow, NColomn, debug=True):
                 try:
                     #temp=re.split(r'[\s\/]+', tableFeatures[i+1][j+1])
                     temp=re.split(r'\s*[;\|\s]\s*', tableFeatures[i+1][j+1])
-                    matrixC[i,j] = float(temp[0])
+                    matrixS[i,j] = float(temp[0])
                     matrixA[i,j] = float(temp[1])
                     matrixB[i,j] = float(temp[2])
                     matrixD[i,j] = float(temp[3])
                 except:
                     print("Error in reading group data!")
                     input("Please check!")
-                    matrixC[i,j] = 0.0
+                    matrixS[i,j] = 0.0
                     matrixA[i,j] = 0.0
                     matrixB[i,j] = 0.0
                     matrixD[i,j] = 0.0
             else:
-                matrixC[i,j] = 0.0
+                matrixS[i,j] = 0.0
                 matrixA[i,j] = 0.0
                 matrixB[i,j] = 0.0
                 matrixD[i,j] = 0.0
                 
     if debug:
         print(tableFeatures, '\n')
-        print('Data in Table:', '\n', matrixC, matrixA, matrixB, matrixD)
-    return matrixC, matrixA, matrixB, matrixD
+        print('Data in Table:', '\n', matrixS, matrixA, matrixB, matrixD)
+    return matrixS, matrixA, matrixB, matrixD
 
 
 def readGroupABD(tableFeatures, NRow, NColomn, debug=True):
@@ -451,23 +451,23 @@ def readGroupABD(tableFeatures, NRow, NColomn, debug=True):
     return matrixA, matrixB, matrixD
     
 
-def readGroupC(tableFeatures, NRow, NColomn, debug=True):
+def readGroupS(tableFeatures, NRow, NColomn, debug=True):
     # NRow and NColomn are the size of data to be extracted from tableFeatures
-    matrixC = np.zeros((NRow, NColomn))
+    matrixS = np.zeros((NRow, NColomn))
     if tableFeatures[i+1][j+1] and tableFeatures[i+1][j+1] != '0':
         try:    
-            matrixC[i,j] = float(tableFeatures[i+1][j+1])        
+            matrixS[i,j] = float(tableFeatures[i+1][j+1])        
         except:
             print("Error in reading group data!")
             input("Please check!")
-            matrixC[i,j] = 0.0
+            matrixS[i,j] = 0.0
     else:
-        matrixC[i,j] = 0.0
+        matrixS[i,j] = 0.0
                 
     if debug:
         print(tableFeatures, '\n')
-        print('Data in Table:', '\n', matrixC)
-    return matrixC
+        print('Data in Table:', '\n', matrixS)
+    return matrixS
 
 
 def readArrayIndex(tableFeatures, NRow, NColomn, index=0, iniX=1, iniY=1, debug=True):

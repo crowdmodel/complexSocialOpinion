@@ -114,7 +114,7 @@ class GUI(object):
         #self.frameSettings = Frame(self.window)
 
         scrollInfo = Scrollbar(self.window)#frameInformation)
-        self.textInformation = Text(self.window, width=45,height=6, bg="brown", fg="lightcyan", wrap=WORD,font=("Courier",10))
+        self.textInformation = Text(self.window, width=45, height=6, undo=True, bg="brown", fg="lightcyan", wrap=WORD,font=("Courier",10))
         scrollInfo.pack(side=RIGHT, fill=Y)
         self.textInformation.pack(side=LEFT,fill=BOTH,expand=YES)
         scrollInfo.config(command=self.textInformation.yview)
@@ -186,7 +186,6 @@ class GUI(object):
         self.lb_guide = Label(self.frameRun, text = "Please select the input files for simulation:\n How-To: Select Input Files --> Create/Modify Simulation --> Run Simulation \n") 
         # + "Please check the examples for details")
         self.lb_guide.pack()
-        
 
         self.lb_csv = Label(self.frameRun,text = "Use csv file to create agent data or together with compartement geometry data.\n"+"The input csv file selected: "+str(self.fname_EVAC)+"\n")
         self.lb_csv.pack()
@@ -214,11 +213,14 @@ class GUI(object):
         #self.buttonFlow = Button(self.frameRun, text='compute egress flow field', command=self.testFlow)
         #self.buttonFlow.pack() #place(x=306, y=206)
         #self.showHelp(self.buttonFlow, "Generate the door flow field.  \n Users should first select either the nearest-exit method (default) or exit probablity method")
-        
-        self.buttonStart = Button(self.frameRun, text='compute and visualize simulation',  width=38,command=self.startSim)
-        self.buttonStart.pack() #(side=LEFT) #place(x=20, y=236)
-        self.showHelp(self.buttonStart, "Compute the numerical result and display the result timely in pygame.  \n Please select the items in parameter panel to adjust the appearance in pygame window. ")
 
+        self.buttonCSVView =Button(self.frameRun, text='View csv data file by Treeview', width=38, command=self.viewCSVTL)
+        self.buttonCSVView.pack()   #place(x=13, y=60)
+        self.showHelp(self.buttonCSVView, "Show the agent data in csv data file.")
+        
+        self.window.bind("<Control-q>", self.viewCSV)
+        self.window.bind("<Control-p>", self.viewCSVTL)
+        
         #####################################################################################33
         # --------------------------------------------
         # frameFDS
@@ -317,7 +319,7 @@ class GUI(object):
         self.showHelp(self.GroupBehavior_CB, "Compute Group Social Force and Self Repulsion.  \n Check this button only if you have specified the group parameters in input file.")  #Uncheck it if you do not know what it means.")  
 
         self.UseConfig_Var = IntVar()
-        self.UseConfig_Var.set(1)
+        self.UseConfig_Var.set(0)
         self.UseConfig_CB=Checkbutton(self.frameRun, text= 'Use configuration data in csv file to overwrite parameters selected in the GUI panels', variable=self.UseConfig_Var, onvalue=1, offvalue=0)
         self.UseConfig_CB.pack() #place(x=2, y=276) #pack() 
         self.showHelp(self.UseConfig_CB, "Use configuration data in csv file to configure simulation object \n  rather than use parameters selected in the GUI panels.")
@@ -354,12 +356,17 @@ class GUI(object):
         nameEntered_tEnd.insert(0, '90.0')
         nameEntered_tEnd.place(x=469, y=152)
         
-        self.buttonComp = Button(self.frameParameters, text='compute simulation and save data without visualization', command=self.compSim)
+        self.buttonComp = Button(self.frameParameters, text='compute simulation and save data without visualization (Stop if t>tEnd)', width=75, command=self.compSim)
         self.buttonComp.place(x=19, y=192)
         #self.buttonComp.grid(row=3, column=1, rowspan=2, ipady=7)
         #self.buttonComp.place(x=397,y=191)
         self.showHelp(self.buttonComp, "Only compute the numerical result without displaying in pygame.  \n Users can use another python program evac-prt5-tool to display the the numerical result.")
-      
+
+        self.buttonStart = Button(self.frameParameters, text='compute and visualize simulation (Stop by User)',  width=75, command=self.startSim)
+        self.buttonStart.place(x=19, y=222) #pack() #(side=LEFT) #place(x=20, y=236)
+        self.showHelp(self.buttonStart, "Compute the numerical result and display the result timely in pygame.  \n Please select the items in parameter panel to adjust the appearance in pygame window. ")
+
+
         ######################################################################################
         # --------------------------------------------
         # frameFlowSettings
@@ -447,28 +454,16 @@ class GUI(object):
         # frameSoc EvacAgent
         # --------------------------------------------
         
-        #self.lbSoc0 = Label(self.frameSoc, text =  "Optional: Below please specify the noise level for fluctuation force: \n Standard derivation for normal distribution.  ")
-        #self.lbSoc0.place(x=15, y=100)
-
-        # Adding a Textbox Entry widget
-        self.ymin_gui = StringVar()
-        nameEntered_ymin = Entry(self.frameSoc, width=12, textvariable=self.ymin_gui)
-        nameEntered_ymin.insert(0, 'auto')
-        nameEntered_ymin.place(x=422, y=6)
-        self.showHelp(nameEntered_ymin, "The noise level for fluctuation force: \n Standard derivation for normal distribution.  \n Write 'auto' or leave it blank if you do not know what it means and the program will automatically give the value.  ")
-        
         self.lbSoc0 = Label(self.frameSoc, text =  "Optional: Below please select the type of opinion dynamics model. \n 0: Opinion dyanmics in linear algebra  1: Random gossip model. ")
         self.lbSoc0.place(x=15, y=150)
         
         self.spin_opinion = Spinbox(self.frameSoc, from_=0, to=1, width=5, bd=8) 
-        self.spin_opinion.insert(1, '0')
-        #self.spin_opinion.set(1)
+        self.spin_opinion.insert(1, '0')   #self.spin_opinion.set(1)
         self.spin_opinion.place(x=656, y=150)
         self.showHelp(self.spin_opinion, "Select the different algorithm of opinion dynamics model: \n 0: Opinion dynamics; 1: Random gossip.  ")  #Uncheck it if you do not know what it means.")
         
         self.lbSoc1 = Label(self.frameSoc, text =  "Optional: Below please select the type of short-range interation force. \n 0: Social Force  1: Magnetic force. ")
         self.lbSoc1.place(x=15, y=100)
-        
         self.spin_socialforce = Spinbox(self.frameSoc, from_=0, to=1, width=5, bd=8) 
         #self.spin_socialforce.insert(0, '0')
         self.spin_socialforce.place(x=656, y=100)
@@ -480,17 +475,27 @@ class GUI(object):
         self.lb_dtAtt = Label(self.frameSoc, text = 'dtAtt:')
         self.lb_dtAtt.place(x=15, y=226)
         self.dtAtt_gui = StringVar()
-        nameEntered_dtAtt = Entry(self.frameSoc, width=12, textvariable=self.dtAtt_gui)
-        nameEntered_dtAtt.insert(0, '0.2')
-        nameEntered_dtAtt.place(x=62, y=226)
+        self.nameEntered_dtAtt = Entry(self.frameSoc, width=12, textvariable=self.dtAtt_gui)
+        self.nameEntered_dtAtt.insert(0, '0.2')
+        self.nameEntered_dtAtt.place(x=62, y=226)
 
         self.lb_dtExit = Label(self.frameSoc, text = 'dtExit:')
-        self.lb_dtExit.place(x=215, y=226)
+        self.lb_dtExit.place(x=205, y=226)
         self.dtExit_gui = StringVar()
         nameEntered_dtExit = Entry(self.frameSoc, width=12, textvariable=self.dtExit_gui)
         nameEntered_dtExit.insert(0, '0.6')
         nameEntered_dtExit.place(x=262, y=226)
 
+        
+        self.lbSocFlunc = Label(self.frameSoc, text =  "Optional: Below please specify the noise level for fluctuation force: \n Standard derivation for normal distribution.  ")
+        self.lbSocFlunc.place(x=15, y=260)
+        # Adding a Textbox Entry widget
+        self.flunc_gui = StringVar()
+        self.nameEntered_flunc = Entry(self.frameSoc, width=10, textvariable=self.flunc_gui)
+        self.nameEntered_flunc.insert(0, 'auto')
+        self.nameEntered_flunc.place(x=656, y=266)
+        self.showHelp(self.nameEntered_flunc, "The noise level for fluctuation force: \n Standard derivation for normal distribution.  \n Write 'auto' or leave it blank if you do not know what it means and the program will automatically give the value.  ")
+        
 
         ##############################################
         # ============================================
@@ -525,15 +530,17 @@ class GUI(object):
         
         #self.scrollbar_y = Scrollbar(self.frameCSV, orient=VERTICAL)
         #self.scrollbar_x = Scrollbar(self.frameCSV, orient=HORIZONTAL)
-        columns = ("agent", "pos", "vel")
+        #columns = ("agent", "pos", "vel")
         
-        self.table_agent2exit = Treeview(self.frameData, height=6, show="headings", columns=('agents', 'data1', 'data2'), selectmode='extended') #, yscrollcommand=self.scrollbar_y.set, xscrollcommand=self.scrollbar_x.set)
-        self.table_agent2exit.column('agents', width=100)
-        self.table_agent2exit.column('data1', width=100)
-        self.table_agent2exit.column('data2', width=150)
-        self.table_agent2exit.heading('agents', text="agents")
-        self.table_agent2exit.heading('data1', text="data_p")
-        self.table_agent2exit.heading('data2', text="exit_prob")
+        self.table_agent2exit = Treeview(self.frameData, height=6, show="headings", columns=('data1', 'data2', 'data3', 'data4'), selectmode='extended') #, yscrollcommand=self.scrollbar_y.set, xscrollcommand=self.scrollbar_x.set)
+        self.table_agent2exit.column('data1', width=70)
+        self.table_agent2exit.column('data2', width=70)
+        self.table_agent2exit.column('data3', width=70)
+        self.table_agent2exit.column('data4', width=150)
+        self.table_agent2exit.heading('data1', text="agents")
+        self.table_agent2exit.heading('data2', text="data_p")
+        self.table_agent2exit.heading('data3', text="data_p2")
+        self.table_agent2exit.heading('data4', text="exit_prob")
         self.table_agent2exit.place(x=556, y=30)
 
         self.table_agent2exit.bind('<Double-1>', self.set_cell_value)
@@ -542,7 +549,7 @@ class GUI(object):
         #self.scrollbar_y.pack(side=RIGHT, fill=Y)
         #self.scrollbar_x.pack(side=BOTTOM, fill=X)
         
-        self.buttonExitProb =Button(self.frameData, text='View exit selection probability', command=self.readData_exitprob)
+        self.buttonExitProb =Button(self.frameData, text='View exit selection probability', width=35, command=self.readData_exitprob)
         self.buttonExitProb.place(x=13, y=30)
         #self.buttonTree.pack()
         self.showHelp(self.buttonExitProb, "Show the agent parameters for exit selection probility.")
@@ -550,12 +557,6 @@ class GUI(object):
         #self.buttonPD =Button(self.frameData, text='View decision balace parameter', command=self.readData_p)
         #self.buttonPD.place(x=223, y=60)
         #self.showHelp(self.buttonPD, "Show the agent parameters for exit selection probility.")
-        
-        self.buttonCSVView =Button(self.frameData, text='View csv data file', command=self.viewCSV)
-        self.buttonCSVView.place(x=13, y=60)
-        self.showHelp(self.buttonCSVView, "Show the agent data in csv data file.")
-        
-        self.window.bind("<Control-w>", self.viewCSV)
 
         ##############################################
         # ============================================
@@ -603,13 +604,254 @@ class GUI(object):
         #print(value)
         #scr.insert(tk.INSERT, value + '\n')
 
+
+    def viewCSVTL(self, event=None):
+        self.topData = Toplevel(self.window)
+        self.topData.title("CSV Data Editor")
+        
+        self.topData.grab_set()
+        self.topData.transient(self.window)
+        #self.menubar.config(state=DISABLED)
+        
+        self.topData.geometry("1300x700")
+        
+        openFileName = None        
+        self.file_name_var = StringVar()
+        self.file_name_label = Label(self.topData, textvar=openFileName, fg="black", bg="white", font=(None, 13))
+        self.file_name_label.pack(side=TOP, expand=1, fill=X)
+        
+        #######################
+        # Configure the menubar      
+        self.menubarTL = Menu(self.topData, bg="lightgrey", fg="cyan")
+        self.topData.config(menu=self.menubarTL)
+        
+        file_menu_tl = Menu(self.menubarTL, tearoff=0, bg="lightgrey", fg="black")
+        #file_menu.add_command(label="Open", command=file_open, accelerator="Ctrl+O")
+        file_menu_tl.add_command(label="Save", command=self.tl_file_save, accelerator="Ctrl+S")
+        self.menubarTL.add_cascade(label="File", menu=file_menu_tl)
+        
+        add_menu_tl = Menu(self.menubarTL, tearoff=0, bg="lightgrey", fg="black")
+        add_menu_tl.add_command(label="Add Item", command=self.addrow, accelerator="Ctrl+A")
+        self.menubarTL.add_cascade(label="Add", menu=add_menu_tl)
+        
+        delete_menu_tl = Menu(self.menubarTL, tearoff=0, bg="lightgrey", fg="black")
+        delete_menu_tl.add_command(label="Delete Item", command=self.deleterow, accelerator="Ctrl+D")
+        self.menubarTL.add_cascade(label="Delete", menu=delete_menu_tl)
+        
+        COL=[]
+        for i in range(26):
+            COL.append(chr(i+65))
+        #print(COL)
+        self.columnsTL = tuple(COL)
+        #columns = ("A", "B")
+        
+        self.scrollbarAy = Scrollbar(self.topData, orient="vertical") #, orient="vertical", command=treeview.yview)
+        self.scrollbarAy.pack(side=RIGHT, expand=1, fill=Y)
+        
+        self.scrollbarAx = Scrollbar(self.topData, orient="horizontal") #, orient="vertical", command=treeview.yview)
+        self.scrollbarAx.pack(side=BOTTOM, expand=1, fill=X)
+        
+        self.treeviewA = Treeview(self.topData, height=18, show="headings", columns=self.columnsTL)  #Table
+        self.scrollbarAy.config(command=self.treeviewA.yview)
+        self.scrollbarAx.config(command=self.treeviewA.xview)
+        
+        for i in range(26):
+            self.treeviewA.column(chr(i+65), width=90, anchor='center')
+        self.treeviewA.pack(side=TOP, fill=BOTH)
+
+        for col in self.columnsTL:  # bind function: enable sorting in table headings
+            self.treeviewA.heading(col, text=col) #,
+
+        
+        dataCSV = None
+        openFileName = self.fname_EVAC
+        currentfn  = os.path.basename(self.fname_EVAC)
+        currentdir = os.path.dirname(self.fname_EVAC)
+        self.file_name_label.config(text = "The csv file selected: "+str(self.fname_EVAC), fg="black", bg="lightgrey", font=(None, 10))
+        #self.textInformation.insert(END, 'fname_EVAC:   '+self.fname_EVAC)
+        print('fname', self.fname_EVAC)
+        #setStatusStr("Simulation not yet started!")
+        #textInformation.insert(END, '\n'+'EVAC Input File Selected:   '+self.fname_EVAC+'\n')
+        
+        dataCSV = readCSV_base(self.fname_EVAC)
+        print(dataCSV)
+        
+        self.treeviewA.delete(*self.treeviewA.get_children())    
+        self.treeviewA.update()  
+        
+        for i in range(len(dataCSV)): #
+            while len(dataCSV[i])<len(self.columnsTL):
+                dataCSV[i].append('')
+            try:
+                self.treeviewA.insert('', i, values=tuple([str(i+1)]+dataCSV[i])) #dataCSV[i][0], dataCSV[i][1], dataCSV[i][2], dataCSV[i][3], dataCSV[i][4], dataCSV[i][5],  dataCSV[i][6], dataCSV[i][7], dataCSV[i][8], dataCSV[i][9], dataCSV[i][10]))
+            except:
+                self.treeviewA.insert('', i, values=(i+1))
+        #openCSV=True
+
+        self.treeviewA.bind('<Double-1>', self.set_cell_value) # Double click to edit items
+        self.topData.bind("<Control-s>", self.file_save)
+        self.topData.bind("<Control-a>", self.addrow)
+        self.topData.bind("<Control-d>", self.deleterow)
+
+
+    def tl_file_save(self, event=None):
+    
+        #global dataCSV
+        #global openCSV
+        #global openFileName
+            
+        new_file_name = tkf.asksaveasfilename(filetypes=(("csv files", "*.csv"),("All files", "*.*")))
+        if new_file_name:
+             openFileName = new_file_name
+        else:
+            msg.showerror("File not saved!", "No file saved! Please input a csv filename!")
+            return
+
+        #with open(self.active_ini_filename, "w") as ini_file:
+        #    self.active_ini.write(ini_file)
+        #saveCSV(dataCSV, openFileName)
+    
+        try:
+            with open(openFileName, mode='w', newline='') as exit_file:
+                csv_writer = csv.writer(exit_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                #for i in range(I):
+                    #print(dataNP[i])
+                    #csv_writer.writerow(dataNP[i])
+                for item in self.treeviewA.get_children():
+                    item_text = self.treeviewA.item(item, "values")
+                    temp = list(item_text)
+                    #print(temp[1:])
+                    while not bool(temp[-1]):
+                        temp.pop()
+                    print(temp[1:])
+                    csv_writer.writerow(temp[1:])
+            msg.showinfo("Saved", "File Saved Successfully")
+        except:
+            with open(openFileName, mode='w') as exit_file:
+                csv_writer = csv.writer(exit_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                #csv_writer.writerow(['&Wall', '0/startX', '1/startY', '2/endX', '3/endY', '4/arrow', '5/shape', '6/inComp'])
+                for item in self.treeviewA.get_children():
+                    item_text = self.treeviewA.item(item, "values")
+                    temp = list(item_text)
+                    #print(temp[1:])
+                    while not bool(temp[-1]):
+                        temp.pop()
+                    print(temp[1:])
+                    csv_writer.writerow(temp[1:])
+            msg.showinfo("Saved", "File Saved Successfully")
+
+
+    def set_cell_value(self, event): # double click to edit the item
+    
+        for item in self.treeviewA.selection():
+            item_text = self.treeviewA.item(item, "values")
+            print(item_text)
+            print(int(item_text[0]))
+            print(item)
+            #print(item_text[0:2])  # Output the column number selected by users
+    
+        column= self.treeviewA.identify_column(event.x)# column
+        row = self.treeviewA.identify_row(event.y)  # row
+    
+        cn = int(str(column).replace('#',''))
+        rn = int(str(row).replace('I',''), base=16)
+        
+        print("cn:", column, cn)
+        print("rn:", row, rn)
+    
+        rn = int(item_text[0])
+    
+        #entryedit = Text(root,width=10+(cn-1)*16,height = 1)
+        entryedit = Text(self.topData, width=20, height = 2)
+        entryedit.insert(END, str(rn)+self.columnsTL[cn-1]+'= '+str(item_text[cn-1]))
+        entryedit.focus_set()
+        #entryedit.place(x=16+(cn-1)*130, y=6+rn*20)
+        entryedit.pack()
+        #lb= Label(root, text = str(rn)+columns[cn-1])
+        #lb.pack()
+    
+        def saveedit():
+            
+            #global dataCSV
+            try:
+                temp=entryedit.get(0.0, 'end').split('=')
+                self.treeviewA.set(item, column=column, value=temp[1].strip())
+                #dataCSV[rn-1][cn-2]=temp[1].strip()
+                #print(dataCSV) #[rn, cn])
+            except:
+                self.treeviewA.set(item, column=column, value=entryedit.get(0.0, 'end').strip())
+                #dataCSV[rn-1][cn-2]=entryedit.get(0.0, 'end').strip()
+                #print(dataCSV) #[rn, cn])
+            #lb.destroy()
+            entryedit.destroy()
+            okb.destroy()
+    
+        okb = Button(self.topData, text= str(rn)+self.columnsTL[cn-1]+':OK', width=9, command=saveedit)
+        okb.pack() #place(x=90+(cn-1)*130,y=2+rn*20)
+        
+    
+    def addrow(self, event):
+    
+        for item in self.treeviewA.selection():
+            #item = I001
+            item_text = self.treeviewA.item(item, "values")
+            print(item_text)
+            print(item)
+            print(item.index)
+            #print(item_text[0:2])  # Output the column number selected by users
+        try:
+            #rn = int(str(item).replace('I',''), base=16)
+            rn = int(item_text[0])
+        except:
+            rn = int(len(dataCSV))
+            
+        try:
+            self.treeviewA.insert('', int(rn), values=item_text) #dataCSV[i][3], dataCSV[i][4], dataCSV[i][5],  dataCSV[i][6], dataCSV[i][7], dataCSV[i][8], dataCSV[i][9], dataCSV[i][10]))
+        except:
+            self.treeviewA.insert('', int(rn), values=(int(rn)+1))
+        #treeviewA.insert('', len(name)-1, values=(name[len(name)-1], pos[len(name)-1], vel[len(name)-1]))
+        self.updateRowNum()
+        self.treeviewA.update()
+    
+        #newb.place(x=120, y=20) #y=(len(name)-1)*20+45)
+        #newb.update()
+        
+    def deleterow(self, event):
+        
+        #global dataCSV
+        for item in self.treeviewA.selection():
+            #item = I001
+            item_text = self.treeviewA.item(item, "values")
+            print(item_text)
+            print(item)
+    
+        #cn = int(str(column).replace('#',''))
+        rn = int(str(item).replace('I',''), base=16)
+        print(rn)
+        try:
+            self.treeviewA.delete(item) #dataCSV[i][3], dataCSV[i][4], dataCSV[i][5],  dataCSV[i][6], dataCSV[i][7], dataCSV[i][8], dataCSV[i][9], dataCSV[i][10]))
+        except:
+            self.treeviewA.delete(item)
+        #treeviewA.insert('', len(name)-1, values=(name[len(name)-1], pos[len(name)-1], vel[len(name)-1]))
+        self.updateRowNum()
+        self.treeviewA.update()
+        
+    def updateRowNum(self):
+        i=1
+        for item in self.treeviewA.get_children():
+            item_text = self.treeviewA.item(item, "values")
+            self.treeviewA.set(item, column=0, value=str(i))
+            i=i+1
+        return None
+
+    '''
     def set_cell_value(event): # double click to edit the item
-        '''
+
         for item in self.table_agent2exit.selection():
             #item = I001
             item_text = self.table_agent2exit.item(item, "values")
             print(item_text[0:2])  # Output the column number selected by users
-        '''
+
         column= self.table_agent2exit.identify_column(event.x)# column
         row = self.table_agent2exit.identify_row(event.y)  # row
         cn = int(str(column).replace('#',''))
@@ -624,7 +866,6 @@ class GUI(object):
             
         okb = Button(self.frameCSV, text='OK', width=4, command=saveedit)
         okb.place(x=90+(cn-1)*242,y=2+rn*20)
-        '''
         '''
 
     def updateCtrlParam(self):
@@ -803,7 +1044,6 @@ class GUI(object):
                         self.textInformation.insert(index, line_t)
         self.window.title(" - ".join(["Social Array Simulation", self.fname_EVAC]))
         
-        
     def selectOutTxtFile_DoorProb(self):
         #tempdir=os.path.dirname(self.fname_EVAC)
         #print(tempdir)
@@ -855,13 +1095,27 @@ class GUI(object):
         self.currentSimu.preprocessGeom()
         self.currentSimu.preprocessAgent()
         self.table_agent2exit.delete(*self.table_agent2exit.get_children())
-        self.table_agent2exit.update()    
+        self.table_agent2exit.update()
+        plot_p = []
+        plot_p2 = []
         for i in range(self.currentSimu.num_agents):
             #for j in range(self.currentSimu.num_exits):
-            self.table_agent2exit.insert('', i, values=(self.currentSimu.agents[i].ID, self.currentSimu.agents[i].p, self.currentSimu.agent2exit[i,:]))
-        self.textInformation.insert(END, '\n'+'agent2exit data: \n '+str(self.currentSimu.agent2exit)+'\n')
+            self.table_agent2exit.insert('', i, values=(self.currentSimu.agents[i].ID, self.currentSimu.agents[i].p, self.currentSimu.agents[i].pp2, self.currentSimu.agent2exit[i,:]))
+            plot_p.append(self.currentSimu.agents[i].p)
+            plot_p2.append(self.currentSimu.agents[i].pp2)
+        #self.textInformation.insert(END, '\n'+'agent2exit data: \n '+str(self.currentSimu.agent2exit)+'\n')
         
-
+        plt.title("Plot of parameter of p and p2")
+        plt.plot(plot_p, linewidth=3.0, label='p')
+        plt.plot(plot_p2, linewidth=3.0, label='p2')
+        plt.grid()
+        plt.legend(loc='best')
+        #temp=FileName.split('.')
+        #fnamePNG = temp[0]+'_exitprob.png'
+        #plt.savefig(fnamePNG)
+        plt.show()
+        
+        
     def readData_p(self):
         self.currentSimu = simulation()
         self.currentSimu.select_file(self.fname_EVAC, self.fname_FDS, "non-debug")
@@ -879,9 +1133,28 @@ class GUI(object):
             pArray.append(ai.p)
         self.textInformation.insert(END, '\n'+'decision parameter p: \n '+str(pArray)+'\n')
 
+    '''
+    def readData_p(self):
+        self.currentSimu = simulation()
+        self.currentSimu.select_file(self.fname_EVAC, self.fname_FDS, "non-debug")
+        self.updateCtrlParam()
+        self.currentSimu.preprocessGeom()
+        self.currentSimu.preprocessAgent()
+        pArray=[]
+        #for i in range(self.currentSimu.num_agents):
+        for i in range(self.currentSimu.num_agents):
+            #for j in range(self.currentSimu.num_exits):
+            self.table_agent2exit.insert('', index='end', text=(self.currentSimu.agents[i].ID, self.currentSimu.agents[i].p))
+        for idai, ai in enumerate(self.currentSimu.agents):
+            #for j in range(self.currentSimu.num_exits):
+            #pArray.append(self.currentSimu.agents[i].p)
+            pArray.append(ai.p)
+        self.textInformation.insert(END, '\n'+'decision parameter p: \n '+str(pArray)+'\n')
+    '''
 
     def viewCSV(self, event=None):
         os.system('notepad '+ os.path.join(self.fname_EVAC))
+        #os.system('D:\GnumericPortable\GnumericPortable '+ os.path.join(self.fname_EVAC))
 
     def file_save_as(self, event=None):
         new_file_name = filedialog.asksaveasfilename(filetypes=(("csv files", "*.csv"),("All files", "*.*")), initialdir=self.currentdir)
@@ -892,6 +1165,7 @@ class GUI(object):
                 open_file.write(new_contents2)
             self.fname_EVAC = new_file_name
             self.currentdir = os.path.dirname(self.fname_EVAC)
+
 
     #def deleteGeom(self):
     def file_save(self, event=None):
@@ -955,9 +1229,10 @@ class GUI(object):
             self.currentSimu.dataComplete()
             if self.AutoPlot_Var.get():
                 self.currentSimu.autoPlot()
-            self.currentSimu.quit()
+            self.currentSimu.destroy()
         else:
             os.remove(self.currentSimu.outDataName + ".txt")
+            self.currentSimu.destroy()
 
         #show_geom(myTest)
         #myTest.show_simulation()
@@ -990,6 +1265,7 @@ class GUI(object):
         #except:
         #    input("At least one exit should be placed in the layout! Please check!")
         show_flow(self.currentSimu)
+
 
     # Compute the numerical result and display the result timely in pygame
     def startSim(self):
@@ -1026,7 +1302,7 @@ class GUI(object):
             self.currentSimu.autoPlot()
         #show_geom(myTest)
         #myTest.show_simulation()
-        self.currentSimu.quit()
+        self.currentSimu.destroy()
     
     # Only compute the numerical result without displaying in pygame
     def compSim(self):
@@ -1045,7 +1321,7 @@ class GUI(object):
             self.updateCtrlParam()
         self.currentSimu.preprocessGeom()
         self.currentSimu.preprocessAgent()
-        if len(self.currentSimu.exits)>0:
+        if len(self.currentSimu.exits)>0 and self.currentSimu.solver!=0:
             self.currentSimu.buildMesh()
             self.currentSimu.flowMesh()
             self.currentSimu.computeDoorDirection()
@@ -1061,7 +1337,13 @@ class GUI(object):
             self.currentSimu.autoPlot()
         #show_geom(myTest)
         #myTest.show_simulation()
-        self.currentSimu.quit()
+        #if self.UseFDS_Var.get():
+        #    visualizeEvac(self.currentSimu.outDataName + ".bin", self.ZOOM, self.xSpa, self.ySpa)
+        #else:
+        #    visualizeEvac(self.currentSimu.outDataName + ".bin", self.ZOOM, self.xSpa, self.ySpa)
+        visualizeEvac(self.currentSimu.outDataName + ".bin", self.ZOOM, self.xSpa, self.ySpa)
+        self.currentSimu.destory()
+        
 
     # Only compute the numerical result without displaying in pygame
     def startVideo(self):
@@ -1069,18 +1351,18 @@ class GUI(object):
         self.fname_OutBIN = tkf.askopenfilename(filetypes=(("bin files", "*.bin"),("npz files", "*.npz"),("All files", "*.*")),\
         initialdir=self.currentdir)
         
-        FN_Temp = os.path.join(self.currentdir, "config.txt")
-        if os.path.exists(FN_Temp):
-            for line in open(FN_Temp, "r"):
+        #FN_Temp = os.path.join(self.currentdir, "config.txt")
+        if os.path.exists(self.fname_EVAC):
+            for line in open(self.fname_EVAC, "r"):
                 if re.match('ZOOM', line):
                     temp =  line.split('=')
-                    self.ZOOM = float(temp[1].strip())                    
+                    self.ZOOM = float(temp[1].strip().strip(','))                    
                 if re.match('xSpace', line):
                     temp =  line.split('=')
-                    self.xSpa = float(temp[1].strip())
+                    self.xSpa = float(temp[1].strip().strip(','))
                 if re.match('ySpace', line):
                     temp =  line.split('=')
-                    self.ySpa = float(temp[1].strip())
+                    self.ySpa = float(temp[1].strip().strip(','))
         #temp=self.fname_OutTXT.split('/') 
         #self.lb_outbin.config(text = "The output bin file selected: "+str(temp[-1])+"\n")
         #self.textInformation.insert(END, 'fname_FDS:   '+self.fname_FDS)
@@ -1089,10 +1371,16 @@ class GUI(object):
         self.textInformation.insert(END, '\n'+'Output Data File Selected:   '+self.fname_OutBIN+'\n')
         temp= self.fname_OutBIN.split('.')
         if temp[1]=='bin':
+            #visualizeEvac(self.fname_OutBIN, self.ZOOM, self.xSpa, self.ySpa)
+            #if self.UseFDS_Var.get():
+            #    visualizeEvac(self.fname_OutBIN, self.ZOOM, self.xSpa, self.ySpa)
+            #else:
+            #    visualizeEvac(self.fname_OutBIN, self.ZOOM, self.xSpa, self.ySpa)
             if self.UseFDS_Var.get():
                 visualizeEvac(self.fname_OutBIN, self.fname_EVAC, self.fname_FDS, self.ZOOM, self.xSpa, self.ySpa)
             else:
                 visualizeEvac(self.fname_OutBIN, self.fname_EVAC, None, self.ZOOM, self.xSpa, self.ySpa)
+
         '''
         if temp[1]=='npz':
             if self.UseFDS_Var.get():
