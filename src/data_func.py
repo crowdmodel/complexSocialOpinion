@@ -1953,6 +1953,7 @@ def compute_simu(simu):
             simu.simulation_update_agent_velocity()
             simu.simulation_update_agent_position()
         simu.simulation_step2022(f)
+        simu.simulation_update_agent_force(f)
         #simu.t_sim = simu.t_sim + simu.DT  # Maybe it should be in step()
         pass
         
@@ -1960,7 +1961,7 @@ def compute_simu(simu):
         f.write('Current simulation time:'+str(simu.t_sim)+'\n')
         
         # Dump agent binary data file
-        if simu.dumpBin and simu.t_sim > simu.tt_DumpData:
+        if simu.dumpBin and simu.t_sim >= simu.tt_DumpData:
             dump_evac(simu.agents, fbin, simu.t_sim)
             simu.tt_DumpData = simu.tt_DumpData + simu.DT_DumpData
             npzTime.append(simu.t_sim)

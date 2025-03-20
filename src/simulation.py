@@ -1450,7 +1450,11 @@ class simulation(object):
             # Initialize Desired Interpersonal Distance
             tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupSABD')
             if len(tableFeatures)<=0:
+                tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&GroupSABD')
+            if len(tableFeatures)<=0:
                 tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupCABD')
+            if len(tableFeatures)<=0:
+                tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&GroupCABD')
             if len(tableFeatures)>0:
                 person.CFactor_Init, person.AFactor_Init, person.BFactor_Init, person.DFactor_Init = readGroupSABD(tableFeatures, len(self.agents), len(self.agents))
                 ###=== Group Behavior is simulated ===
@@ -1468,6 +1472,8 @@ class simulation(object):
                         self.GROUPBEHAVIOR = False
                         
                     tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupS')
+                    if len(tableFeatures)<=0:
+                        tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&GroupS')
                     if len(tableFeatures)<=0:
                         tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupC')
                     if len(tableFeatures)>0:
@@ -1738,6 +1744,8 @@ class simulation(object):
                 if ai.inComp == 0:
                     continue
                 ai.updateSeeList(self.agents, self.walls) 
+                ai.updateAttentionList(self.agents, self.GROUPBEHAVIOR) #, self.WALLBLOCKHERDING)
+                ai.updateTalkList(self.agents)
                 #ai.updateAttentionList(self.agents, self.GROUPBEHAVIOR) #, self.WALLBLOCKHERDING)
                 #ai.updatePArray(self.agents)
                 print ('=== ai id ===::', idai)
@@ -1756,15 +1764,6 @@ class simulation(object):
                 elif ai.pMode =='fixed':
                     pass
                 
-                # Start to search visible doors
-                #ai.visibleDoors=ai.findVisibleTarget(self.walls, self.doors)
-                ai.updateVisibleDoors(self.walls, self.doors)
-                print ('ai:', ai.ID, 'Length of visibleDoors:', len(ai.visibleDoors))
-            
-                # Start to search visible exits
-                #ai.visibleExits=ai.findVisibleTarget(self.walls, self.exits)
-                ai.updateVisibleExits(self.walls, self.exits)
-                
             person.CFactor=person.CFactor_Init*person.comm
             CArray=person.CFactor_Init*person.comm
             for idai,ai in enumerate(self.agents):
@@ -1776,13 +1775,19 @@ class simulation(object):
                     #CArray[idai,:] = CArray[idai,:]/np.sum(CArray[idai,:])
                     for idaj,aj in enumerate(self.agents):
                         if idaj == idai:
-                            person.PFactor[idai,idaj] = 1-ai.p*np.sum(np.fabs(CArray[idai,:]))
+                            person.PFactor[idai,idaj] = 1-ai.p*np.sum(CArray[idai,:])
                             #person.PFactor[idai,idaj] = 1-ai.p
                         else:
                             person.PFactor[idai,idaj] = CArray[idai,idaj]*ai.p
                 else:
-                    person.PFactor[idai,idai]=1.0
-            
+                    #person.PFactor[idai,idai]=1.0
+                    for idaj,aj in enumerate(self.agents):
+                        if idaj == idai:
+                            person.PFactor[idai,idaj] = 1.0
+                            #person.PFactor[idai,idaj] = 1-ai.p
+                        else:
+                            person.PFactor[idai,idaj] = 0.0
+
             person.CFactor=CArray
             
             print("person.see_flag:\n", person.see_flag)
@@ -1842,7 +1847,16 @@ class simulation(object):
             f.write('\n')
             f.write('\n')
             #f.close()
-            
+
+            # Start to search visible doors
+            #ai.visibleDoors=ai.findVisibleTarget(self.walls, self.doors)
+            ai.updateVisibleDoors(self.walls, self.doors)
+            print ('ai:', ai.ID, 'Length of visibleDoors:', len(ai.visibleDoors))
+        
+            # Start to search visible exits
+            #ai.visibleExits=ai.findVisibleTarget(self.walls, self.exits)
+            ai.updateVisibleExits(self.walls, self.exits)
+
             #Visible_exits are known exits           
             person.exit_konwn = person.visible_exits + person.exit_known
             (M,N)=np.shape(person.exit_konwn)
@@ -1933,7 +1947,9 @@ class simulation(object):
             f.write('\n')
             f.close()
             '''
+        
 
+    def simulation_update_agent_force(self, f):
         #f.write('\n\n&Simulation Time:\n')
         f.write('\n\n&SimulationTime:' + str(self.t_sim)+'\n')
         for idai,ai in enumerate(self.agents):
@@ -2246,8 +2262,6 @@ class simulation(object):
             elif self.OPINIONMODEL == 1:
                 ai.opinionExchange()
                 
-            ai.updateAttentionList(self.agents, self.GROUPBEHAVIOR) #, self.WALLBLOCKHERDING)
-            ai.updateTalkList()
             #peopleInter = + ai.adaptPhyForce(self.agents)
             
             phySFInter = ai.adaptPhysicSF(self.agents, f)
