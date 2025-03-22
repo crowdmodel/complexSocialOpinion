@@ -1783,11 +1783,12 @@ def show_simu(simu):
             simu.simulation_update_agent_velocity()
             simu.simulation_update_agent_position()
         simu.simulation_step2022(f)
+        simu.simulation_update_agent_force(f)
         #simu.t_sim = simu.t_sim + simu.DT  # Maybe it should be in step()
         #pass
 
         # Dump agent binary data file
-        if simu.dumpBin and simu.t_sim > simu.tt_DumpData:
+        if simu.dumpBin and simu.t_sim >= simu.tt_DumpData:
             dump_evac(simu.agents, fbin, simu.t_sim)
             simu.tt_DumpData = simu.tt_DumpData + simu.DT_DumpData
             npzTime.append(simu.t_sim)
@@ -2875,6 +2876,8 @@ def visualizeTpre(fname, evacfile=None, fdsfile=None, Zmin=0.0, Zmax=3.0, showda
         plt.plot(Time, arrayTpre[i,:], linewidth=2.0, label=str(i))
         #plt.plot(arrayTpre[i,:], linewidth=3.0, label=str(i))
         plt.text(0, arrayTpre[i,0], str(i), fontsize=18)
+    
+    plt.plot(Time, Time, linewidth=3.0, linestyle='-.')
     #plt.plot(arrayTpre)
     plt.title("Pre-movement Time")
     plt.grid()
@@ -2888,9 +2891,9 @@ def visualizeTpre(fname, evacfile=None, fdsfile=None, Zmin=0.0, Zmax=3.0, showda
     return arrayTpre            
 
 
-def visualizeEvac(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=20.0, ySpace=20.0, Zmin=0.0, Zmax=3.0, debug=False):
+def visualizeAgent(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=20.0, ySpace=20.0, Zmin=0.0, Zmax=3.0, debug=False):
     
-    # Because visualizeEvac is a 2D visualizer, we can only show agents in a single floors each time and if there are multiple floors in fds+evac simulation, users should specify which floor they want to visualize.  Otherwise there will be overlap of agents in different floors.  The default values are given by Zmin=0.0 and Zmax=3.0, which means the gound floor approximately.  
+    # Because visualizeAgent is a 2D visualizer, we can only show agents in a single floors each time and if there are multiple floors in fds+evac simulation, users should specify which floor they want to visualize.  Otherwise there will be overlap of agents in different floors.  The default values are given by Zmin=0.0 and Zmax=3.0, which means the gound floor approximately.  
  
      # Therefore It is recommended for users to first open .fds input file to see if there are multiple floors.  User should specify Zmin and Zmax and agents are visualized in z axis between Zmin and Zmax.  
         

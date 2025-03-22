@@ -25,7 +25,7 @@ if sys.version_info[0] == 3: # Python 3
     from tkinter import *
     from tkinter.ttk import Notebook
     from tkinter.ttk import Treeview
-    from tkinter.ttk import Entry
+    #from tkinter.ttk import Entry
     import tkinter.filedialog as tkf
     import tkinter.messagebox as msg
 else:
@@ -114,7 +114,7 @@ class GUI(object):
         #self.frameSettings = Frame(self.window)
 
         scrollInfo = Scrollbar(self.window)#frameInformation)
-        self.textInformation = Text(self.window, width=45, height=6, undo=True, bg="brown", fg="lightcyan", wrap=WORD,font=("Courier",10))
+        self.textInformation = Text(self.window, width=45, height=6, undo=True, bg="black", fg="cyan", wrap=WORD,font=("Courier",10))
         scrollInfo.pack(side=RIGHT, fill=Y)
         self.textInformation.pack(side=LEFT,fill=BOTH,expand=YES)
         scrollInfo.config(command=self.textInformation.yview)
@@ -338,21 +338,21 @@ class GUI(object):
         self.lb_dtSim = Label(self.frameParameters, text = 'dtSim:')
         self.lb_dtSim.place(x=12, y=152)
         self.dtSim_gui = StringVar()
-        nameEntered_dtSim = Entry(self.frameParameters, width=12, textvariable=self.dtSim_gui)
+        nameEntered_dtSim = Entry(self.frameParameters, width=12, bg='black', fg="white", textvariable=self.dtSim_gui)
         nameEntered_dtSim.insert(0, '0.2')
         nameEntered_dtSim.place(x=62, y=152)
 
         self.lb_dtDump = Label(self.frameParameters, text = 'dtDump:')
         self.lb_dtDump.place(x=212, y=152)
         self.dtDump_gui = StringVar()
-        nameEntered_dtDump = Entry(self.frameParameters, width=12, textvariable=self.dtDump_gui)
+        nameEntered_dtDump = Entry(self.frameParameters, width=12, bg='black', fg="white", textvariable=self.dtDump_gui)
         nameEntered_dtDump.insert(0, '0.2')
         nameEntered_dtDump.place(x=269, y=152)
         
         self.lb_tEnd = Label(self.frameParameters, text = 'tEnd:')
         self.lb_tEnd.place(x=412, y=152)
         self.tEnd_gui = StringVar()
-        nameEntered_tEnd = Entry(self.frameParameters, width=13, textvariable=self.tEnd_gui)
+        nameEntered_tEnd = Entry(self.frameParameters, width=13, bg='black', fg="white", textvariable=self.tEnd_gui)
         nameEntered_tEnd.insert(0, '90.0')
         nameEntered_tEnd.place(x=469, y=152)
         
@@ -1016,33 +1016,33 @@ class GUI(object):
         #    self.open_file = file_to_open
             self.fname_EVAC=file_to_open
             self.textInformation.delete(1.0, END)
+                
+            #temp=self.fname_EVAC.split('/') 
+            temp=os.path.basename(self.fname_EVAC)
+            self.currentdir = os.path.dirname(self.fname_EVAC)
+            self.lb_csv.config(text = "The input csv file selected: "+str(self.fname_EVAC)+"\n")
+            #self.textInformation.insert(END, 'fname_EVAC:   '+self.fname_EVAC)
+            print('fname', self.fname_EVAC)
+            self.setStatusStr("Simulation not yet started!")
+            self.textInformation.insert(END, '\n'+'EVAC Input File Selected:   '+self.fname_EVAC+'\n')
+            self.currentdir = os.path.dirname(self.fname_EVAC)
+    
+            #if file_to_open:
+            #    self.open_file = file_to_open
+            #    self.textInformation.delete(1.0, tk.END)
             
-        #temp=self.fname_EVAC.split('/') 
-        temp=os.path.basename(self.fname_EVAC)
-        self.currentdir = os.path.dirname(self.fname_EVAC)
-        self.lb_csv.config(text = "The input csv file selected: "+str(self.fname_EVAC)+"\n")
-        #self.textInformation.insert(END, 'fname_EVAC:   '+self.fname_EVAC)
-        print('fname', self.fname_EVAC)
-        self.setStatusStr("Simulation not yet started!")
-        self.textInformation.insert(END, '\n'+'EVAC Input File Selected:   '+self.fname_EVAC+'\n')
-        self.currentdir = os.path.dirname(self.fname_EVAC)
-
-        #if file_to_open:
-        #    self.open_file = file_to_open
-        #    self.textInformation.delete(1.0, tk.END)
-        
-        with open(file_to_open, "r") as file_contents:
-                file_lines = file_contents.readlines()
-                #file_lines_t = re.sub(r',', '\t', file_lines)
-                if len(file_lines) > 0:
-                    for index, line in enumerate(file_lines):
-                        index = float(index) + 1.0
-                        #line=line.rstrip(',')
-                        line=re.sub(r',,', '', line)
-                        #print(line)
-                        line_t = re.sub(r',', ',\t', line)
-                        self.textInformation.insert(index, line_t)
-        self.window.title(" - ".join(["Social Array Simulation", self.fname_EVAC]))
+            with open(self.fname_EVAC, "r") as file_contents:
+                    file_lines = file_contents.readlines()
+                    #file_lines_t = re.sub(r',', '\t', file_lines)
+                    if len(file_lines) > 0:
+                        for index, line in enumerate(file_lines):
+                            index = float(index) + 1.0
+                            #line=line.rstrip(',')
+                            line=re.sub(r',,', '', line)
+                            #print(line)
+                            line_t = re.sub(r',', ',\t', line)
+                            self.textInformation.insert(index, line_t)
+            self.window.title(" - ".join(["Social Array Simulation", self.fname_EVAC]))
         
     def selectOutTxtFile_DoorProb(self):
         #tempdir=os.path.dirname(self.fname_EVAC)
@@ -1160,12 +1160,36 @@ class GUI(object):
         new_file_name = filedialog.asksaveasfilename(filetypes=(("csv files", "*.csv"),("All files", "*.*")), initialdir=self.currentdir)
         if new_file_name:
             new_contents = self.textInformation.get(1.0, END)
-            with open(self.new_file_name, "w") as open_file:
+            with open(new_file_name, "w") as open_file:
                 new_contents2 = re.sub(',\t', ',', new_contents)
                 open_file.write(new_contents2)
             self.fname_EVAC = new_file_name
             self.currentdir = os.path.dirname(self.fname_EVAC)
+            msg.showinfo("Saved", "File Saved Successfully")
 
+        #temp=self.fname_EVAC.split('/') 
+        temp=os.path.basename(self.fname_EVAC)
+        self.currentdir = os.path.dirname(self.fname_EVAC)
+        self.lb_csv.config(text = "The input csv file selected: "+str(self.fname_EVAC)+"\n")
+        #self.textInformation.insert(END, 'fname_EVAC:   '+self.fname_EVAC)
+        print('fname', self.fname_EVAC)
+        
+        self.setStatusStr("Simulation not yet started!")
+        self.textInformation.delete(1.0, END)
+        self.textInformation.insert(END, '\n'+'EVAC Input File Selected:   '+self.fname_EVAC+'\n')
+        
+        with open(self.fname_EVAC, "r") as file_contents:
+                file_lines = file_contents.readlines()
+                #file_lines_t = re.sub(r',', '\t', file_lines)
+                if len(file_lines) > 0:
+                    for index, line in enumerate(file_lines):
+                        index = float(index) + 1.0
+                        #line=line.rstrip(',')
+                        line=re.sub(r',,', '', line)
+                        #print(line)
+                        line_t = re.sub(r',', ',\t', line)
+                        self.textInformation.insert(index, line_t)
+        self.window.title(" - ".join(["Social Array Simulation", self.fname_EVAC]))
 
     #def deleteGeom(self):
     def file_save(self, event=None):
@@ -1338,10 +1362,10 @@ class GUI(object):
         #show_geom(myTest)
         #myTest.show_simulation()
         #if self.UseFDS_Var.get():
-        #    visualizeEvac(self.currentSimu.outDataName + ".bin", self.ZOOM, self.xSpa, self.ySpa)
+        #    visualizeAgent(self.currentSimu.outDataName + ".bin", self.ZOOM, self.xSpa, self.ySpa)
         #else:
-        #    visualizeEvac(self.currentSimu.outDataName + ".bin", self.ZOOM, self.xSpa, self.ySpa)
-        visualizeEvac(self.currentSimu.outDataName + ".bin", self.ZOOM, self.xSpa, self.ySpa)
+        #    visualizeAgent(self.currentSimu.outDataName + ".bin", self.ZOOM, self.xSpa, self.ySpa)
+        visualizeAgent(self.currentSimu.outDataName + ".bin", self.ZOOM, self.xSpa, self.ySpa)
         self.currentSimu.destory()
         
 
@@ -1371,15 +1395,15 @@ class GUI(object):
         self.textInformation.insert(END, '\n'+'Output Data File Selected:   '+self.fname_OutBIN+'\n')
         temp= self.fname_OutBIN.split('.')
         if temp[1]=='bin':
-            #visualizeEvac(self.fname_OutBIN, self.ZOOM, self.xSpa, self.ySpa)
+            #visualizeAgent(self.fname_OutBIN, self.ZOOM, self.xSpa, self.ySpa)
             #if self.UseFDS_Var.get():
-            #    visualizeEvac(self.fname_OutBIN, self.ZOOM, self.xSpa, self.ySpa)
+            #    visualizeAgent(self.fname_OutBIN, self.ZOOM, self.xSpa, self.ySpa)
             #else:
-            #    visualizeEvac(self.fname_OutBIN, self.ZOOM, self.xSpa, self.ySpa)
+            #    visualizeAgent(self.fname_OutBIN, self.ZOOM, self.xSpa, self.ySpa)
             if self.UseFDS_Var.get():
-                visualizeEvac(self.fname_OutBIN, self.fname_EVAC, self.fname_FDS, self.ZOOM, self.xSpa, self.ySpa)
+                visualizeAgent(self.fname_OutBIN, self.fname_EVAC, self.fname_FDS, self.ZOOM, self.xSpa, self.ySpa)
             else:
-                visualizeEvac(self.fname_OutBIN, self.fname_EVAC, None, self.ZOOM, self.xSpa, self.ySpa)
+                visualizeAgent(self.fname_OutBIN, self.fname_EVAC, None, self.ZOOM, self.xSpa, self.ySpa)
 
         '''
         if temp[1]=='npz':
