@@ -1115,9 +1115,11 @@ class person(object):
                         
             if no_wall_ij:
                 see_i2j = True
-                if np.dot(self.actualV, aj.pos-self.pos)<0.2:
+                person.see_flag[self.ID, aj.ID]=1
+                if np.linalg.norm(self.actualV)>0.6 and np.dot(self.actualV, aj.pos-self.pos)<0.2:
                     see_i2j = False
                     person.see_flag[self.ID, aj.ID]=0
+                    
                 #elif np.linalg.norm(self.actualV)<0.2:
                 #    temp=random.uniform(-180, 180)
                 #    if temp < 70 and temp > -70:
@@ -1125,9 +1127,10 @@ class person(object):
                 #        person.see_flag[idai, idaj]=1
                 #
                 # eyesight is narrowed when one moves fast ?
-                else:
-                    see_i2j =True
-                    person.see_flag[self.ID, aj.ID]=1
+                
+                #else:
+                #    see_i2j =True
+                #    person.see_flag[self.ID, aj.ID]=1
         
         
         #############################################
@@ -1150,6 +1153,7 @@ class person(object):
         self.others=[]
         #self.physicF = np.array([0.0,0.0])
         for idaj, aj in enumerate(agents):
+        #for aj in self.seeothers:
             
             # All the list are initialized as np.zeros((self.num_agents, self.num_agents))
             if aj.inComp == 0: # List value = 0 if aj.inComp=0
@@ -1180,14 +1184,14 @@ class person(object):
             # There are several persons around you.  Which draws your attention?  
             ######################################################################
             if GROUPBEHAVIOR:
-                if dij < 2*self.B_CF*person.BFactor[self.ID, aj.ID] + person.DFactor[self.ID, aj.ID] and person.see_flag[self.ID, aj.ID] or person.talk[aj.ID, self.ID] == 1:
+                if dij < 2*self.B_CF*person.BFactor[self.ID, aj.ID] + person.DFactor[self.ID, aj.ID] and person.see_flag[self.ID, aj.ID]: #or person.talk[aj.ID, self.ID] == 1:
                 #if dij < self.talk_range and person.see_flag[self.ID, aj.ID] or person.talk[aj.ID, self.ID] == 1:
                     person.comm[self.ID, aj.ID] = 1
                     self.others.append(aj)
                 else:
                     person.comm[self.ID, aj.ID] = 0
             else:
-                if dij < self.talk_range and person.see_flag[self.ID, aj.ID] or person.talk[aj.ID, self.ID] == 1:
+                if dij < self.talk_range and person.see_flag[self.ID, aj.ID]: #or person.talk[aj.ID, self.ID] == 1:
                     person.comm[self.ID, aj.ID] = 1
                     self.others.append(aj)
                 else: 
@@ -1195,11 +1199,12 @@ class person(object):
             # Loop of idaj,aj ends here
             ###########################
 
-    def updateTalkList(self, debug=False):
+    def updateTalkList(self, agents, debug=False):
         
         # Talk List -- Social Behavior
         self.talkothers =[]
-        for aj in self.others:
+        #for aj in self.others:
+        for idaj, aj in enumerate(agents):
 
             if aj.inComp == 0:
                 continue
@@ -1219,13 +1224,14 @@ class person(object):
             ##################################
             #Group Effect and Talking Behavior
             person.talk[self.ID, aj.ID] = 0                        
-            if person.talk[aj.ID, self.ID] == 1:
-                person.talk[self.ID, aj.ID]=1
-                self.tau = self.talk_tau
-                self.talkothers.append(aj)
-                
-            elif dij<self.talk_range and self.talk_prob>random.uniform(0.0,1.0): 
+            #if person.talk[aj.ID, self.ID] == 1:
+            #    person.talk[self.ID, aj.ID]=1
+            #    self.tau = self.talk_tau
+            #    self.talkothers.append(aj)
+            #elif dij<self.talk_range and self.talk_prob>random.uniform(0.0,1.0): 
             #and 0.6<random.uniform(0.0,1.0):
+            
+            if dij<self.talk_range and self.talk_prob>random.uniform(0.0,1.0): 
                 self.tau = self.talk_tau
                 person.talk[self.ID, aj.ID]=1
                 self.talkothers.append(aj)
@@ -1308,7 +1314,11 @@ class person(object):
         otherTpre = 0.0
         otherArousal = 0.0
         
-        temp = np.random.multinomial(1, person.CFactor[self.ID, :], size=1)
+        if np.sum(np.fabs(person.CFactor[self.ID,:]))>0:
+            temp = np.random.multinomial(1, np.fabs(person.CFactor[self.ID, :]), size=1)
+        else:
+            return otherMovingDir, otherMovingSpeed
+            
         print(self.ID)
         print(person.CFactor[self.ID, :])
         print(temp)
@@ -1323,13 +1333,18 @@ class person(object):
                 otherArousal = aj.arousalLevel
         
         if len(self.others)>0:
-            self.tpre = (1-self.p)*self.tpre + self.p*otherTpre
-            self.arousalLevel = (1-self.p)*self.arousalLevel + self.p*otherArousal
+            self.tpre = (1-person.PFactor[self.ID, other_index])*self.tpre + person.PFactor[self.ID, other_index]*otherTpre 
+            self.arousalLevel = (1-person.PFactor[self.ID, other_index])*self.arousalLevel + person.PFactor[self.ID, other_index]*otherArousal
+            
+            #self.tpre = (1-self.p)*self.tpre + self.p*otherTpre
+            #self.arousalLevel = (1-self.p)*self.arousalLevel + self.p*otherArousal
+            
         #DFactor[idai, idaj] = (1-ai.p)*DFactor[idai, idaj]+ai.p*DFactor[idaj, idai]
         #AFactor[idai, idaj] = (1-ai.p)*AFactor[idai, idaj]+ai.p*AFactor[idaj, idai]
         #BFactor[idai, idaj] = (1-ai.p)*BFactor[idai, idaj]+ai.p*BFactor[idaj, idai]
         #ai.desiredV = (1-ai.p)*ai.desiredV + ai.p*aj.desiredV
         #return None
+        
         return otherMovingDir, otherMovingSpeed
 
     #####################################
@@ -1350,6 +1365,14 @@ class person(object):
         otherArousal = 0.0
 
         for idaj, aj in enumerate(self.others):
+            
+            # Checking process: 
+            #if idaj != aj.ID:
+            #    if sys.version_info[0] == 2: 
+            #        raw_input("Please check!")
+            #    else:
+            #        input("please check!")
+
             otherMovingDir += normalize(person.CFactor[self.ID, aj.ID]*aj.actualV) #/DFactor[idai, idaj]*AFactor[idai, idaj]
             otherMovingSpeed += np.linalg.norm(person.CFactor[self.ID, aj.ID]*aj.actualV) #/DFactor[idai, idaj]*AFactor[idai, idaj]
             otherMovingNum += 1
@@ -1374,14 +1397,59 @@ class person(object):
         #otherV = other.actualV
         
         #return otherMovingDir, otherMovingSpeed/otherMovingNum, otherTpre
-        if len(self.others)>0:
+        #if len(self.others)>0:
             #otherMovingDir, otherMovingSpeed_average, otherTpre = self.opinionDynamics()
-            self.arousalLevel = (1-self.p)*self.arousalLevel + self.p*otherArousal
-            self.tpre = (1-self.p)*self.tpre + self.p*otherTpre
+            
+            # Checking process: 
+            #if np.fabs(np.sum(person.CFactor[self.ID,:]) - 1.0)>1e-5:
+            #    if sys.version_info[0] == 2: 
+            #        raw_input("Please check!")
+            #    else:
+            #        input("please check!")
+        
+        if np.sum(np.fabs(person.CFactor[self.ID,:]))>0:
+            pNew = self.p*np.sum(person.CFactor[self.ID,:])
+            self.arousalLevel = (1-pNew)*self.arousalLevel + self.p*otherArousal
+            self.tpre = (1-pNew)*self.tpre + self.p*otherTpre
+
+            #self.arousalLevel = (1-self.p)*self.arousalLevel + self.p*otherArousal
+            #self.tpre = (1-self.p)*self.tpre + self.p*otherTpre
+            
             #if self.arousalLevel>0.5:
             #    self.tpre = (1-self.p)*self.tpre + self.p*otherTpre
+            
         return otherMovingDir, otherMovingSpeed
+
+
+    # This is a realization of classic linear algebra of opinion dynamics
+    # However, if there are too many agents in simulation, this function is time-consuming and it will reduce the computational efficiency of the program.   
+    def opinionDynamics2025(self, agents):
+
+        otherMovingDir = np.array([0.0, 0.0])
+        otherMovingSpeed = 0.0
+        otherMovingNum = 0
+        otherTpre = 0.0
+        otherArousal = 0.0
+
+        for idaj, aj in enumerate(self.others):
+
+            # Checking process: 
+            #if idaj != aj.ID:
+            #    if sys.version_info[0] == 2: 
+            #        raw_input("Please check!")
+            #    else:
+            #        input("please check!")
+                    
+            otherMovingDir += normalize(person.PFactor[self.ID, aj.ID]*aj.actualV) #/DFactor[idai, idaj]*AFactor[idai, idaj]
+            otherMovingSpeed += np.linalg.norm(person.PFactor[self.ID, aj.ID]*aj.actualV) #/DFactor[idai, idaj]*AFactor[idai, idaj]
+            otherMovingNum += 1
+            otherTpre += person.PFactor[self.ID, aj.ID]*aj.tpre
+            otherArousal += person.PFactor[self.ID, aj.ID]*aj.arousalLevel
         
+        self.arousalLevel = otherArousal
+        self.tpre = otherTpre
+        
+
 
     def findDoorDir(self, direction):
         if direction == 1:
