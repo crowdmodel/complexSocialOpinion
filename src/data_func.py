@@ -41,6 +41,61 @@ except:
     else:
         input("please check!")
 
+# Sequentially search for Title1, Title2 and Title3 through FileName
+def findTitle(FileName, Title1=None, Title2=None, Title3=None):
+    findTitle=False
+    if Title1:
+        for line in open(FileName):
+            if re.match(Title1, line):
+                findTitle=True
+                return line
+    if Title2:
+        for line in open(FileName):
+            if re.match(Title2, line):
+                findTitle=True
+                return line
+    if Title3:
+        for line in open(FileName):
+            if re.match(Title3, line):
+                findTitle=True
+                return line
+    return None
+
+
+def findKey(FileName, Title1=None, Title2=None, Title3=None, TitleStr=''):
+    
+    FindTitle1=int(0)
+    FindTitle2=int(0)
+    FindTitle3=int(0)
+    
+    for line in open(FileName, "r"):
+        if Title1:
+            if re.match(Title1, line):
+                FindTitle1=int(1)
+                temp =  line.split('=')
+                result = str(temp[1].rstrip('\n').rstrip(',').strip())
+                return result
+        if Title2:
+            if re.match(Title2, line):
+                FindTitle2=int(1)
+                temp =  line.split('=')
+                result = str(temp[1].rstrip('\n').rstrip(',').strip())
+                return result
+        if Title3:
+            if re.match(Title3, line):
+                FindTitle3=int(1)
+                temp =  line.split('=')
+                result = str(temp[1].rstrip('\n').rstrip(',').strip())
+                return result
+    if FindTitle1+FindTitle2+FindTitle3>1.0:
+        print("Warning: Multiple input line for Title of "+str(TitleStr)+"\n")
+        print("Use the last key value found for the title!")
+        if sys.version_info[0] == 2: 
+            raw_input("Please check!")
+        else:
+            input("please check!")
+    return result
+
 
 def readStepTxt(FileName, showdata=True):
     findStep=False
@@ -592,8 +647,22 @@ def readSocialArrayCSV(FileName, debug=True, marginTitle=1):
         print ('Number of Exit2Door:', Num_Exit2Door, '\n')
         print ('Features of Exit2Door\n', exit2doorFeatures, "\n")
 
+    simuObjFeatures = []
+    if solverFeature:
+        simuObjFeatures.append(solverFeature)
+    if dtFeature:
+        simuObjFeatures.append(dtFeature)
+    if dt1Feature:
+        simuObjFeatures.append(dt1Feature)
+    if dt2Feature:
+        simuObjFeatures.append(dt2Feature)
+    if dt3Feature:
+        simuObjFeatures.append(dt3Feature)
+    if tendFeature:
+        simuObjFeatures.append(tendFeature)
 
-    return agentFeatures, agent2exitFeatures, agentgroupFeatures, obstFeatures, exitFeatures, doorFeatures, exit2doorFeatures
+    return agentFeatures, agent2exitFeatures, agentgroupFeatures, obstFeatures, exitFeatures, \
+    doorFeatures, exit2doorFeatures, simuObjFeatures
 
 
 # The file to record the some output data of the simulation
@@ -1953,6 +2022,7 @@ def compute_simu(simu):
             simu.simulation_update_agent_velocity()
             simu.simulation_update_agent_position()
         simu.simulation_step2022(f)
+        simu.simulation_update_agent_desiredV(f)
         simu.simulation_update_agent_force(f)
         #simu.t_sim = simu.t_sim + simu.DT  # Maybe it should be in step()
         pass
