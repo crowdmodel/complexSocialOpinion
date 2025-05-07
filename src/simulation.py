@@ -78,7 +78,7 @@ class simulation(object):
         # Time parameters
         self.DT = 0.3
         self.t_sim=0.0
-        self.t_end=9.0
+        self.t_end=float('inf')
         self.t_pause=0.0
 
         # A Logical Varible to Control if TestGeom Goes to Simulation
@@ -156,7 +156,6 @@ class simulation(object):
         #self.t_pause = 0.0
 
         self.solver=2
-        
         self.bldmesh = None
 
         #Human Mesh Data
@@ -444,74 +443,193 @@ class simulation(object):
         #FN_Temp = os.path.join(self.fpath, "config.txt")
         if os.path.exists(FN_Temp):
             for line in open(FN_Temp, "r"):
-                if re.match('ZOOM', line):
+                
+                self.ZOOMFACTOR = float(findKey('&ZOOM', '&zoom', 'ZOOM'))
+                
+                if re.match('&ZOOM', line):
                     temp =  line.split('=')
-                    self.ZOOMFACTOR = float(temp[1].rstrip('\n').rstrip(',').strip())                    
-                if re.match('xSpace', line):
+                    self.ZOOMFACTOR = float(temp[1].rstrip('\n').rstrip(',').strip())
+                elif re.match('&zoom', line):
                     temp =  line.split('=')
-                    self.xSpace = float(temp[1].rstrip('\n').rstrip(',').strip())   
-                if re.match('ySpace', line):
+                    self.ZOOMFACTOR = float(temp[1].rstrip('\n').rstrip(',').strip())
+                elif re.match('ZOOM', line):
+                    temp =  line.split('=')
+                    self.ZOOMFACTOR = float(temp[1].rstrip('\n').rstrip(',').strip())
+
+                if re.match('&OFFSET_X', line):
+                    temp =  line.split('=')
+                    self.xSpace = float(temp[1].rstrip('\n').rstrip(',').strip())
+                elif re.match('&offset_x', line):
+                    temp =  line.split('=')
+                    self.xSpace = float(temp[1].rstrip('\n').rstrip(',').strip())
+                elif re.match('xSpace', line):
+                    temp =  line.split('=')
+                    self.xSpace = float(temp[1].rstrip('\n').rstrip(',').strip())
+
+                if re.match('&OFFSET_Y', line):
+                    temp =  line.split('=')
+                    self.ySpace = float(temp[1].rstrip('\n').rstrip(',').strip())
+                elif re.match('&offset_y', line):
+                    temp =  line.split('=')
+                    self.ySpace = float(temp[1].rstrip('\n').rstrip(',').strip())
+                elif re.match('ySpace', line):
                     temp =  line.split('=')
                     self.ySpace = float(temp[1].rstrip('\n').rstrip(',').strip())   
-                if re.match('solver', line):
+
+                if re.match('&SOLVER', line):
+                    temp =  line.split('=')
+                    self.solver = int(temp[1].rstrip('\n').rstrip(',').strip()) 
+                elif re.match('&solver', line):
+                    temp =  line.split('=')
+                    self.solver = int(temp[1].rstrip('\n').rstrip(',').strip()) 
+                elif re.match('solver', line):
                     temp =  line.split('=')
                     self.solver = int(temp[1].rstrip('\n').rstrip(',').strip())   
-                if re.match('groupbehavior', line):
+
+                if re.match('&GROUPF', line):
                     temp =  line.split('=')
                     self.GROUPBEHAVIOR = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                elif re.match('&groupf', line):
+                    temp =  line.split('=')
+                    self.GROUPBEHAVIOR = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                elif re.match('groupbehavior', line):
+                    temp =  line.split('=')
+                    self.GROUPBEHAVIOR = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+
+                if re.match('&OPINION', line):
+                    temp =  line.split('=')
+                    self.OPINIONMODEL = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                elif re.match('&opinion', line):
+                    temp =  line.split('=')
+                    self.OPINIONMODEL = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+
                 #if re.match('pre-evac', line):
                 #    temp =  line.split('=')
                 #    self.TPREMODE = int(temp[1].strip())
-                if re.match('self-repulsion', line):
+                
+                if re.match('&SELF_REP', line):
                     temp =  line.split('=')
                     self.SELFREPULSION = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
-                    
-                if re.match('dumpBinary', line):
+                elif re.match('&self_rep', line):
+                    temp =  line.split('=')
+                    self.SELFREPULSION = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                elif re.match('self-repulsion', line):
+                    temp =  line.split('=')
+                    self.SELFREPULSION = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+
+                if re.match('&DUMPBIN', line):
+                    temp =  line.split('=')
+                    self.dumpBin = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                elif re.match('&dumpbin', line):
+                    temp =  line.split('=')
+                    self.dumpBin = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                elif re.match('dumpBinary', line):
                     temp =  line.split('=')
                     self.dumpBin = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
                 
                 # Time parameters
-                if re.match('DT', line):
+                if re.match('&DT', line):
                     temp =  line.split('=')
                     self.DT = float(temp[1].rstrip('\n').rstrip(',').strip())   
-                if re.match('DT_DumpData', line):
+                elif re.match('&dt', line):
+                    temp =  line.split('=')
+                    self.DT = float(temp[1].rstrip('\n').rstrip(',').strip())   
+                elif re.match('DT', line):
+                    temp =  line.split('=')
+                    self.DT = float(temp[1].rstrip('\n').rstrip(',').strip())   
+
+                if re.match('&DT_DUMPBIN', line):
+                    temp =  line.split('=')
+                    self.DT_DumpData = float(temp[1].rstrip('\n').rstrip(',').strip()) 
+                elif re.match('&dt_dumpbin', line):
+                    temp =  line.split('=')
+                    self.DT_DumpData = float(temp[1].rstrip('\n').rstrip(',').strip()) 
+                elif re.match('DT_DumpData', line):
                     temp =  line.split('=')
                     self.DT_DumpData = float(temp[1].rstrip('\n').rstrip(',').strip())   
-                if re.match('DT_OtherList', line):
+                    
+                if re.match('&DT_LIST', line):
+                    temp =  line.split('=')
+                    self.DT_OtherList = float(temp[1].rstrip('\n').rstrip(',').strip())  
+                elif re.match('&dt_list', line):
+                    temp =  line.split('=')
+                    self.DT_OtherList = float(temp[1].rstrip('\n').rstrip(',').strip())  
+                elif re.match('DT_OtherList', line):
                     temp =  line.split('=')
                     self.DT_OtherList = float(temp[1].rstrip('\n').rstrip(',').strip())   
-                    
-                if re.match('DT_ChangeDoor', line):
+
+                if re.match('&DT_EXIT', line):
+                    temp =  line.split('=')
+                    self.DT_ChangeDoor = float(temp[1].rstrip('\n').rstrip(',').strip())  
+                elif re.match('&dt_exit', line):
+                    temp =  line.split('=')
+                    self.DT_ChangeDoor = float(temp[1].rstrip('\n').rstrip(',').strip())  
+                elif re.match('DT_ChangeDoor', line):
                     temp =  line.split('=')
                     self.DT_ChangeDoor = float(temp[1].rstrip('\n').rstrip(',').strip())   
 
-                if re.match('TEND', line):
+                if re.match('&TEND', line):
                     temp =  line.split('=')
                     try:
                         self.t_end = float(temp[1].rstrip('\n').rstrip(',').strip())   
                     except:
-                        self.t_end = float(90.00)
+                        self.t_end = float('inf')
+                elif re.match('&tend', line):
+                    temp =  line.split('=')
+                    try:
+                        self.t_end = float(temp[1].rstrip('\n').rstrip(',').strip())   
+                    except:
+                        self.t_end = float('inf')
+                elif re.match('TEND', line):
+                    temp =  line.split('=')
+                    try:
+                        self.t_end = float(temp[1].rstrip('\n').rstrip(',').strip())   
+                    except:
+                        self.t_end = float('inf')
                 
                 # Mesh parameters
-                if re.match('xmin', line):
+                if re.match('&xmin', line):
                     temp =  line.split('=')
                     self.xmin = int(temp[1].rstrip('\n').rstrip(',').strip())   
-                if re.match('xmax', line):
+                elif re.match('xmin', line):
+                    temp =  line.split('=')
+                    self.xmin = int(temp[1].rstrip('\n').rstrip(',').strip())  
+                     
+                if re.match('&xmax', line):
                     temp =  line.split('=')
                     self.xmax = int(temp[1].rstrip('\n').rstrip(',').strip())   
-                if re.match('ymin', line):
+                elif re.match('xmax', line):
+                    temp =  line.split('=')
+                    self.xmax = int(temp[1].rstrip('\n').rstrip(',').strip())   
+
+                if re.match('&ymin', line):
                     temp =  line.split('=')
                     self.ymin = int(temp[1].rstrip('\n').rstrip(',').strip())   
-                if re.match('ymax', line):
+                elif re.match('ymin', line):
+                    temp =  line.split('=')
+                    self.ymin = int(temp[1].rstrip('\n').rstrip(',').strip())   
+
+                if re.match('&ymax', line):
+                    temp =  line.split('=')
+                    self.ymax = int(temp[1].rstrip('\n').rstrip(',').strip())  
+                elif re.match('ymax', line):
                     temp =  line.split('=')
                     self.ymax = int(temp[1].rstrip('\n').rstrip(',').strip())   
-                if re.match('xpt', line):
+                    
+                if re.match('&xpt', line):
                     temp =  line.split('=')
                     self.xpt = int(temp[1].rstrip('\n').rstrip(',').strip())   
-                if re.match('ypt', line):
+                elif re.match('xpt', line):
+                    temp =  line.split('=')
+                    self.xpt = int(temp[1].rstrip('\n').rstrip(',').strip())   
+
+                if re.match('&ypt', line):
                     temp =  line.split('=')
                     self.ypt = int(temp[1].rstrip('\n').rstrip(',').strip())   
-                    
+                elif re.match('ypt', line):
+                    temp =  line.split('=')
+                    self.ypt = int(temp[1].rstrip('\n').rstrip(',').strip())   
+
         return None
         
         
@@ -886,7 +1004,7 @@ class simulation(object):
                 # Test of Eular Solver here
                 zeroArray = np.zeros(np.shape(Ud0))
                 D_t= self.DT #0.05
-                t_end=10.0
+                tend=self.t_end
                 R_ini = np.zeros(np.shape(Ud0))
                 # Construct R_ini here!
                 for agent in self.agents:
@@ -901,9 +1019,9 @@ class simulation(object):
     
                 print('R_ini:\n',R_ini)
                 print('np.sum(R_ini):',np.sum(R_ini))
-                #eular2D(x_min, y_min, x_max, y_max, x_points, y_points, D_t, t_end, bldInfo, R0, U0, V0, Rdes, Udes, Vdes, mode=0, saveData=True, showPlot=True, debug=True):
+                #eular2D(x_min, y_min, x_max, y_max, x_points, y_points, D_t, tend, bldInfo, R0, U0, V0, Rdes, Udes, Vdes, mode=0, saveData=True, showPlot=True, debug=True):
                 exitpoints=build_exitpt(x_min, y_min, x_max, y_max, x_points, y_points, self.exits)
-                RRt, UUt, VVt = lwr2D(x_min, y_min, x_max, y_max, x_points, y_points, t_end, self.bldmesh, R0=R_ini, U0=zeroArray, V0=zeroArray, Rdes=zeroArray, Udes=Ud0, Vdes=Vd0, exitpt=exitpoints, mode=6, debug=False)
+                RRt, UUt, VVt = lwr2D(x_min, y_min, x_max, y_max, x_points, y_points, tend, self.bldmesh, R0=R_ini, U0=zeroArray, V0=zeroArray, Rdes=zeroArray, Udes=Ud0, Vdes=Vd0, exitpt=exitpoints, mode=6, debug=False)
                 ##saveData=False, showPlot=False
                 if savedata:
                     np.savez(os.path.join(self.fpath, "vel_flow1.npz"), Ud0, Vd0, RRt, UUt, VVt, BLDinfo, [x_min, y_min, x_max, y_max, x_points,y_points])
@@ -1929,7 +2047,68 @@ class simulation(object):
 
             print('Simulation Time:', self.t_sim)
             print(person.exit_prob)
+
+
+        f.write('\n\n&SimulationTime:' + str(self.t_sim)+'\n')
+        for idai,ai in enumerate(self.agents):
+        
+            # Whether ai is in computation
+            if ai.inComp == 0:
+                continue
+
+            # Stress indicator is used (Or known as ratioV)
+            if ai.desiredSpeed != 0: 
+                ai.ratioV = ai.actualSpeed/ai.desiredSpeed
+            else: 
+                ai.ratioV = 1
+            ai.stressLevel = 1 - ai.ratioV
+            ai.test = 0.0 #??
             
+            ai.updateStress(flag='accumulate')
+            #ai.updateAttentionList(self.agents, self.GROUPBEHAVIOR)
+            #ai.updateTalkList(self.agents)
+
+            if self.OPINIONMODEL == 0:
+                ai.opinionDynamics()
+            elif self.OPINIONMODEL == 1:
+                ai.opinionExchange()
+
+            ###########################################
+            ## Output time when agents reach the safety
+            if self.solver==0 and self.num_exits==0:
+                if (np.linalg.norm(ai.pos-ai.dest)<=0.2) and (ai.Goal == 0):
+                    print ('Reaching the goal:')
+                    ai.inComp = 0
+                    ai.Goal = 1
+                    ai.timeOut = self.t_sim
+                    ai.tpre = 0.0
+                    print ('Time to Reach the Goal:', ai.timeOut)
+                    f.write('&FinalInfo')
+                    f.write('agent ID'+str(ai.ID)+'\n'+'Time to Reach the Goal:'+str(ai.timeOut))
+
+            ###########################################
+            ## Remove agent when agent reaches the exit
+            else:
+                #for exit in self.exits:
+                for idexit, exit in enumerate(self.exits):
+                    if exit.inComp == 0:
+                        continue
+                    if exit.inside(ai.pos):
+                        ai.inComp = 0
+                        ai.Goal = 1
+                        ai.timeOut = self.t_sim
+                        ai.tpre = 0.0
+                        self.exitUsage[idexit,0] +=1
+                        print ('Time to reach an exit:', ai.timeOut)
+                        #print('exitUsage:', np.transpose(self.exitUsage))
+                        #print ('Time to reach an exit:', ai.timeOut)
+                        #input("Please check!")
+                        
+                        f.write('\n\n&FinalInfo\n')
+                        f.write('agent ID'+str(ai.ID)+'\t reach the exit ID'+str(exit.oid)+'\n')
+                        f.write('agent ID'+str(ai.ID)+'\t reaches the exit at time   '+str(ai.timeOut)+'\n')
+                        f.write('exitUsage in time:'+str(np.transpose(self.exitUsage)))
+
 
             '''
             FN_Temp = self.outDataName + ".txt"
@@ -1949,7 +2128,7 @@ class simulation(object):
             '''
         
 
-    def simulation_update_agent_force(self, f):
+    def simulation_update_agent_desiredV(self, f):
         #f.write('\n\n&Simulation Time:\n')
         f.write('\n\n&SimulationTime:' + str(self.t_sim)+'\n')
         for idai,ai in enumerate(self.agents):
@@ -1969,47 +2148,17 @@ class simulation(object):
             #ai.desiredV = ai.desiredSpeed*ai.direction
             #ai.desiredV = 0.7*ai.desiredV + 0.3*ai.desiredV_old
 
-            peopleInter = np.array([0.0, 0.0])
-            wallInter = np.array([0.0, 0.0])
-            doorInter = np.array([0.0, 0.0])
-            
-            phyInter = np.array([0.0, 0.0])
-            phySFInter = np.array([0.0, 0.0])
-            phyWFInter = np.array([0.0, 0.0])
-            
-            ai.actualSpeed = np.linalg.norm(ai.actualV)
-            ai.desiredSpeed = np.linalg.norm(ai.desiredV)
+            #ai.actualSpeed = np.linalg.norm(ai.actualV)
+            #ai.desiredSpeed = np.linalg.norm(ai.desiredV)
             
             #print >> f, "desired speed of agent i:", ai.desiredSpeed, "/n"
             #print >> f, "actual speed of agent i:", ai.actualSpeed, "/n"
-            
-            ######################
-            # Wall force adjusted
-            # Stress indicator is used (Or known as ratioV)
-            if ai.desiredSpeed != 0: 
-                ai.ratioV = ai.actualSpeed/ai.desiredSpeed
-            else: 
-                ai.ratioV = 1
-            ai.stressLevel = 1 - ai.ratioV
-            ai.test = 0.0 #??
-            
-            ai.updateStress(flag='accumulate')
-            
-            #ai.diw_desired = max(0.2, ai.ratioV)*0.6
-            #ai.A_WF = 700*max(0.3, ai.ratioV)
-            #ai.B_WF = 1.6*max(min(0.6, ai.ratioV),0.2)
-            
-            ai.diw_desired = max(0.5, ai.ratioV)*0.6
-            #ai.A_WF = 30*max(0.5, ai.ratioV)
-            ai.B_WF = 2.2*max(min(0.5, ai.ratioV),0.2) 
             
             #############################################
             # Calculate Motive Forces
             # Consider TPRE features
             #############################################	
-            #tt = pygame.time.get_ticks()/1000-t_pause
-            wallInter, doorInter, outsideDoor = ai.adaptWallDoorForce(self.walls, self.doors)
-            
+
             #Pre-Evacuation Time Effect
             #tt = pygame.time.get_ticks()/1000 - t_pause
             if (self.t_sim < ai.tpre):
@@ -2228,6 +2377,19 @@ class simulation(object):
                     ai.desiredV = ai.desiredSpeed*ai.direction
                     motiveForce = ai.adaptMotiveForce()
 
+            if self.solver == 0 or self.num_exits == 0:
+                if goDoor is not None:
+                    f.write('goDoor:'+str(goDoor.oid)+'\n')
+                else:
+                    f.write('goDoor: None'+'\n')
+            elif self.solver ==2:
+                f.write('ExitSelected:'+str(ai.exitInMind.oid)+'\n')
+            else:
+                f.write('The Nearest Exit is Selected.  No exit selection algorithm is involved.'+'\n')
+
+            #f.write('visibleDoors:'+str(ai.visibleDoors)+'\n')
+            #f.write('visibleExits:'+str(ai.visibleExits)+'\n')
+
             #ai.others=list(set(ai.others))
             #################################
             # Herding Effect Computed
@@ -2237,9 +2399,74 @@ class simulation(object):
                 #ai.direction = (1-ai.p)*ai.direction + ai.p*otherMovingDir
                 #ai.desiredSpeed = (1-ai.p)*ai.desiredSpeed + #ai.p*otherMovingSpeed/otherMovingNum
                 #ai.desiredV = ai.desiredSpeed*ai.direction
-
                 #ai.desiredV = (1-ai.p)*ai.desiredV + ai.p*otherMovingDir
 
+
+    def simulation_update_agent_force(self, f):
+        #f.write('\n\n&Simulation Time:\n')
+        f.write('\n\n&SimulationTime:' + str(self.t_sim)+'\n')
+        for idai,ai in enumerate(self.agents):
+            
+            # Whether ai is in computation
+            if ai.inComp == 0:
+                continue
+            
+            # Calculate Positions
+            #ai.pos = ai.pos + ai.actualV*self.DT
+            #print(ai.pos)
+            #print(accl,ai.actualV,ai.pos)
+            
+            #ai.dest = ai.memory.peek()
+            
+            #ai.direction = normalize(ai.dest - ai.pos)
+            #ai.desiredV = ai.desiredSpeed*ai.direction
+            #ai.desiredV = 0.7*ai.desiredV + 0.3*ai.desiredV_old
+
+            #peopleInter = np.array([0.0, 0.0])
+            #wallInter = np.array([0.0, 0.0])
+            #doorInter = np.array([0.0, 0.0])
+            
+            #phyInter = np.array([0.0, 0.0])
+            #phySFInter = np.array([0.0, 0.0])
+            #phyWFInter = np.array([0.0, 0.0])
+
+            #ai.diw_desired = max(0.2, ai.ratioV)*0.6
+            #ai.A_WF = 700*max(0.3, ai.ratioV)
+            #ai.B_WF = 1.6*max(min(0.6, ai.ratioV),0.2)
+            
+            ai.diw_desired = max(0.5, ai.ratioV)*0.6
+            #ai.A_WF = 30*max(0.5, ai.ratioV)
+            ai.B_WF = 2.2*max(min(0.5, ai.ratioV),0.2) 
+
+            motiveForce = ai.adaptMotiveForce()
+            peopleInter = np.array([0.0, 0.0])
+            wallInter = np.array([0.0, 0.0])
+            doorInter = np.array([0.0, 0.0])
+            
+            phyInter = np.array([0.0, 0.0])
+            phySFInter = np.array([0.0, 0.0])
+            phyWFInter = np.array([0.0, 0.0])
+
+            ai.actualSpeed = np.linalg.norm(ai.actualV)
+            ai.desiredSpeed = np.linalg.norm(ai.desiredV)
+            
+            #print >> f, "desired speed of agent i:", ai.desiredSpeed, "/n"
+            #print >> f, "actual speed of agent i:", ai.actualSpeed, "/n"
+            
+            ######################
+            # Wall force adjusted
+            
+            #ai.diw_desired = max(0.2, ai.ratioV)*0.6
+            #ai.A_WF = 700*max(0.3, ai.ratioV)
+            #ai.B_WF = 1.6*max(min(0.6, ai.ratioV),0.2)
+            
+            ai.diw_desired = max(0.5, ai.ratioV)*0.6
+            #ai.A_WF = 30*max(0.5, ai.ratioV)
+            ai.B_WF = 2.2*max(min(0.5, ai.ratioV),0.2) 
+            
+            #tt = pygame.time.get_ticks()/1000-t_pause
+            wallInter, doorInter, outsideDoor = ai.adaptWallDoorForce(self.walls, self.doors)
+            
             ########################################################
             # Turn on or off self-repulsion by boolean variable SELFREPULSION
             # Also known as sub-consciousness effect in crowd dynamics
@@ -2256,11 +2483,6 @@ class simulation(object):
                 
             
             peopleInter = ai.adaptSocialForce(self.agents, self.GROUPBEHAVIOR, True)
-            
-            if self.OPINIONMODEL == 0:
-                ai.opinionDynamics()
-            elif self.OPINIONMODEL == 1:
-                ai.opinionExchange()
                 
             #peopleInter = + ai.adaptPhyForce(self.agents)
             
@@ -2313,55 +2535,6 @@ class simulation(object):
                 f.write('numOtherSee:'+str(len(ai.seeothers))+'\n')
                 f.write('numOther:'+str(len(ai.others))+'\n')
                 
-                if self.solver == 0 and self.num_exits == 0:
-                    if goDoor is not None:
-                        f.write('goDoor:'+str(goDoor.oid)+'\n')
-                    else:
-                        f.write('goDoor: None'+'\n')
-                elif self.solver == 2:
-                    f.write('ExitSelected:'+str(ai.exitInMind.oid)+'\n')
-                else:
-                    pass
-                
-                #f.write('visibleDoors:'+str(ai.visibleDoors)+'\n')
-                #f.write('visibleExits:'+str(ai.visibleExits)+'\n')
-    
-       
-            ###########################################
-            ## Output time when agents reach the safety
-            if self.num_exits==0:
-                if (np.linalg.norm(ai.pos-ai.dest)<=0.2) and (ai.Goal == 0):
-                    print ('Reaching the goal:')
-                    #ai.inComp = 0
-                    #ai.Goal = 1
-                    #ai.timeOut = self.t_sim
-                    print ('Time to Reach the Goal:', ai.timeOut)
-                    f.write('&FinalInfo')
-                    f.write('agent ID'+str(ai.ID)+'\n'+'Time to Reach the Goal:'+str(ai.timeOut))
-            
-
-            ###########################################
-            ## Remove agent when agent reaches the exit
-            else:
-                #for exit in self.exits:
-                for idexit, exit in enumerate(self.exits):
-                    if exit.inComp == 0:
-                        continue
-                    if exit.inside(ai.pos):
-                        ai.inComp = 0
-                        ai.Goal = 1
-                        ai.timeOut = self.t_sim
-                        self.exitUsage[idexit,0] +=1
-
-                        #print('exitUsage:', np.transpose(self.exitUsage))
-                        #print ('Time to reach an exit:', ai.timeOut)
-                        #input("Please check!")
-                        
-                        f.write('\n\n&FinalInfo\n')
-                        f.write('agent ID'+str(ai.ID)+'\t reach the exit ID'+str(exit.oid)+'\n')
-                        f.write('agent ID'+str(ai.ID)+'\t reaches the exit at time   '+str(ai.timeOut)+'\n')
-                        f.write('exitUsage in time:'+str(np.transpose(self.exitUsage)))
-
             '''
             ###########################################
             ## Output time when agents reach the safety
@@ -2391,7 +2564,6 @@ class simulation(object):
         #f.write('SimulationTime=' + str(self.t_sim)+'\n')
         # Update simulation time
         self.t_sim = self.t_sim + self.DT
-
 
                     
     def quit(self):
