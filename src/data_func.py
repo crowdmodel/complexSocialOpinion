@@ -62,11 +62,12 @@ def findTitle(FileName, Title1=None, Title2=None, Title3=None):
     return None
 
 
-def findKey(FileName, Title1=None, Title2=None, Title3=None, TitleStr=''):
+def findKey(FileName, Title1=None, Title2=None, Title3=None):
     
     FindTitle1=int(0)
     FindTitle2=int(0)
     FindTitle3=int(0)
+    result=None
     
     for line in open(FileName, "r"):
         if Title1:
@@ -74,21 +75,21 @@ def findKey(FileName, Title1=None, Title2=None, Title3=None, TitleStr=''):
                 FindTitle1=int(1)
                 temp =  line.split('=')
                 result = str(temp[1].rstrip('\n').rstrip(',').strip())
-                return result
+                #return result
         if Title2:
             if re.match(Title2, line):
                 FindTitle2=int(1)
                 temp =  line.split('=')
                 result = str(temp[1].rstrip('\n').rstrip(',').strip())
-                return result
+                #return result
         if Title3:
             if re.match(Title3, line):
                 FindTitle3=int(1)
                 temp =  line.split('=')
                 result = str(temp[1].rstrip('\n').rstrip(',').strip())
-                return result
+                #return result
     if FindTitle1+FindTitle2+FindTitle3>1.0:
-        print("Warning: Multiple input line for Title of "+str(TitleStr)+"\n")
+        print("Warning: Multiple input lines for Title of "+str(Title1)+str(Title2)+str(Title3)+"\n")
         print("Use the last key value found for the title!")
         if sys.version_info[0] == 2: 
             raw_input("Please check!")
@@ -509,16 +510,18 @@ def readGroupABD(tableFeatures, NRow, NColomn, debug=True):
 def readGroupS(tableFeatures, NRow, NColomn, debug=True):
     # NRow and NColomn are the size of data to be extracted from tableFeatures
     matrixS = np.zeros((NRow, NColomn))
-    if tableFeatures[i+1][j+1] and tableFeatures[i+1][j+1] != '0':
-        try:    
-            matrixS[i,j] = float(tableFeatures[i+1][j+1])        
-        except:
-            print("Error in reading group data!")
-            input("Please check!")
-            matrixS[i,j] = 0.0
-    else:
-        matrixS[i,j] = 0.0
-                
+    for i in range(NRow):
+        for j in range(NColomn):
+            if tableFeatures[i+1][j+1] and tableFeatures[i+1][j+1] != '0':
+                try:    
+                    matrixS[i,j] = float(tableFeatures[i+1][j+1])        
+                except:
+                    print("Error in reading group data!")
+                    input("Please check!")
+                    matrixS[i,j] = 0.0
+            else:
+                matrixS[i,j] = 0.0
+                        
     if debug:
         print(tableFeatures, '\n')
         print('Data in Table:', '\n', matrixS)
@@ -717,17 +720,17 @@ def readAgents(FileName, debug=True, marginTitle=1, ini=1):
             agent.pp2 = 0.5
         
         try:
-            agent.tpreMode = int(agentFeature[ini+9]) #arousalLevel = float(agentFeature[ini+9])
+            agent.talk_range = float(agentFeature[ini+9]) #arousalLevel = float(agentFeature[ini+9])
             agent.aType = str(agentFeature[ini+10])
             agent.inComp = int(agentFeature[ini+11]) 
         except:
-            agent.tpreMode = int(1) #arousalLevel = 0 #0.2
+            agent.talk_range = 2.0 #arousalLevel = 0 #0.2
             agent.aType = 'active'
             agent.inComp = int(1)
         
         try:
             #agent.moving_tau = float(agentFeature[ini+12])
-            agent.talk_range = float(agentFeature[ini+12])
+            agent.tpreMode = int(agentFeature[ini+12])
             agent.talk_tau = float(agentFeature[ini+13])
             agent.talk_prob = float(agentFeature[ini+14])
             #agent.pp2 = float(agentFeature[ini+15])
@@ -735,7 +738,7 @@ def readAgents(FileName, debug=True, marginTitle=1, ini=1):
             agent.mass = float(agentFeature[ini+17])
         except:     
             #agent.moving_tau = agent.tau
-            agent.talk_range = 2.0
+            agent.tpreMode = int(1)
             agent.talk_tau = agent.tau
             agent.talk_prob = 0.6
             #agent.pp2 = 0.1
