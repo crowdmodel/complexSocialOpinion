@@ -1744,6 +1744,111 @@ menubar.add_cascade(label="Delete", menu=delete_menu)
 #delA = Button(frameAgent, text='Delete Agent', width=20, command=del_agent)
 #delA.pack() #place(x=120,y=20 )
 
+def selectOutTxtFile_DoorProb(event=None):
+    #tempdir=os.path.dirname(self.fname_EVAC)
+    #print(tempdir)
+    fname_OutTXT = tkf.askopenfilename(filetypes=(("txt files", "*.txt"),("All files", "*.*")),\
+    initialdir=currentdir)
+    #self.lb_outtxt.config(text = "The output txt file selected: "+str(temp[-1])+"\n")
+    #self.textInformation.insert(END, 'fname_FDS:   '+self.fname_FDS)
+    print('fname_outTxtFile:', fname_OutTXT)
+    exitNum = spin_exitnumber.get()
+    print('Exit index in plot:', exitNum)
+    readDoorProb(fname_OutTXT, int(exitNum))
+
+def py3tpre(event=None):
+    fname_OutBIN = tkf.askopenfilename(filetypes=(("bin files", "*.bin"),("All files", "*.*")),\
+    initialdir=currentdir)
+    temp=re.split(r'/', fname_OutBIN)
+    #temp=self.fname_OutTXT.split('/') 
+    #self.lb_outbin.config(text = "The output bin file selected: "+str(temp[-1])+"\n")
+    #self.textInformation.insert(END, 'fname_FDS:   '+self.fname_FDS)
+    print('fname_outBinFile:', fname_OutBIN)
+    visualizeTpre(fname_OutBIN)
+    
+def py3vis(event=None):
+    fname_OutBIN = tkf.askopenfilename(filetypes=(("bin files", "*.bin"),("npz files", "*.npz"),("All files", "*.*")),\
+    initialdir=currentdir)
+    
+
+    if os.path.exists('log.txt'):
+        for line in open('log.txt', "r"):
+            if re.match('ZOOM', line):
+                temp =  line.split('=')
+                ZOOM = float(temp[1].strip())                    
+            if re.match('xSpace', line):
+                temp =  line.split('=')
+                xSpa = float(temp[1].strip())
+            if re.match('ySpace', line):
+                temp =  line.split('=')
+                ySpa = float(temp[1].strip())
+    else:
+        ZOOM = 60.0
+        xSpa = 30.0
+        ySpa = 30.0
+    
+    #temp=self.fname_OutTXT.split('/') 
+    #self.lb_outbin.config(text = "The output bin file selected: "+str(temp[-1])+"\n")
+    #self.textInformation.insert(END, 'fname_FDS:   '+self.fname_FDS)
+    print('Output data file selected:', fname_OutBIN)
+    temp= fname_OutBIN.split('.')
+    if temp[1]=='bin':
+        visualizeAgent(fname_OutBIN, None, None, ZOOM, xSpa, ySpa)
+        
+
+def py3preprocess(event=None):
+    topPreData = Toplevel(root)
+    topPreData.title("Preprocess Data")
+    
+    topPreData.grab_set()
+    topPreData.transient(root)
+    topPreData.geometry("900x360")
+    
+    buttonTpre = Button(topPreData, text='Read output files and plot time line', width=60, command=py3tpre)
+    buttonTpre.pack()
+    
+    buttonExitProb = Button(topPreData, text='Read output files and plot the exit selection probablity', width=60, command=selectOutTxtFile_DoorProb)
+    buttonExitProb.pack() #place(x=19, y=230)
+
+    spin_exitnumber = Spinbox(topPreData, from_=0, to=100, width=5, bd=8) 
+    spin_exitnumber.pack() #place(x=596, y=230)
+
+
+def py3PostData(event=None):
+    topPostData = Toplevel(root)
+    topPostData.title("Plot Panel")
+    
+    topPostData.grab_set()
+    topPostData.transient(root)
+    #self.menubar.config(state=DISABLED)
+    
+    master_pos_x = root.winfo_x()
+    master_pos_y = root.winfo_y()
+
+    master_width = root.winfo_width()
+    master_height = root.winfo_height()
+    
+    my_width = 300
+    my_height = 100
+
+    pos_x = (master_pos_x + (master_width // 2)) - (my_width // 2)
+    pos_y = (master_pos_y + (master_height // 2)) - (my_height // 2)
+
+    geometry = "{}x{}+{}+{}".format(my_width, my_height, pos_x, pos_y)
+    
+    topPostData.geometry("600x200")
+    
+    buttonTpre = Button(topPostData, text='Read output binary data and plot time line', width=60, command= py3tpre)
+    buttonTpre.pack()
+
+    buttonVis = Button(topPostData, text='Read output binary data and visualize simulation', width=60, command= py3vis)#py3tpre)
+    buttonVis.pack()
+    
+    buttonExitProb = Button(topPostData, text='Read output files and plot the exit selection probablity', width=60, command= selectOutTxtFile_DoorProb)
+    buttonExitProb.pack() #place(x=19, y=230)
+
+    spin_exitnumber = Spinbox(topPostData, from_=0, to=100, width=5, bd=8) 
+    spin_exitnumber.pack() #place(x=596, y=230)
 
 
 def py3run(event=None):
@@ -1773,10 +1878,11 @@ def py3run(event=None):
         myTest.dataComplete()
     else:
         os.remove(myTest.outDataName + ".txt")
-        
+
 run_menu = Menu(menubar, tearoff=0, bg="lightgrey", fg="black")
 run_menu.add_command(label="Run Simulation", command=py3run, accelerator="F5")
-#run_menu.add_command(label="Delete Wall", command=del_wall) #, accelerator="Ctrl+D")
+run_menu.add_command(label="Data Tool (Post-process)", command=py3PostData, accelerator="F6")
+run_menu.add_command(label="Data Tool (Pre-process)", command=py3preprocess, accelerator="F7")
 #run_menu.add_command(label="Delete Exit", command=del_exit)#, accelerator="Ctrl+D")
 #run_menu.add_command(label="Delete Door", command=del_door) #, accelerator="Ctrl+D")
 menubar.add_cascade(label="Run", menu=run_menu)
