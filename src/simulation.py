@@ -441,10 +441,41 @@ class simulation(object):
         FN_Temp = self.FN_EVAC
         #if FN_Temp is None:
         #FN_Temp = os.path.join(self.fpath, "config.txt")
+        
+        '''
+        if findKey(FN_Temp, '&ZOOM', '&zoom', 'ZOOM'):
+            self.ZOOMFACTOR = float(findKey(FN_Temp, '&ZOOM', '&zoom', 'ZOOM'))
+
+        if findKey(FN_Temp, '&OFFSET_X', '&offset_x', 'xSpace'):
+            self.xSpace = float(findKey(FN_Temp, '&OFFSET_X', '&offset_x', 'xSpace'))
+            
+        if findKey(FN_Temp, '&OFFSET_Y', '&offset_y', 'ySpace'):
+            self.ySpace = float(findKey(FN_Temp, '&OFFSET_Y', '&offset_y', 'ySpace'))
+        
+        self.solver = int(findKey(FN_Temp, '&SOLVER', '&solver', 'solver'))
+        self.dumpBin = int(findKey(FN_Temp, '&DUMPBIN', '&dumpbin', 'dumpBinary'))
+        
+        self.GROUPBEHAVIOR = int(findKey(FN_Temp, '&GROUPF', '&groupf', 'groupbehavior'))
+        self.OPINIONMODEL = int(findKey(FN_Temp, '&OPINION', '&opinion', 'opinion'))
+        self.SELFREPULSION = int(findKey(FN_Temp, '&SELF_REP', '&self_rep', 'self-repulsion'))
+        
+        self.DT = float(findKey(FN_Temp, '&DT', '&dt', 'DT'))
+        self.DT_DumpData = float(findKey(FN_Temp, '&DT_DUMPBIN', '&dt_dumpbin', 'DT'))
+        self.DT_DumpData = float(findKey(FN_Temp, '&DT_DUMPBIN', '&dt_dumpbin', 'DT'))
+        self.DT_DumpData = float(findKey(FN_Temp, '&DT_DUMPBIN', '&dt_dumpbin', 'DT'))
+        self.TEND = float(findKey(FN_Temp, '&TEND', '&tend', 'TEND'))
+        
+        '''
         if os.path.exists(FN_Temp):
+            
+            if findKey(FN_Temp, '&ZOOM', '&zoom', 'ZOOM'):
+                self.ZOOMFACTOR = float(findKey(FN_Temp, '&ZOOM', '&zoom', 'ZOOM'))
+            if findKey(FN_Temp, '&OFFSET_X', '&offset_x', 'xSpace'):
+                self.xSpace = float(findKey(FN_Temp, '&OFFSET_X', '&offset_x', 'xSpace'))
+            if findKey(FN_Temp, '&OFFSET_Y', '&offset_y', 'ySpace'):
+                self.xSpace = float(findKey(FN_Temp, '&OFFSET_Y', '&offset_y', 'ySpace'))
+
             for line in open(FN_Temp, "r"):
-                
-                self.ZOOMFACTOR = float(findKey('&ZOOM', '&zoom', 'ZOOM'))
                 
                 if re.match('&ZOOM', line):
                     temp =  line.split('=')
@@ -488,13 +519,13 @@ class simulation(object):
 
                 if re.match('&GROUPF', line):
                     temp =  line.split('=')
-                    self.GROUPBEHAVIOR = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                    self.GROUPBEHAVIOR = int(int(temp[1].rstrip('\n').rstrip(',').strip()))   
                 elif re.match('&groupf', line):
                     temp =  line.split('=')
-                    self.GROUPBEHAVIOR = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                    self.GROUPBEHAVIOR = int(int(temp[1].rstrip('\n').rstrip(',').strip()))   
                 elif re.match('groupbehavior', line):
                     temp =  line.split('=')
-                    self.GROUPBEHAVIOR = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                    self.GROUPBEHAVIOR = int(int(temp[1].rstrip('\n').rstrip(',').strip()))   
 
                 if re.match('&OPINION', line):
                     temp =  line.split('=')
@@ -629,10 +660,9 @@ class simulation(object):
                 elif re.match('ypt', line):
                     temp =  line.split('=')
                     self.ypt = int(temp[1].rstrip('\n').rstrip(',').strip())   
-
         return None
-        
-        
+
+      
     def dataSummary(self):
 
         FN_Temp = self.outDataName + ".txt"
@@ -777,6 +807,7 @@ class simulation(object):
 
         return self.inputDataCorrect
         # Return a boolean variable to check if the input data format is correct or not
+
 
     def buildMesh(self, showdata=False):
         
@@ -1564,31 +1595,31 @@ class simulation(object):
         person.wall_flag = np.zeros((self.num_agents, self.num_agents))
         person.see_flag = np.zeros((self.num_agents, self.num_agents))
 
-        if self.GROUPBEHAVIOR:
-            # Initialize Desired Interpersonal Distance
-            tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupSABD')
-            if len(tableFeatures)<=0:
-                tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&GroupSABD')
-            if len(tableFeatures)<=0:
-                tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupCABD')
-            if len(tableFeatures)<=0:
-                tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&GroupCABD')
-            if len(tableFeatures)>0:
-                person.CFactor_Init, person.AFactor_Init, person.BFactor_Init, person.DFactor_Init = readGroupSABD(tableFeatures, len(self.agents), len(self.agents))
-                ###=== Group Behavior is simulated ===
-                self.GROUPBEHAVIOR = True
-            else:
-                try:
-                    tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupABD')
-                    if len(tableFeatures)>0:
-                        person.AFactor_Init, person.BFactor_Init, person.DFactor_Init = readGroupABD(tableFeatures, len(self.agents), len(self.agents))
-                        self.GROUPBEHAVIOR = True
-                    else:
-                        person.AFactor_Init = np.zeros((self.num_agents, self.num_agents))
-                        person.BFactor_Init = np.zeros((self.num_agents, self.num_agents))
-                        person.DFactor_Init = np.zeros((self.num_agents, self.num_agents))
-                        self.GROUPBEHAVIOR = False
-                        
+        #if self.GROUPBEHAVIOR:
+        # Initialize Desired Interpersonal Distance
+        tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupSABD')
+        if len(tableFeatures)<=0:
+            tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&GroupSABD')
+        if len(tableFeatures)<=0:
+            tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupCABD')
+        if len(tableFeatures)<=0:
+            tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&GroupCABD')
+        if len(tableFeatures)>0:
+            person.CFactor_Init, person.AFactor_Init, person.BFactor_Init, person.DFactor_Init = readGroupSABD(tableFeatures, len(self.agents), len(self.agents))
+            ###=== Group Behavior is simulated ===
+            #self.GROUPBEHAVIOR = True
+        else:
+            try:
+                tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupABD')
+                if len(tableFeatures)>0:
+                    person.AFactor_Init, person.BFactor_Init, person.DFactor_Init = readGroupABD(tableFeatures, len(self.agents), len(self.agents))
+                    #self.GROUPBEHAVIOR = True
+                else:
+                    person.AFactor_Init = np.zeros((self.num_agents, self.num_agents))
+                    person.BFactor_Init = np.zeros((self.num_agents, self.num_agents))
+                    person.DFactor_Init = np.zeros((self.num_agents, self.num_agents))
+                    #self.GROUPBEHAVIOR = False
+                    
                     tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupS')
                     if len(tableFeatures)<=0:
                         tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&GroupS')
@@ -1596,82 +1627,110 @@ class simulation(object):
                         tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupC')
                     if len(tableFeatures)>0:
                         person.CFactor_Init = readGroupS(tableFeatures, len(self.agents), len(self.agents))
+
+                        CArray = person.CFactor_Init
+                        for idai, ai in enumerate(self.agents):
+                            if ai.inComp == 0:
+                                continue
+                            if np.sum(np.fabs(CArray[idai,:]))>0:
+                                CArray[idai,:] = np.fabs(CArray[idai,:])/np.sum(np.fabs(CArray[idai,:]))#*np.sign(CArray[idai,:])
+    
+                        for i in range(len(self.agents)):
+                            for j in range(len(self.agents)):
+                                person.AFactor_Init[i,j] = CArray[i,j]*100
+                                person.BFactor_Init[i,j] = CArray[i,j]*10+0.1
+                                #if CArray[i,j]>0.0:
+                                person.DFactor_Init[i,j] = 1.0
+                                
+                        #CArray = person.CFactor_Init
+                        #for idai, ai in enumerate(self.agents):
+                        #    if ai.inComp == 0:
+                        #        continue
+                        #    if np.sum(np.fabs(CArray[idai,:]))>0:
+                        #        CArray[idai,:] = np.sign(CArray[idai,:])*np.fabs(CArray[idai,:])/np.sum(np.fabs(CArray[idai,:]))
+
+                        #for i in range(len(self.agents)):
+                        #    for j in range(len(self.agents)):
+                        #        person.AFactor_Init[i,j] = CArray[i,j]*100
+                        #        person.BFactor_Init[i,j] = CArray[i,j]*10+0.1
+                        #        person.DFactor_Init[i,j] = 1.0
                     else:
                         person.CFactor_Init = np.zeros((self.num_agents, self.num_agents))
-                except:
-                    person.CFactor_Init = np.zeros((self.num_agents, self.num_agents))
-                    person.DFactor_Init = np.zeros((self.num_agents, self.num_agents))
-                    person.AFactor_Init = np.zeros((self.num_agents, self.num_agents))
-                    person.BFactor_Init = np.zeros((self.num_agents, self.num_agents))
-                    self.GROUPBEHAVIOR = False
-                    
-                    print('Matrix C D A B are required to define the social relationship of agents if group dynamics is enabled in simulation!\n')
-                    print('However, users do not input such group parameters in input csv file!')
-                    if sys.version_info[0] == 2: 
-                        raw_input('Please check input data here!')
-                        #UserInput = raw_input('Check Input Data Here!')
-                    if sys.version_info[0] == 3:
-                        input('Please check input data here!')
-                    
-            #tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupABD')
-            #person.AFactor_Init = readArrayIndex(tableFeatures, len(self.agents), len(self.agents), index=0, iniX=1, iniY=1)
-            #person.BFactor_Init = readArrayIndex(tableFeatures, len(self.agents), len(self.agents), index=1, iniX=1, iniY=1)
-            #person.DFactor_Init = readArrayIndex(tableFeatures, len(self.agents), len(self.agents), index=2, iniX=1, iniY=1)
-            
-            #tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupA')
-            #person.AFactor_Init = readFloatArray(tableFeatures, len(self.agents), len(self.agents))
-            #AFactor_Init = readCSV("A_Data2018.csv", 'float')
-    
-            #tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupB')
-            #person.BFactor_Init = readFloatArray(tableFeatures, len(self.agents), len(self.agents))
-            #BFactor_Init = readCSV("B_Data2018.csv", 'float')
-    
-            # Initialize Desired Interpersonal Distance
-            #tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupD')
-            #person.DFactor_Init = readFloatArray(tableFeatures, len(self.agents), len(self.agents))
-            #DFactor_Init = readCSV("D_Data2018.csv", 'float')
-            
-            if self.DEBUG:
-                #print >> f, "Wall Matrix\n", walls, "\n"
-                f.write("C Matrix\n"+str(person.CFactor_Init)+"\n")
-                f.write("A Matrix\n"+str(person.AFactor_Init)+"\n")
-                f.write("B Matrix\n"+str(person.BFactor_Init)+"\n")
-                f.write("D Matrix\n"+str(person.DFactor_Init)+"\n")
+            except:
+                #person.CFactor_Init = np.zeros((self.num_agents, self.num_agents))
+                #person.DFactor_Init = np.zeros((self.num_agents, self.num_agents))
+                #person.AFactor_Init = np.zeros((self.num_agents, self.num_agents))
+                #person.BFactor_Init = np.zeros((self.num_agents, self.num_agents))
+                #self.GROUPBEHAVIOR = False
                 
-                print("C Matrix\n", person.CFactor_Init, "\n")
-                print("A Matrix\n", person.AFactor_Init, "\n")
-                print("B Matrix\n", person.BFactor_Init, "\n")
-                print("D Matrix\n", person.DFactor_Init, "\n")
-    
-            if np.shape(person.CFactor_Init)!= (self.num_agents, self.num_agents):
-                print('\nError on input data: CFactor_Init\n')
-                f.write('\nError on input data: CFactor_Init\n')
-                #raw_input('Error on input data: CFactor_Init!  Please check')
-                self.inputDataCorrect = False
+                print('Matrix C D A B are required to define the social relationship of agents if group dynamics is enabled in simulation!\n')
+                print('However, users do not input such group parameters in input csv file!')
+                if sys.version_info[0] == 2: 
+                    raw_input('Please check input data here!')
+                    #UserInput = raw_input('Check Input Data Here!')
+                if sys.version_info[0] == 3:
+                    input('Please check input data here!')
                 
-            if np.shape(person.AFactor_Init)!= (self.num_agents, self.num_agents): 
-                print('\nError on input data: AFactor_Init\n')
-                f.write('\nError on input data: AFactor_Init\n')
-                #raw_input('Error on input data: AFactor_Init!  Please check')
-                self.inputDataCorrect = False
-    
-            if np.shape(person.BFactor_Init)!= (self.num_agents, self.num_agents): 
-                print('\nError on input data: BFactor_Init\n')
-                f.write('\nError on input data: BFactor_Init\n')
-                #raw_input('Error on input data: BFactor_Init!  Please check')
-                self.inputDataCorrect = False
-                
-            if np.shape(person.DFactor_Init)!= (self.num_agents, self.num_agents):
-                print('\nError on input data: DFactor_Init\n')
-                f.write('\nError on input data: DFactor_Init\n')
-                #raw_input('Error on input data: DFactor_Init!  Please check')
-                self.inputDataCorrect = False
-    
-            person.CFactor = person.CFactor_Init            
-            person.AFactor = person.AFactor_Init
-            person.BFactor = person.BFactor_Init
-            person.DFactor = person.DFactor_Init
+        #tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupABD')
+        #person.AFactor_Init = readArrayIndex(tableFeatures, len(self.agents), len(self.agents), index=0, iniX=1, iniY=1)
+        #person.BFactor_Init = readArrayIndex(tableFeatures, len(self.agents), len(self.agents), index=1, iniX=1, iniY=1)
+        #person.DFactor_Init = readArrayIndex(tableFeatures, len(self.agents), len(self.agents), index=2, iniX=1, iniY=1)
+        
+        #tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupA')
+        #person.AFactor_Init = readFloatArray(tableFeatures, len(self.agents), len(self.agents))
+        #AFactor_Init = readCSV("A_Data2018.csv", 'float')
+
+        #tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupB')
+        #person.BFactor_Init = readFloatArray(tableFeatures, len(self.agents), len(self.agents))
+        #BFactor_Init = readCSV("B_Data2018.csv", 'float')
+
+        # Initialize Desired Interpersonal Distance
+        #tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupD')
+        #person.DFactor_Init = readFloatArray(tableFeatures, len(self.agents), len(self.agents))
+        #DFactor_Init = readCSV("D_Data2018.csv", 'float')
+        
+        if self.DEBUG:
+            #print >> f, "Wall Matrix\n", walls, "\n"
+            f.write("C Matrix\n"+str(person.CFactor_Init)+"\n")
+            f.write("A Matrix\n"+str(person.AFactor_Init)+"\n")
+            f.write("B Matrix\n"+str(person.BFactor_Init)+"\n")
+            f.write("D Matrix\n"+str(person.DFactor_Init)+"\n")
             
+            print("C Matrix\n", person.CFactor_Init, "\n")
+            print("A Matrix\n", person.AFactor_Init, "\n")
+            print("B Matrix\n", person.BFactor_Init, "\n")
+            print("D Matrix\n", person.DFactor_Init, "\n")
+
+        if np.shape(person.CFactor_Init)!= (self.num_agents, self.num_agents):
+            print('\nError on input data: CFactor_Init\n')
+            f.write('\nError on input data: CFactor_Init\n')
+            #raw_input('Error on input data: CFactor_Init!  Please check')
+            self.inputDataCorrect = False
+            
+        if np.shape(person.AFactor_Init)!= (self.num_agents, self.num_agents): 
+            print('\nError on input data: AFactor_Init\n')
+            f.write('\nError on input data: AFactor_Init\n')
+            #raw_input('Error on input data: AFactor_Init!  Please check')
+            self.inputDataCorrect = False
+
+        if np.shape(person.BFactor_Init)!= (self.num_agents, self.num_agents): 
+            print('\nError on input data: BFactor_Init\n')
+            f.write('\nError on input data: BFactor_Init\n')
+            #raw_input('Error on input data: BFactor_Init!  Please check')
+            self.inputDataCorrect = False
+            
+        if np.shape(person.DFactor_Init)!= (self.num_agents, self.num_agents):
+            print('\nError on input data: DFactor_Init\n')
+            f.write('\nError on input data: DFactor_Init\n')
+            #raw_input('Error on input data: DFactor_Init!  Please check')
+            self.inputDataCorrect = False
+
+        person.CFactor = person.CFactor_Init            
+        person.AFactor = person.AFactor_Init
+        person.BFactor = person.BFactor_Init
+        person.DFactor = person.DFactor_Init
+        
+        '''
         ###=== If Group Behavior is not simulated ===
         if self.GROUPBEHAVIOR == False:
             
@@ -1684,6 +1743,7 @@ class simulation(object):
             person.DFactor = person.DFactor_Init
             person.AFactor = person.AFactor_Init
             person.BFactor = person.BFactor_Init
+        '''
 
         person.PFactor_Init = np.zeros((self.num_agents, self.num_agents))
         person.PFactor = np.zeros((self.num_agents, self.num_agents))
@@ -1699,8 +1759,16 @@ class simulation(object):
         for idai, ai in enumerate(self.agents):
             if ai.inComp == 0:
                 continue
-            person.PFactor_Init[idai, idai]=1-ai.p
-            person.PFactor[idai, idai]=1-ai.p
+
+            #person.PFactor[idai,idai]=1.0
+            for idaj,aj in enumerate(self.agents):
+                if idaj == idai:
+                    person.PFactor[idai,idaj] = 1.0
+                    person.PFactor_Init[idai,idaj] = 1.0
+                    #person.PFactor[idai,idaj] = 1-ai.p
+                else:
+                    person.PFactor[idai,idaj] = 0.0
+                    person.PFactor_Init[idai,idaj] = 0.0
 
         if self.inputDataCorrect:
             print("Input data format is correct!")
@@ -2107,7 +2175,7 @@ class simulation(object):
                         f.write('\n\n&FinalInfo\n')
                         f.write('agent ID'+str(ai.ID)+'\t reach the exit ID'+str(exit.oid)+'\n')
                         f.write('agent ID'+str(ai.ID)+'\t reaches the exit at time   '+str(ai.timeOut)+'\n')
-                        f.write('exitUsage in time:'+str(np.transpose(self.exitUsage)))
+                        #f.write('exitUsage in time:'+str(np.transpose(self.exitUsage)))
 
 
             '''
@@ -2167,7 +2235,7 @@ class simulation(object):
                 #ai.preEvacModel()
                 motiveForce = ai.adaptMotiveForce()
                 
-                '''
+                
                 if (ai.tpreMode == 1): # Desired velocity is zero
                     ai.desiredV = ai.direction*0.0
                     ai.desiredSpeed = 0.0
@@ -2204,7 +2272,7 @@ class simulation(object):
                         print  ('ai:', ai.ID, '&&& In Tpre Stage:')
                         print ('goSomeone is None.')
                         print ('postion:', ai.pos)
-                '''
+                
                     
             if (self.t_sim >= ai.tpre):
 
@@ -2430,14 +2498,6 @@ class simulation(object):
             #phySFInter = np.array([0.0, 0.0])
             #phyWFInter = np.array([0.0, 0.0])
 
-            #ai.diw_desired = max(0.2, ai.ratioV)*0.6
-            #ai.A_WF = 700*max(0.3, ai.ratioV)
-            #ai.B_WF = 1.6*max(min(0.6, ai.ratioV),0.2)
-            
-            ai.diw_desired = max(0.5, ai.ratioV)*0.6
-            #ai.A_WF = 30*max(0.5, ai.ratioV)
-            ai.B_WF = 2.2*max(min(0.5, ai.ratioV),0.2) 
-
             motiveForce = ai.adaptMotiveForce()
             peopleInter = np.array([0.0, 0.0])
             wallInter = np.array([0.0, 0.0])
@@ -2459,7 +2519,7 @@ class simulation(object):
             #ai.diw_desired = max(0.2, ai.ratioV)*0.6
             #ai.A_WF = 700*max(0.3, ai.ratioV)
             #ai.B_WF = 1.6*max(min(0.6, ai.ratioV),0.2)
-            
+
             ai.diw_desired = max(0.5, ai.ratioV)*0.6
             #ai.A_WF = 30*max(0.5, ai.ratioV)
             ai.B_WF = 2.2*max(min(0.5, ai.ratioV),0.2) 
@@ -2559,12 +2619,13 @@ class simulation(object):
                     print ('Time to reach an exit:', ai.timeOut)
                     #f.write('agent ID'+str(ai.ID)+'\n'+'Time to Reach the Goal:'+str(ai.timeOut))
             '''
-
+        f.write('\n&EndofForceComputation:'+str(self.t_sim)+'\n')
         f.write('\n&EndofStep:'+str(self.t_sim)+'\n')
+        f.write('SimulationTime=' +str(self.t_sim)+'\n')
         #f.write('SimulationTime=' + str(self.t_sim)+'\n')
         # Update simulation time
         self.t_sim = self.t_sim + self.DT
-
+        
                     
     def quit(self):
         #if self.dumpBin:
