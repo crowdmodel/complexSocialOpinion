@@ -939,7 +939,7 @@ class GUI(object):
         if isfloatnum(self.dtSim_gui.get()) and isfloatnum(self.dtDump_gui.get()) and isfloatnum(self.tEnd_gui.get()):
             self.currentSimu.DT=float(self.dtSim_gui.get())
             self.currentSimu.DT_DumpData=float(self.dtDump_gui.get())
-            self.currentSimu.t_end=float(self.tEnd_gui.get())
+            self.currentSimu.t_end=float('inf') #(self.tEnd_gui.get())
         else:
             self.textInformation.insert(END, 'error: dtSim, dtDump and tEnd should be float number! Default data used!')
 
