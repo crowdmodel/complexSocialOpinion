@@ -79,6 +79,7 @@ class simulation(object):
         self.DT = 0.3
         self.t_sim=0.0
         self.t_end=float('inf')
+        self.t_end_crowdflow=float('inf')
         self.t_pause=0.0
 
         # A Logical Varible to Control if TestGeom Goes to Simulation
@@ -99,8 +100,10 @@ class simulation(object):
         self.WALLBLOCKHERDING = True
         self.TESTFORCE = True
         #self.TPREMODE = 2        ### Instructinn: 1 -- DesiredV = 0  2 -- Motive Force =0: 
-        self.GROUPBEHAVIOR = True     # Enable the group social force
+        self.GROUPBEHAVIOR = 0     # Enable the group social force
+        self.ATTEN = 0
         self.SELFREPULSION = True      # Enable self repulsion
+        
         self.FLUCTUATION = True        # Enable Fluctuation Force: Mainly useful for particles
         self.INTERACTION = 0
         self.OPINIONMODEL = 0
@@ -473,60 +476,18 @@ class simulation(object):
             if findKey(FN_Temp, '&OFFSET_X', '&offset_x', 'xSpace'):
                 self.xSpace = float(findKey(FN_Temp, '&OFFSET_X', '&offset_x', 'xSpace'))
             if findKey(FN_Temp, '&OFFSET_Y', '&offset_y', 'ySpace'):
-                self.xSpace = float(findKey(FN_Temp, '&OFFSET_Y', '&offset_y', 'ySpace'))
+                self.ySpace = float(findKey(FN_Temp, '&OFFSET_Y', '&offset_y', 'ySpace'))
+            if findKey(FN_Temp, '&SOLVER', '&solver', 'solver'):
+                self.solver = int(findKey(FN_Temp, '&SOLVER', '&solver', 'solver'))
+            if findKey(FN_Temp, '&GROUPF', '&groupf', 'groupbehavior'):
+                self.GROUPBEHAVIOR = int(findKey(FN_Temp, '&GROUPF', '&groupf', 'groupbehavior'))
+            if findKey(FN_Temp, '&OPINION', '&opinion', 'opinion'):
+                self.OPINIONMODEL = bool(findKey(FN_Temp, '&OPINION', '&opinion', 'opinion'))
+            if findKey(FN_Temp, '&SELF_REP', '&self_rep', 'self-repulsion'):
+                self.SELFREPULSION = bool(findKey(FN_Temp, '&SELF_REP', '&self_rep', 'self-repulsion'))
 
             for line in open(FN_Temp, "r"):
-                
-                if re.match('&ZOOM', line):
-                    temp =  line.split('=')
-                    self.ZOOMFACTOR = float(temp[1].rstrip('\n').rstrip(',').strip())
-                elif re.match('&zoom', line):
-                    temp =  line.split('=')
-                    self.ZOOMFACTOR = float(temp[1].rstrip('\n').rstrip(',').strip())
-                elif re.match('ZOOM', line):
-                    temp =  line.split('=')
-                    self.ZOOMFACTOR = float(temp[1].rstrip('\n').rstrip(',').strip())
-
-                if re.match('&OFFSET_X', line):
-                    temp =  line.split('=')
-                    self.xSpace = float(temp[1].rstrip('\n').rstrip(',').strip())
-                elif re.match('&offset_x', line):
-                    temp =  line.split('=')
-                    self.xSpace = float(temp[1].rstrip('\n').rstrip(',').strip())
-                elif re.match('xSpace', line):
-                    temp =  line.split('=')
-                    self.xSpace = float(temp[1].rstrip('\n').rstrip(',').strip())
-
-                if re.match('&OFFSET_Y', line):
-                    temp =  line.split('=')
-                    self.ySpace = float(temp[1].rstrip('\n').rstrip(',').strip())
-                elif re.match('&offset_y', line):
-                    temp =  line.split('=')
-                    self.ySpace = float(temp[1].rstrip('\n').rstrip(',').strip())
-                elif re.match('ySpace', line):
-                    temp =  line.split('=')
-                    self.ySpace = float(temp[1].rstrip('\n').rstrip(',').strip())   
-
-                if re.match('&SOLVER', line):
-                    temp =  line.split('=')
-                    self.solver = int(temp[1].rstrip('\n').rstrip(',').strip()) 
-                elif re.match('&solver', line):
-                    temp =  line.split('=')
-                    self.solver = int(temp[1].rstrip('\n').rstrip(',').strip()) 
-                elif re.match('solver', line):
-                    temp =  line.split('=')
-                    self.solver = int(temp[1].rstrip('\n').rstrip(',').strip())   
-
-                if re.match('&GROUPF', line):
-                    temp =  line.split('=')
-                    self.GROUPBEHAVIOR = int(int(temp[1].rstrip('\n').rstrip(',').strip()))   
-                elif re.match('&groupf', line):
-                    temp =  line.split('=')
-                    self.GROUPBEHAVIOR = int(int(temp[1].rstrip('\n').rstrip(',').strip()))   
-                elif re.match('groupbehavior', line):
-                    temp =  line.split('=')
-                    self.GROUPBEHAVIOR = int(int(temp[1].rstrip('\n').rstrip(',').strip()))   
-
+                   
                 if re.match('&OPINION', line):
                     temp =  line.split('=')
                     self.OPINIONMODEL = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
@@ -1035,7 +996,10 @@ class simulation(object):
                 # Test of Eular Solver here
                 zeroArray = np.zeros(np.shape(Ud0))
                 D_t= self.DT #0.05
-                tend=self.t_end
+                if self.t_end_crowdflow == float('inf'):
+                    tend=6.0
+                else:
+                    tend=self.t_end_crowdflow
                 R_ini = np.zeros(np.shape(Ud0))
                 # Construct R_ini here!
                 for agent in self.agents:
@@ -1608,6 +1572,15 @@ class simulation(object):
             person.CFactor_Init, person.AFactor_Init, person.BFactor_Init, person.DFactor_Init = readGroupSABD(tableFeatures, len(self.agents), len(self.agents))
             ###=== Group Behavior is simulated ===
             #self.GROUPBEHAVIOR = True
+            
+            # Normalize the parameter matrix person.CFactor_Init
+            CArray = person.CFactor_Init
+            for idai, ai in enumerate(self.agents):
+                if ai.inComp == 0:
+                    continue
+                if np.sum(np.fabs(CArray[idai,:]))>0:
+                    CArray[idai,:] = np.fabs(CArray[idai,:])/np.sum(np.fabs(CArray[idai,:]))#*np.sign(CArray[idai,:])
+            person.CFactor_Init=CArray
         else:
             try:
                 tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupABD')
@@ -1627,14 +1600,16 @@ class simulation(object):
                         tableFeatures, LowerIndex, UpperIndex = getData(self.FN_EVAC, '&groupC')
                     if len(tableFeatures)>0:
                         person.CFactor_Init = readGroupS(tableFeatures, len(self.agents), len(self.agents))
-
+                        
+                        # Normalize the parameter matrix person.CFactor_Init
                         CArray = person.CFactor_Init
                         for idai, ai in enumerate(self.agents):
                             if ai.inComp == 0:
                                 continue
                             if np.sum(np.fabs(CArray[idai,:]))>0:
                                 CArray[idai,:] = np.fabs(CArray[idai,:])/np.sum(np.fabs(CArray[idai,:]))#*np.sign(CArray[idai,:])
-    
+                        person.CFactor_Init=CArray            
+                                    
                         for i in range(len(self.agents)):
                             for j in range(len(self.agents)):
                                 person.AFactor_Init[i,j] = CArray[i,j]*100
@@ -1648,12 +1623,6 @@ class simulation(object):
                         #        continue
                         #    if np.sum(np.fabs(CArray[idai,:]))>0:
                         #        CArray[idai,:] = np.sign(CArray[idai,:])*np.fabs(CArray[idai,:])/np.sum(np.fabs(CArray[idai,:]))
-
-                        #for i in range(len(self.agents)):
-                        #    for j in range(len(self.agents)):
-                        #        person.AFactor_Init[i,j] = CArray[i,j]*100
-                        #        person.BFactor_Init[i,j] = CArray[i,j]*10+0.1
-                        #        person.DFactor_Init[i,j] = 1.0
                     else:
                         person.CFactor_Init = np.zeros((self.num_agents, self.num_agents))
             except:
@@ -1930,9 +1899,9 @@ class simulation(object):
                 if ai.inComp == 0:
                     continue
                 ai.updateSeeList(self.agents, self.walls) 
-                ai.updateAttentionList(self.agents, self.GROUPBEHAVIOR) #, self.WALLBLOCKHERDING)
+                ai.updateAttentionList(self.agents, self.ATTEN) #, self.WALLBLOCKHERDING)
                 ai.updateTalkList(self.agents)
-                #ai.updateAttentionList(self.agents, self.GROUPBEHAVIOR) #, self.WALLBLOCKHERDING)
+                #ai.updateAttentionList(self.agents, self.ATTEN) #, self.WALLBLOCKHERDING)
                 #ai.updatePArray(self.agents)
                 print ('=== ai id ===::', idai)
                 print ('ai.others len:', len(ai.others))
@@ -1949,6 +1918,8 @@ class simulation(object):
                     #ai.p = 1 - ai.ratioV  	# Method-2 ai.p=ai.stressLevel
                 elif ai.pMode =='fixed':
                     pass
+                elif ai.pMode =='hk':
+                    ai.p=1-1/(len(ai.others)+1)
                 
             person.CFactor=person.CFactor_Init*person.comm
             CArray=person.CFactor_Init*person.comm
@@ -2133,7 +2104,7 @@ class simulation(object):
             ai.test = 0.0 #??
             
             ai.updateStress(flag='accumulate')
-            #ai.updateAttentionList(self.agents, self.GROUPBEHAVIOR)
+            #ai.updateAttentionList(self.agents, self.ATTEN)
             #ai.updateTalkList(self.agents)
 
             if self.OPINIONMODEL == 0:
@@ -2627,7 +2598,7 @@ class simulation(object):
         self.t_sim = self.t_sim + self.DT
         
                     
-    def quit(self):
+    def destroy(self):
         #if self.dumpBin:
         #    self.fbin.close()
         #sys.exit()
