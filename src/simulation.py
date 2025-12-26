@@ -485,30 +485,42 @@ class simulation(object):
                 self.OPINIONMODEL = bool(findKey(FN_Temp, '&OPINION', '&opinion', 'opinion'))
             if findKey(FN_Temp, '&SELF_REP', '&self_rep', 'self-repulsion'):
                 self.SELFREPULSION = bool(findKey(FN_Temp, '&SELF_REP', '&self_rep', 'self-repulsion'))
+            if findKey(FN_Temp, '&DUMPBIN', '&dumpbin', 'dumpBinary'):
+                self.dumpBin = bool(findKey(FN_Temp, '&DUMPBIN', '&dumpbin', 'dumpBinary'))
+            if findKey(FN_Temp, '&DT', '&dt', 'DT'):
+                self.DT = bool(findKey(FN_Temp, '&DT', '&dt', 'DT'))
+            if findKey(FN_Temp, '&DT_DUMPBIN', '&dt_dumpbin', 'DT_DumpData'):
+                self.DT_DumpData = bool(findKey(FN_Temp, '&DT_DUMPBIN', '&dt_dumpbin', 'DT_DumpData'))
+            if findKey(FN_Temp, '&DT_LIST', '&dt_list', 'DT_OtherList'):
+                self.DT_OtherList = bool(findKey(FN_Temp, '&DT_LIST', '&dt_list', 'DT_OtherList'))
+            if findKey(FN_Temp, '&DT_EXIT', '&dt_exit', 'DT_ChangeDoor'):
+                self.DT_ChangeDoor = bool(findKey(FN_Temp, '&DT_EXIT', '&dt_exit', 'DT_ChangeDoor'))
+
 
             for line in open(FN_Temp, "r"):
                    
-                if re.match('&OPINION', line):
-                    temp =  line.split('=')
-                    self.OPINIONMODEL = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
-                elif re.match('&opinion', line):
-                    temp =  line.split('=')
-                    self.OPINIONMODEL = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                #if re.match('&OPINION', line):
+                #    temp =  line.split('=')
+                #    self.OPINIONMODEL = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                #elif re.match('&opinion', line):
+                #    temp =  line.split('=')
+                #    self.OPINIONMODEL = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
 
                 #if re.match('pre-evac', line):
                 #    temp =  line.split('=')
                 #    self.TPREMODE = int(temp[1].strip())
                 
-                if re.match('&SELF_REP', line):
-                    temp =  line.split('=')
-                    self.SELFREPULSION = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
-                elif re.match('&self_rep', line):
-                    temp =  line.split('=')
-                    self.SELFREPULSION = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
-                elif re.match('self-repulsion', line):
-                    temp =  line.split('=')
-                    self.SELFREPULSION = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
-
+                #if re.match('&SELF_REP', line):
+                #    temp =  line.split('=')
+                #    self.SELFREPULSION = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                #elif re.match('&self_rep', line):
+                #    temp =  line.split('=')
+                #    self.SELFREPULSION = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                #elif re.match('self-repulsion', line):
+                #    temp =  line.split('=')
+                #    self.SELFREPULSION = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
+                
+                '''
                 if re.match('&DUMPBIN', line):
                     temp =  line.split('=')
                     self.dumpBin = bool(int(temp[1].rstrip('\n').rstrip(',').strip()))   
@@ -559,7 +571,8 @@ class simulation(object):
                 elif re.match('DT_ChangeDoor', line):
                     temp =  line.split('=')
                     self.DT_ChangeDoor = float(temp[1].rstrip('\n').rstrip(',').strip())   
-
+                '''
+                
                 if re.match('&TEND', line):
                     temp =  line.split('=')
                     try:
