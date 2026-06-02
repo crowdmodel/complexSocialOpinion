@@ -157,6 +157,9 @@ class person(object):
 
         self.lamb = random.uniform(0.2,0.4)
         self.diw_desired = 0.2
+        
+        self.lamb_op = 1.0
+        self.tpre_ini = self.tpre
 
         self.ratioV = 1
         self.ratioAccumulateV=1
@@ -1001,9 +1004,20 @@ class person(object):
         anisoF = self.lamb + (1-self.lamb)*(1+cos(phiij))*0.5
         
         #first = Afactor*self.A_CF/(self.B_CF*Bfactor)*np.exp((rij*Dfactor-dij)/(self.B_CF*Bfactor))*(rij*Dfactor-dij)*nij*anisoF
-        first = Afactor*self.A_CF/(self.B_CF*Bfactor)*np.exp((Dfactor-dij)/(self.B_CF*Bfactor))*(Dfactor-dij)*nij*anisoF
-        #print("group social force:", first, "/n")
-        return first
+        if Bfactor:
+            first = Afactor*self.A_CF/(self.B_CF*Bfactor)*np.exp((Dfactor-dij)/(self.B_CF*Bfactor))*(Dfactor-dij)*nij*anisoF
+            #print("group social force:", first, "/n")
+            return first
+        else:
+            if not Afactor:
+                return np.array([0.0, 0.0])
+            else:
+                print("Warning: Bfactor is zero when computing group social force! Return zero 2D vector!")
+                if sys.version_info[0] == 2: 
+                    raw_input("Please check!")
+                else:
+                    input("please check!")
+                return np.array([0.0, 0.0])
 
 
     def socialForce(self, other):
@@ -1140,7 +1154,7 @@ class person(object):
                 self.seeothers.append(aj)
 
 
-    def updateAttentionList(self, agents, GROUPBEHAVIOR): #, WALLBLOCKHERDING):
+    def updateAttentionList(self, agents, GROUPB=0): #, WALLBLOCKHERDING):
     
         #######################################################
         # Compute interaction of agents:  Find the agents who draw ai's attention
@@ -1183,18 +1197,25 @@ class person(object):
             ######################################################################
             # There are several persons around you.  Which draws your attention?  
             ######################################################################
-            if GROUPBEHAVIOR:
+            if GROUPB==0:
+                if dij < self.talk_range and person.see_flag[self.ID, aj.ID]: #or person.talk[aj.ID, self.ID] == 1:
+                    person.comm[self.ID, aj.ID] = 1
+                    self.others.append(aj)
+                else: 
+                    person.comm[self.ID, aj.ID] = 0
+            elif GROUPB==1:
                 if dij < 2*self.B_CF*person.BFactor[self.ID, aj.ID] + person.DFactor[self.ID, aj.ID] and person.see_flag[self.ID, aj.ID]: #or person.talk[aj.ID, self.ID] == 1:
                 #if dij < self.talk_range and person.see_flag[self.ID, aj.ID] or person.talk[aj.ID, self.ID] == 1:
                     person.comm[self.ID, aj.ID] = 1
                     self.others.append(aj)
                 else:
                     person.comm[self.ID, aj.ID] = 0
-            else:
-                if dij < self.talk_range and person.see_flag[self.ID, aj.ID]: #or person.talk[aj.ID, self.ID] == 1:
+            elif GROUPB==2:
+                if dij < self.talk_range*person.CFactor_Init[self.ID, aj.ID] and person.see_flag[self.ID, aj.ID]: #or person.talk[aj.ID, self.ID] == 1:
+                #if dij < self.talk_range and person.see_flag[self.ID, aj.ID] or person.talk[aj.ID, self.ID] == 1:
                     person.comm[self.ID, aj.ID] = 1
                     self.others.append(aj)
-                else: 
+                else:
                     person.comm[self.ID, aj.ID] = 0
             # Loop of idaj,aj ends here
             ###########################
@@ -1203,8 +1224,8 @@ class person(object):
         
         # Talk List -- Social Behavior
         self.talkothers =[]
-        #for aj in self.others:
-        for idaj, aj in enumerate(agents):
+        for aj in self.others:
+        #for idaj, aj in enumerate(agents):
 
             if aj.inComp == 0:
                 continue
@@ -1240,7 +1261,7 @@ class person(object):
                 person.talk[self.ID, aj.ID]=0
 
 
-    def adaptSocialForce(self, agents, GROUPBEHAVIOR=True, ShortRangeF=1, debug=False):
+    def adaptSocialForce(self, agents, GroupForce=0, ShortRangeF=1, debug=False):
         self.socialF = np.array([0.0,0.0])
         #for idaj, aj in enumerate(agents):
         for aj in self.seeothers: #enumerate(self.seeothers):
@@ -1261,7 +1282,7 @@ class person(object):
         # Turn on or off group social force
         ####################################
         self.groupF= np.array([0.0,0.0])
-        if GROUPBEHAVIOR:
+        if GroupForce==1:
             for aj in self.others:
                 if aj.inComp == 0:
                     continue
@@ -1295,9 +1316,16 @@ class person(object):
         
                 self.groupF += self.groupForce(aj, person.DFactor[self.ID, aj.ID], person.AFactor[self.ID, aj.ID], person.BFactor[self.ID, aj.ID]) + 180.0*ggg(np.dot(-vij, nij))*nij*anisoF # The force term of vij_acutalV is not that useful
 
-                #########################################
-                # Opinion dynamics for tpre feature: Opinion Exchange
-                #########################################
+        elif GroupForce==2:
+            for aj in self.seeothers: #enumerate(self.seeothers):
+                if aj.inComp == 0:
+                    continue
+                if aj is self:
+                    continue
+                self.groupF += self.groupForce(aj, 1.0, 100*person.CFactor_Init[self.ID, aj.ID], 0.1+10*person.CFactor_Init[self.ID, aj.ID])
+                #######################################################
+                # Opinion dynamics for tpre feature: Opinion Exchange #
+                #######################################################
                 #if dij < self.talk_range:
                 #    self.tpre = (1-self.p)*self.tpre + self.p*aj.tpre
         return self.socialF + self.groupF
