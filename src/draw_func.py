@@ -2140,66 +2140,6 @@ def show_simu(simu):
     pygame.display.quit()
 
 
-
-if __name__=="__main__":
-
-    print("=======================")
-    print("A Test Case for Draw Geometry")
-    from obst import *
-    #from passage import *
-    #from outlet import *
-
-    # initialize OBST
-    obstFeatures = readCSV("./test_case/obstData2018.csv", "string")
-    walls = []
-    index = 0
-    for obstFeature in obstFeatures:
-        wall = obst()
-        wall.params[0]= float(obstFeature[0])
-        wall.params[1]= float(obstFeature[1])
-        wall.params[2]= float(obstFeature[2])
-        wall.params[3]= float(obstFeature[3])
-        wall.mode = obstFeature[4]
-        wall.name = str(obstFeature[5])
-        wall.inComp = int(obstFeature[6])
-        wall.arrow = int(obstFeature[7])
-        #wall.pointer1 = np.array([float(obstFeature[8]), float(obstFeature[9])])
-        #wall.pointer2 = np.array([float(obstFeature[10]), float(obstFeature[11])])
-        wall.oid = index
-        index = index+1
-        walls.append(wall)
-
-
-    pygame.init()
-    screen = pygame.display.set_mode(SCREENSIZE)
-    pygame.display.set_caption('Test of This Package')
-    clock = pygame.time.Clock()
-    #screen.fill(BACKGROUNDCOLOR)
-
-    #myfont=pygame.font.SysFont("arial",16)
-    #text_surface=myfont.render("No2",True, (0,0,0), (255,255,255))
-    #screen.blit(text_surface, (16,20))
-
-    t_pause=0.0
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                (mouseX, mouseY) = pygame.mouse.get_pos()
-                
-        ####################################
-        # Drawing the geometries: walls, doors, exits
-        ####################################
-        drawWalls(screen, walls)
-        #drawDoors(screen, doors)
-        #drawExits(screen, exits)
-        
-        pygame.display.flip()
-        clock.tick(20)
-
-
 def show_agents_npz(filename, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=20.0, ySpace=20.0, Zmin=0.0, Zmax=3.0, debug=True):
     
     # Read in data from filename
@@ -3598,3 +3538,50 @@ def visualizeAgent(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=2
         clock.tick(TimeInterval)
 
 
+if __name__=="__main__":
+
+    print("=======================")
+    print("A Test Case for Draw Geometry")
+    from obst import *
+    from data_func import *
+    
+    # Data Postprocessing Functions:
+    #visualizeAgent(r'./examples/OpinionModel_2Choices/agent2024Aug_2026-10-29_15_09_06.bin')
+    visualizeTpre(r'./examples/OpinionModel_2Choices/agent2024Aug_2026-10-29_15_09_06.bin')
+    visualizeStress(r'./examples/OpinionModel_2Choices/agent2024Aug_2026-10-29_15_09_06.bin')
+    readDoorProb(r'./examples/OpinionModel_2Choices/agent2024Aug_2026-10-29_15_09_06.txt', 0)
+    
+    agents = readAgents(r'./examples/crowd2door2024Apr/agent2024Apr.csv')
+    walls = readWalls(r'./examples/crowd2door2024Apr/agent2024Apr.csv')
+    doors = readDoors(r'./examples/crowd2door2024Apr/agent2024Apr.csv')
+    exits = readExits(r'./examples/crowd2door2024Apr/agent2024Apr.csv')
+
+    pygame.init()
+    screen = pygame.display.set_mode(SCREENSIZE)
+    pygame.display.set_caption('Test of This Package')
+    clock = pygame.time.Clock()
+    #screen.fill(BACKGROUNDCOLOR)
+
+    #myfont=pygame.font.SysFont("arial",16)
+    #text_surface=myfont.render("No2",True, (0,0,0), (255,255,255))
+    #screen.blit(text_surface, (16,20))
+
+    t_pause=0.0
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                (mouseX, mouseY) = pygame.mouse.get_pos()
+                
+        ####################################
+        # Drawing the geometries: walls, doors, exits
+        ####################################
+        drawWalls(screen, walls)
+        drawDoors(screen, doors)
+        drawExits(screen, exits)
+        
+        pygame.display.flip()
+        clock.tick(20)
+        
