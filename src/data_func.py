@@ -1430,7 +1430,7 @@ def updateAgentData(agents, outputFile, inputFile=None):
                 csv_writer.writerow([str(agent.name), str(agent.pos[0]), str(agent.pos[1]), str(agent.actualV[0]), str(agent.actualV[1]), str(agent.tau), str(agent.tpre), str(agent.p), str(agent.pMode), str(agent.pp2), str(agent.tpreMode), str(agent.aType), str(agent.inComp), str(agent.talk_range), str(agent.talk_prob)])
                 index_temp=index_temp+1
     except:
-        with open(outputFile, mode='wb+') as agent_test_file:
+        with open(outputFile, mode='ab+') as agent_test_file:
             csv_writer = csv.writer(agent_test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([])
             if inputFile is not None:
@@ -1459,7 +1459,7 @@ def updateDoorData(doors, outputFile, inputFile=None):
                 csv_writer.writerow(['--', str(door.params[0]), str(door.params[1]), str(door.params[2]), str(door.params[3]), str(door.arrow), str(door.mode), str(door.inComp)])
                 index_temp=index_temp+1
     except:
-        with open(outputFile, mode='wb+') as door_test_file:
+        with open(outputFile, mode='ab+') as door_test_file:
             csv_writer = csv.writer(door_test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([])
             if inputFile is not None:
@@ -1488,7 +1488,7 @@ def updateExitData(doors, outputFile, inputFile=None):
                 csv_writer.writerow(['--', str(door.params[0]), str(door.params[1]), str(door.params[2]), str(door.params[3]), str(door.arrow), str(door.mode), str(door.inComp)])
                 index_temp=index_temp+1
     except:
-        with open(outputFile, mode='wb+') as exit_test_file:
+        with open(outputFile, mode='ab+') as exit_test_file:
             csv_writer = csv.writer(exit_test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([])
             if inputFile is not None:
@@ -1517,7 +1517,7 @@ def updateWallData(walls, outputFile, inputFile=None):
                 csv_writer.writerow(['--', str(wall.params[0]), str(wall.params[1]), str(wall.params[2]), str(wall.params[3]), str(wall.arrow), str(wall.mode), str(wall.inComp)])
                 index_temp=index_temp+1
     except:
-        with open(outputFile, mode='wb+') as wall_test_file:
+        with open(outputFile, mode='ab+') as wall_test_file:
             csv_writer = csv.writer(wall_test_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([])
             if inputFile is not None:
@@ -1567,7 +1567,7 @@ def updateExit2Doors(exit2doors, outputFile, inputFile=None):
                 csv_writer.writerow(dataNP[i])
     
     except:
-        with open(outputFile, mode='wb+') as exit2door_file:
+        with open(outputFile, mode='ab+') as exit2door_file:
             csv_writer = csv.writer(exit2door_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             csv_writer.writerow([])
             if inputFile is not None:
@@ -1975,6 +1975,7 @@ def compute_simu(simu):
         npzEP = np.zeros((1, simu.num_agents, simu.num_exits))
         
         dump_evac(simu.agents, fbin, simu.t_sim)
+        simu.tt_DumpData = simu.tt_DumpData + simu.DT_DumpData
         npzTime.append(simu.t_sim)
         
         if len(npzTime)==1:
