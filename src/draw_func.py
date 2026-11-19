@@ -534,7 +534,7 @@ def show_geom(simu, debug=False):
                 running = False
                 #pygame.display.quit()
                 simu.continueToSimu=False
-                simu.quit()
+                simu.destroy()
                 os.remove(simu.outDataName + ".txt")
                 #os.remove(simu.outDataName + ".bin")
                 #simu.t_pause = pygame.time.get_ticks()/1000
@@ -557,6 +557,10 @@ def show_geom(simu, debug=False):
                 if button ==(1,0,0):
                     menu_left = False
 
+                if event.button == 4:
+                    ZOOMFACTOR = ZOOMFACTOR +2
+                if event.button == 5:
+                    ZOOMFACTOR = max(6.0, ZOOMFACTOR -2)
                 ### Menu No 1:  Output Data ###
                 ### This method is useful to generate menu bar in pygame
                 if mouseX<60 and mouseX>0 and mouseY<20 and mouseY>3:
@@ -644,7 +648,7 @@ def show_geom(simu, debug=False):
 
                 if mouseX<500 and mouseX>430 and mouseY<20 and mouseY>3:
                     running = False
-                    #simu.quit()
+                    #simu.destroy()
                     simu.continueToSimu=True
                     simu.t_pause = pygame.time.get_ticks()/1000
 
@@ -899,7 +903,7 @@ def show_geom(simu, debug=False):
             except:
                 pygame.draw.circle(screen, tan, scPos, int(0.3*ZOOMFACTOR), LINEWIDTH)
 
-            myfont=pygame.font.SysFont("arial",14)
+            myfont=pygame.font.SysFont("arial",26)
             if simu.SHOWNAME:
                 text_surface=myfont.render(str(idai)+'/'+str(agent.name), True, (255,0,0), (255,255,255))
             else:
@@ -1282,7 +1286,7 @@ def show_flow(simu):
             if event.type == pygame.QUIT:
                 running = False
                 #pygame.display.quit()
-                simu.quit()
+                simu.destroy()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 (mouseX, mouseY) = pygame.mouse.get_pos()
                 #button = pygame.mouse.get_pressed()      
@@ -1653,6 +1657,7 @@ def show_simu(simu):
         #npzTalk = [] #np.zeros((simu.num_agents, simu.num_agents, 1))
 
         dump_evac(simu.agents, fbin, simu.t_sim)
+        simu.tt_DumpData = simu.tt_DumpData + simu.DT_DumpData
         npzTime.append(simu.t_sim)
 
         if len(npzTime)==1:
@@ -1726,9 +1731,14 @@ def show_simu(simu):
             if event.type == pygame.QUIT:
                 running = False
                 #pygame.display.quit()
-                simu.quit()
+                simu.destroy()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 (mouseX, mouseY) = pygame.mouse.get_pos()
+
+                if event.button == 4:
+                    ZOOMFACTOR = ZOOMFACTOR +2
+                if event.button == 5:
+                    ZOOMFACTOR = max(6.0, ZOOMFACTOR -2)
                 #button = pygame.mouse.get_pressed()            
             # elif event.type == pygame.MOUSEBUTTONUP:
             elif event.type == pygame.KEYDOWN:
@@ -2931,9 +2941,10 @@ def visualizeTpre(fname, evacfile=None, fdsfile=None, Zmin=0.0, Zmax=3.0, showda
         #plt.plot(arrayTpre[i,:], linewidth=3.0, label=str(i))
         plt.text(0, arrayTpre[i,0], str(i), fontsize=18)
     
+    plt.xticks(fontsize=18)
     plt.plot(Time, Time, linewidth=3.0, linestyle='-.')
     #plt.plot(arrayTpre)
-    plt.title("Pre-movement Time")
+    plt.title("Pre-movement Time",fontsize=18)
     plt.grid()
     plt.legend(loc='best')
     if showdata:
@@ -3110,6 +3121,24 @@ def visualizeAgent(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=2
                 mouse_pos = np.array([mouseX, mouseY])
                 px1 = (mouse_pos-xyShift)*(1/ZOOMFACTOR)
                 drawLine = False
+
+                button = pygame.mouse.get_pressed()
+                print('Three Buttons:', button)#1, button2, button3)
+
+                # The button response may some problem in pygame.
+                # So I will not use it (Not differentiate if it is right key or left key in mouse pressed)
+                if button == (1,0,0):
+                    REWIND = True
+                    PAUSE = True
+                    
+                if button ==(0,0,1):
+                    FORWARD = True
+                    PAUSE = True
+
+                if event.button == 4:
+                    ZOOMFACTOR = ZOOMFACTOR +2
+                if event.button == 5:
+                    ZOOMFACTOR = max(6.0, ZOOMFACTOR -2)
 
                 #button = pygame.mouse.get_pressed()            
             elif event.type == pygame.MOUSEBUTTONUP:
