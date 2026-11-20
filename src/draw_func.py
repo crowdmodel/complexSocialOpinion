@@ -2842,7 +2842,7 @@ def visualizeStress(fname, showdata=True):
     return arrayStress
 
 
-def visualizeTpre(fname, evacfile=None, fdsfile=None, Zmin=0.0, Zmax=3.0, showdata=True):
+def visualizeTpre(fname, Zmin=0.0, Zmax=3.0, showdata=True):
     
     # Plot pre-movement time by using matplotlib
  
@@ -2897,7 +2897,7 @@ def visualizeTpre(fname, evacfile=None, fdsfile=None, Zmin=0.0, Zmax=3.0, showda
     plt.grid()
     plt.legend(loc='best')
     if showdata:
-        temp=fname.split('.')
+        temp=fname.split('.bin')
         fnamePNG = temp[0]+'_tpre.png'
         plt.savefig(fnamePNG)
         plt.show()
@@ -2929,7 +2929,7 @@ def visualizeAgent(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=2
     Time, XYZ, TAG, INFO, n_part, n_agents, n_quant = readPRTfile(fname)
     agentsPos = np.zeros((n_agents, 2))
 
-    temp=fname.split('.')
+    temp=fname.split('.bin')
     fnameNPZ = temp[0]+'.npz'
     fnameCSV = temp[0]+'.csv'
     fnameTXT = temp[0]+'.txt' 
