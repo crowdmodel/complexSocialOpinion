@@ -28,7 +28,7 @@ from math_func import *
 from data_func import *
 from draw_func import *
 from flow import *
-from ui import*
+#from ui import*
 
 
 class simulation(object):
@@ -2213,6 +2213,11 @@ class simulation(object):
 
             #Pre-Evacuation Time Effect
             #tt = pygame.time.get_ticks()/1000 - t_pause
+
+            # Need outsideDoor to continue calculation for solver=0.
+            # The force terms wallInter and doorInter are not used in this sub-routine, but useful in the sub-routine of simulation_update_agent_force() 
+            wallInter, doorInter, outsideDoor = ai.adaptWallDoorForce(self.walls, self.doors)
+            
             if (self.t_sim < ai.tpre):
                 #ai.desiredSpeed = random.uniform(0.3,1.6)
                 goDoor = None
