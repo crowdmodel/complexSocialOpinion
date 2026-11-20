@@ -412,8 +412,17 @@ def show_vel(screen, x_min, y_min, x_max, y_max, x_points, y_points, Ud, Vd, ZOO
 
     #Ud=np.load("Ud.npy")
     #Vd=np.load("Vd.npy")
-    print(np.shape(Ud))
-    (dimX,dimY)=np.shape(Ud)
+    
+    if np.shape(Ud)!= np.shape(Vd):
+        print('Inequal Dimensions of Ud and Vd!')
+        if sys.version_info[0] == 2: 
+            raw_input('Inequal Dimensions of Ud and Vd: Please check input data here!')
+            #UserInput = raw_input('Check Input Data Here!')
+        if sys.version_info[0] == 3:
+            UserInput =input('Inequal Dimensions of Ud and Vd: Please check input data here!')
+    else: 
+        print(np.shape(Ud))
+        (dimX,dimY)=np.shape(Ud)
 
     #dim=np.shape(U)
     #print(dimX, dimY)
@@ -2991,7 +3000,17 @@ def visualizeAgent(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=2
     exits=[]
     
     
-    if evacfile!="" and evacfile!="None" and evacfile is not None:
+    if os.path.exists(fnameTXT):
+        walls = readWalls(fnameTXT)
+        doors = readDoors(fnameTXT)
+        exits = readExits(fnameTXT)
+    elif os.path.exists(fnameCSV) and len(walls)+len(doors)+len(exits)==0:
+        walls = readWalls(fnameCSV)
+        doors = readDoors(fnameCSV)
+        exits = readExits(fnameCSV)
+    
+    
+    if evacfile!="" and evacfile!="None" and evacfile is not None and len(walls)+len(doors)+len(exits)==0:
         walls = readWalls(evacfile)  #readWalls(FN_Walls) #readWalls("obstData2018.csv")
         doors = readDoors(evacfile)
         exits = readExits(evacfile)
@@ -3006,16 +3025,7 @@ def visualizeAgent(fname, evacfile=None, fdsfile=None, ZOOMFACTOR=10.0, xSpace=2
         exits=readEXIT(fdsfile, '&EXIT', Zmin, Zmax)
         #doors=doors+readPATH(fdsfile, '&DOOR', Zmin, Zmax)
         #entries=readPATH(fdsfile, '&ENTRY', Zmin, Zmax)
-    
-    if os.path.exists(fnameCSV) and len(walls)+len(doors)+len(exits)==0:
-        walls = readWalls(fnameCSV)
-        doors = readDoors(fnameCSV)
-        exits = readExits(fnameCSV)
         
-    elif os.path.exists(fnameTXT) and len(walls)+len(doors)+len(exits)==0:
-        walls = readWalls(fnameTXT)
-        doors = readDoors(fnameTXT)
-        exits = readExits(fnameTXT)
     
     MODETRAJ=False
     SHOWTIME=True
@@ -3546,15 +3556,15 @@ if __name__=="__main__":
     from data_func import *
     
     # Data Postprocessing Functions:
-    #visualizeAgent(r'./examples/OpinionModel_2Choices/agent2024Aug_2026-10-29_15_09_06.bin')
-    visualizeTpre(r'./examples/OpinionModel_2Choices/agent2024Aug_2026-10-29_15_09_06.bin')
-    visualizeStress(r'./examples/OpinionModel_2Choices/agent2024Aug_2026-10-29_15_09_06.bin')
-    readDoorProb(r'./examples/OpinionModel_2Choices/agent2024Aug_2026-10-29_15_09_06.txt', 0)
+    #visualizeAgent(r'../examples/OpinionModel_2Choices/ped2024July_2024-09-25_22_03_44.bin')
+    visualizeTpre(r'../examples/OpinionModel_2Choices/ped2024July_2024-09-25_22_03_44.bin')
+    visualizeStress(r'../examples/OpinionModel_2Choices/ped2024July_2024-09-25_22_03_44.bin')
+    readDoorProb(r'../examples/OpinionModel_2Choices/ped2024July_2024-09-25_22_03_44.txt', 0)
     
-    agents = readAgents(r'./examples/crowd2door2024Apr/agent2024Apr.csv')
-    walls = readWalls(r'./examples/crowd2door2024Apr/agent2024Apr.csv')
-    doors = readDoors(r'./examples/crowd2door2024Apr/agent2024Apr.csv')
-    exits = readExits(r'./examples/crowd2door2024Apr/agent2024Apr.csv')
+    agents = readAgents(r'../examples/crowd2door2024Apr/agent2024Apr.csv')
+    walls = readWalls(r'../examples/crowd2door2024Apr/agent2024Apr.csv')
+    doors = readDoors(r'../examples/crowd2door2024Apr/agent2024Apr.csv')
+    exits = readExits(r'../examples/crowd2door2024Apr/agent2024Apr.csv')
 
     pygame.init()
     screen = pygame.display.set_mode(SCREENSIZE)
